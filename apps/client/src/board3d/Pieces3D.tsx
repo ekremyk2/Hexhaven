@@ -30,8 +30,12 @@ import { robberHopOffset } from '../board/Pieces';
 import { usePrefersReducedMotion } from '../theme/motion';
 import { edgeWorldPosition, hexWorldCenter, vertexWorldPosition, type WorldVec3 } from './coords';
 import { TILE_HEIGHT } from './constants';
-import { CityBody, PirateBody, RobberBody, RoadBody, SettlementBody, ShipBody } from './PieceBodies';
+import { PirateBody, RobberBody, ShipBody } from './PieceBodies';
 import { HOP_DURATION_MS, PLACEMENT_DURATION_MS, hopOffset, placementDropOffset, placementScale } from './pieceAnimation';
+// T-1503: settlement/city/road now render the user-supplied STL models (tinted per seat), falling
+// back to their `PieceBodies` procedural equivalents on load failure — see `StlPieceModels.tsx`.
+// Robber/ship/pirate stay procedural (no STL supplied for them), unchanged from T-1401.
+import { CityModel, RoadModel, SettlementModel } from './StlPieceModels';
 
 /** How far above its resting spot a piece drops in from — big enough to read as a "landing" rather
  *  than an imperceptible nudge, small enough it never clips through the sky/other pieces. */
@@ -95,7 +99,7 @@ export function Pieces3D({
         const pos = edgeWorldPosition(edgeOf(eid), TILE_HEIGHT);
         return (
           <PlacementGroup key={`r${eid}-${i}`} position={pos} rotationY={pos.rotationY} reducedMotion={reducedMotion}>
-            <RoadBody color={PLAYER_COLORS[seat]} />
+            <RoadModel color={PLAYER_COLORS[seat]} />
           </PlacementGroup>
         );
       })}
@@ -113,7 +117,7 @@ export function Pieces3D({
         const pos = vertexWorldPosition(vertexOf(vid), TILE_HEIGHT);
         return (
           <PlacementGroup key={`s${vid}-${i}`} position={pos} reducedMotion={reducedMotion}>
-            <SettlementBody color={PLAYER_COLORS[seat]} />
+            <SettlementModel color={PLAYER_COLORS[seat]} />
           </PlacementGroup>
         );
       })}
@@ -122,7 +126,7 @@ export function Pieces3D({
         const pos = vertexWorldPosition(vertexOf(vid), TILE_HEIGHT);
         return (
           <PlacementGroup key={`ci${vid}-${i}`} position={pos} reducedMotion={reducedMotion}>
-            <CityBody color={PLAYER_COLORS[seat]} />
+            <CityModel color={PLAYER_COLORS[seat]} />
           </PlacementGroup>
         );
       })}

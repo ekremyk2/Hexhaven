@@ -53,6 +53,8 @@ function AppShell() {
       <div className={['min-h-0 flex-1', isFixedViewportRoute ? 'overflow-hidden' : 'overflow-auto'].join(' ')}>
         <Routes>
           <Route path="/" element={<Home />} />
+          {/* Invite link `<base>/join/CODE` → Home, which prefills the room code from the param. */}
+          <Route path="/join/:code" element={<Home />} />
           <Route path="/lobby/:gameId" element={<Lobby />} />
           <Route path="/game/:gameId" element={<Game />} />
           <Route path="/hotseat" element={<Hotseat />} />

@@ -9,7 +9,7 @@ import { Badge, Button, Card, Panel, PlayerChip } from '../ui';
 import { BugReportButton } from '../components/BugReportButton';
 import { useLobbyState, useStore } from '../store';
 import { gameModeSummary, isCkAddonOn } from '../options/OptionsPanel';
-import { buildInviteHash, canStartGame } from './lobbyForms';
+import { canStartGame } from './lobbyForms';
 
 interface LobbyLocationState {
   config?: RoomConfig;
@@ -69,7 +69,11 @@ export default function Lobby() {
   }
 
   const code = lobby.code ?? gameId ?? '';
-  const inviteUrl = typeof window !== 'undefined' ? `${window.location.origin}/${buildInviteHash(code)}` : '';
+  // Clean path-based invite link that respects the app's base path (import.meta.env.BASE_URL is
+  // "/Hexhaven/" on GitHub Pages, "/" for the single-port server build) — the old `origin + '/'`
+  // form dropped the base and broke the link on the Pages sub-path deploy.
+  const inviteUrl =
+    typeof window !== 'undefined' ? `${window.location.origin}${import.meta.env.BASE_URL}join/${code}` : '';
 
   const modeSummary = knownConfig ? gameModeSummary(knownConfig) : null;
 

@@ -3,7 +3,7 @@
 // and reacts to `lobby.state`/`lobby.lastError` to navigate into the room or show an inline error.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { RoomConfig } from '@hexhaven/shared';
 import { Badge, Button, Card, TextInput } from '../ui';
 import {
@@ -60,12 +60,14 @@ export default function Home() {
   const [gameModeOpen, setGameModeOpen] = useState(false);
   const [modifiersOpen, setModifiersOpen] = useState(false);
 
-  // Requirement 3's invite link round trip: a `#/join/CODE` fragment (no dedicated route — the app
-  // is a plain BrowserRouter, so this is read once rather than matched by react-router).
+  // Invite-link round trip: the copyable link is now the clean path `<base>/join/CODE` (matched by
+  // the `/join/:code` route → this component). The legacy `#/join/CODE` hash form is still honored so
+  // old links keep working.
+  const { code: joinCodeParam } = useParams<{ code?: string }>();
   useEffect(() => {
-    const code = parseJoinHash(window.location.hash);
+    const code = joinCodeParam ? joinCodeParam.toUpperCase() : parseJoinHash(window.location.hash);
     if (code) setJoinCode(code);
-  }, []);
+  }, [joinCodeParam]);
 
   // Once create/join succeeds (a `lobby.state` assigned us a seat), leave for the room. Guarded on
   // `pendingFlow` so mounting Home while already seated (e.g. browser back button) doesn't bounce

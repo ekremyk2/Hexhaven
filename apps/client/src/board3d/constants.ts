@@ -1,9 +1,9 @@
 // Shared sizing constants for the WebGL 3D scene (T-1400). Every value here is derived from
 // `board/palette.ts`'s `HEX_SIZE` (the same px-per-unit scale `coords.ts` uses) so the 3D scene's
 // proportions read consistently with the flat SVG board rather than carrying their own hand-picked
-// scale. These are 3D-only (tile thickness/bevel, token size) — they do NOT reuse the SVG board's
-// own `TILE_THICKNESS`/`HEX_INSET` (`board/palette.ts`), which are tuned for the faux-3D tilt's
-// skirt-polygon look, a different rendering technique with different proportions.
+// scale. These are 3D-only (tile thickness/bevel, token size) — the flat SVG board's own former
+// `TILE_THICKNESS`/`HEX_INSET` skirt-polygon constants (tuned for the Phase-13 faux-3D tilt, a
+// different rendering technique) were retired in T-1404 along with that technique.
 import { HEX_SIZE } from '../board/palette';
 
 /** How tall (world Y) a hex tile's prism body is, top face to base. */

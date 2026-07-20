@@ -42,7 +42,8 @@
   },
   "board3d": {
     "switcherLabel": "3B tahta",
-    "unavailable": "Bu cihazda WebGL kullanılamıyor — düz tahta gösteriliyor."
+    "unavailable": "Bu cihazda WebGL kullanılamıyor — düz tahta gösteriliyor.",
+    "resetView": "Kamera görünümünü sıfırla"
   },
   "ui": {
     "modal": {

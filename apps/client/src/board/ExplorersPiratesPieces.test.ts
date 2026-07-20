@@ -6,13 +6,12 @@ import { describe, expect, it } from 'vitest';
 import { GEOMETRY, type Seat, type VertexId } from '@hexhaven/shared';
 import { ExplorersPiratesPieces } from './ExplorersPiratesPieces';
 import { HEX_SIZE, PLAYER_COLORS } from './palette';
-import { boardProjection } from './projection';
 
 const VERTEX_A = GEOMETRY.vertices[0]!.id as VertexId;
 const VERTEX_B = GEOMETRY.vertices[1]!.id as VertexId;
 
 const px = (n: number) => n * HEX_SIZE;
-function rawVertex(vid: VertexId) {
+function vertexPoint(vid: VertexId) {
   const v = GEOMETRY.vertices[vid]!;
   return { x: px(v.x), y: px(v.y) };
 }
@@ -41,29 +40,14 @@ describe('Harbor settlements (§EP4.2)', () => {
     expect(html).toContain('data-seat="0"');
     expect(html).toContain('data-seat="2"');
   });
-});
 
-describe('T-1212 "3D board": ExplorersPiratesPieces reprojection', () => {
-  it('with 3D off (identity projection), the harbor settlement is the plain pre-phase-13 pentagon at the raw vertex point', () => {
-    const raw = rawVertex(VERTEX_A);
+  it('renders the plain flat pentagon (single polygon) at the vertex point, in the owner seat colour', () => {
+    const p = vertexPoint(VERTEX_A);
     const s = HEX_SIZE * 0.24;
-    const pts = `${raw.x - s},${raw.y + s} ${raw.x - s},${raw.y - s * 0.2} ${raw.x},${raw.y - s} ${raw.x + s},${raw.y - s * 0.2} ${raw.x + s},${raw.y + s}`;
-    const html = render({ harborSettlements: [{ vertex: VERTEX_A, seat: 0 as Seat }], projection: boardProjection(false) });
+    const pts = `${p.x - s},${p.y + s} ${p.x - s},${p.y - s * 0.2} ${p.x},${p.y - s} ${p.x + s},${p.y - s * 0.2} ${p.x + s},${p.y + s}`;
+    const html = render({ harborSettlements: [{ vertex: VERTEX_A, seat: 0 as Seat }] });
     expect(html).toContain(`points="${pts}"`);
     expect(html).toContain(`fill="${PLAYER_COLORS[0]}"`);
     expect(html.match(/<polygon/g)?.length).toBe(1);
-  });
-
-  it('with 3D on, the harbor settlement stands on a two-tone wall+roof (not the flat single-fill pentagon)', () => {
-    const html = render({ harborSettlements: [{ vertex: VERTEX_A, seat: 0 as Seat }], projection: boardProjection(true) });
-    expect(html.match(/<polygon/g)?.length).toBe(2); // wall + roof
-    expect(html).not.toContain(`fill="${PLAYER_COLORS[0]}"`); // both faces are shaded, not the plain seat fill
-  });
-
-  it('3D on differs from 3D off for the same props', () => {
-    const props = { harborSettlements: [{ vertex: VERTEX_A, seat: 0 as Seat }] };
-    const flat = render({ ...props, projection: boardProjection(false) });
-    const tilted = render({ ...props, projection: boardProjection(true) });
-    expect(tilted).not.toBe(flat);
   });
 });

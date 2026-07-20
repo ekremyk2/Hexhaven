@@ -78,31 +78,16 @@ export function isRedNumber(value: number): boolean {
   return value === 6 || value === 8;
 }
 
-// --- 3D board (T-1210): per-hex "chunky raised tile" look ------------------------------------
-// Every non-sea hex renders as its OWN proud tile (not just the island's outer rim): its top face
-// is inset slightly toward its centre so neighbouring tiles show a visible gap/seam, and its
-// viewer-facing edges (per `projection.ts`'s tilt) get a filled side wall down to `-TILE_THICKNESS`.
-// Gated entirely behind `BoardProjection.enabled` in BoardView — with 3D off neither constant is
-// consulted, so the flat board stays byte-identical to pre-T-1210.
+// --- Piece/tile shading helpers -----------------------------------------------------------------
+// The Phase-13 faux-3D tilt (skirts/insets/piece extrusion) that used to consume these has been
+// retired (T-1404) — `darken`/`lighten` themselves stay, though: the WebGL 3D board's own piece
+// bodies (`board3d/PieceBodies.tsx`) and overlay markers (`board3d/overlays/*`) still derive their
+// two-tone shading from a seat's own base colour via these two functions, unconditionally (no
+// tilt/extrusion flag to gate on any more — the 3D board is always "3D").
 
-/** How far (px) each hex's top-face vertex is pulled toward the hex centre, so adjacent 3D tiles
- *  read as separate raised slabs rather than one seamless island. ~5% of `HEX_SIZE`. */
-export const HEX_INSET = HEX_SIZE * 0.05;
-
-/** How far (px) a hex's side walls ("skirt") hang below its top face — the tile's visible
- *  thickness. Passed as the negative `height` to `BoardProjection.project` for the wall's bottom
- *  edge. */
-export const TILE_THICKNESS = HEX_SIZE * 0.4;
-
-/** How much darker a skirt's fill is than its tile's top-face fill (0 = same, 1 = black) — reads as
- *  the side wall being in shadow relative to the sunlit top face. */
-export const SKIRT_DARKEN_AMOUNT = 0.4;
-
-/** Darkens a `#rrggbb` color toward black by `amount` (0..1) — used to derive a hex's skirt shade
- *  from its top-face fill without hand-picking a `*_SIDE` constant per terrain. Non-hex fills (e.g.
- *  a gradient reference like `url(#gold-grad)`, which sea/gold hexes use) pass through unchanged —
- *  callers only ever darken a LAND hex's flat `TERRAIN_FILL`, never a gradient url, but this keeps
- *  the helper total rather than throwing on unexpected input. */
+/** Darkens a `#rrggbb` color toward black by `amount` (0..1) — the shadow-face shade. Non-hex
+ *  fills (e.g. a gradient reference like `url(#gold-grad)`, which sea/gold hexes use) pass through
+ *  unchanged rather than throwing on unexpected input. */
 export function darken(fill: string, amount: number): string {
   if (!/^#[0-9a-fA-F]{6}$/.test(fill)) return fill;
   const n = parseInt(fill.slice(1), 16);
@@ -113,16 +98,8 @@ export function darken(fill: string, amount: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
-// --- 3D board (T-1211): faux-3D piece shading ------------------------------------------------
-// `darken` (above) already gives hex-tile skirts their shadow; standing PIECES (settlements,
-// cities, roads/ships, the robber/pirate) need the OTHER half of two-tone shading too — a
-// lightened "lit roof/top face" derived from the same seat colour, so a piece's raised body reads
-// as catching light on top and sitting in shadow on its sides without any hand-picked `*_LIT`
-// constant per seat. Symmetric with `darken`: same hex-only guard, same passthrough for non-hex
-// fills (e.g. a gradient url), same 0..1 amount convention (0 = unchanged, 1 = white).
-
-/** Lightens a `#rrggbb` color toward white by `amount` (0..1) — the roof/top-face counterpart to
- *  `darken`'s skirt/wall shade. Non-hex fills pass through unchanged (see `darken`'s rationale). */
+/** Lightens a `#rrggbb` color toward white by `amount` (0..1) — the lit-face counterpart to
+ *  `darken`. Non-hex fills pass through unchanged (see `darken`'s rationale). */
 export function lighten(fill: string, amount: number): string {
   if (!/^#[0-9a-fA-F]{6}$/.test(fill)) return fill;
   const n = parseInt(fill.slice(1), 16);

@@ -7,9 +7,6 @@ import {
   PLAYER_BADGES,
   TERRAIN_FILL,
   darken,
-  HEX_INSET,
-  TILE_THICKNESS,
-  SKIRT_DARKEN_AMOUNT,
 } from './palette';
 
 describe('board palette', () => {
@@ -43,13 +40,6 @@ describe('board palette', () => {
     }
   });
 
-  it('3D board skirt constants are positive (T-1210)', () => {
-    expect(HEX_INSET).toBeGreaterThan(0);
-    expect(TILE_THICKNESS).toBeGreaterThan(0);
-    expect(SKIRT_DARKEN_AMOUNT).toBeGreaterThan(0);
-    expect(SKIRT_DARKEN_AMOUNT).toBeLessThan(1);
-  });
-
   describe('darken()', () => {
     it('moves each channel toward black by `amount`', () => {
       expect(darken('#ffffff', 0.5)).toBe('#808080');
@@ -59,7 +49,7 @@ describe('board palette', () => {
 
     it('darkens every real terrain fill without throwing/producing invalid output', () => {
       for (const fill of Object.values(TERRAIN_FILL)) {
-        const out = darken(fill, SKIRT_DARKEN_AMOUNT);
+        const out = darken(fill, 0.4);
         expect(out).toMatch(/^#[0-9a-f]{6}$/);
         expect(out).not.toBe(fill);
       }

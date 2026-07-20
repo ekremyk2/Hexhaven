@@ -22,7 +22,6 @@ import type { Seat } from '@hexhaven/shared';
 import { BoardView } from '../board/BoardView';
 import { boardGeometryFor } from '../board/geometry';
 import { InteractionLayer } from '../board/InteractionLayer';
-import { boardProjection } from '../board/projection';
 import { Pieces3D } from '../board3d/Pieces3D';
 import { Interaction3D } from '../board3d/Interaction3D';
 import { Pieces } from '../board/Pieces';
@@ -99,18 +98,13 @@ export default function Game() {
   // T-907 PM wiring: the viewer's own cosmetic-theme choice (persisted client-side, never part of
   // RoomConfig/GameConfig — see themes.ts's header) reskins the board robber + a few HUD labels.
   const { themeId } = useHexhavenTheme();
-  // T-1400 "WebGL 3D board": `useBoard3d()` now drives the RENDERER CHOICE (real WebGL `<Board3D>`
-  // vs the flat SVG `<BoardView>` fallback), not the old faux-3D tilt (`board/projection.ts`, kept
-  // only for the fallback and retired in T-1404). `hasWebGL()` feature-detects once per mount — a
-  // browser/device without WebGL always falls back regardless of the viewer's preference.
+  // T-1400 "WebGL 3D board": `useBoard3d()` drives the RENDERER CHOICE (real WebGL `<Board3D>` vs
+  // the flat SVG `<BoardView>` fallback — the T-1210/1211 faux-3D tilt/extrusion it superseded was
+  // retired in T-1404). `hasWebGL()` feature-detects once per mount — a browser/device without
+  // WebGL always falls back regardless of the viewer's preference.
   const [prefer3d] = useBoard3d();
   const webglAvailable = useMemo(() => hasWebGL(), []);
   const use3d = prefer3d && webglAvailable;
-  // The 2D fallback always renders FLAT now (the WebGL board is the shipped "3D" look; the faux-3D
-  // tilt it supersedes is dead code walking until T-1404 deletes it) — every consumer below
-  // (BoardView/Pieces/InteractionLayer/overlay layers) shares this one identity projection so their
-  // hit-testing/tilt math stays consistent with each other.
-  const projection = boardProjection(false);
 
   if (!view) {
     return (
@@ -257,7 +251,6 @@ export default function Game() {
             hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
             hiddenNumbers={view.hiddenNumbers}
             epUnexplored={epExt?.unexplored ?? []}
-            projection={projection}
           >
             <Pieces
               geometry={geometry}
@@ -269,23 +262,10 @@ export default function Game() {
               pirate={seafarers?.pirate ?? null}
               themeId={themeId}
               hexPieces={view.ext?.hexPieces?.pieces ?? []}
-              projection={projection}
             />
-            {ep ? (
-              <ExplorersPiratesPieces
-                geometry={geometry}
-                harborSettlements={epHarborSettlements}
-                projection={projection}
-              />
-            ) : null}
+            {ep ? <ExplorersPiratesPieces geometry={geometry} harborSettlements={epHarborSettlements} /> : null}
             {ck ? (
-              <CitiesKnightsPieces
-                geometry={geometry}
-                knights={ckKnights}
-                walls={ckWalls}
-                metropolises={ckMetropolises}
-                projection={projection}
-              />
+              <CitiesKnightsPieces geometry={geometry} knights={ckKnights} walls={ckWalls} metropolises={ckMetropolises} />
             ) : null}
             {tb ? (
               <TradersBarbariansPieces
@@ -302,17 +282,9 @@ export default function Game() {
                 tradeHexes={tbExt?.tradeHexes ?? []}
                 wagons={tbWagons}
                 pathBarbarians={tbExt?.pathBarbarians ?? []}
-                projection={projection}
               />
             ) : null}
-            <InteractionLayer
-              geometry={geometry}
-              mode={mode}
-              targets={targets}
-              onPick={onPick}
-              ghostColor={PLAYER_COLORS[me]}
-              projection={projection}
-            />
+            <InteractionLayer geometry={geometry} mode={mode} targets={targets} onPick={onPick} ghostColor={PLAYER_COLORS[me]} />
           </BoardView>
         )}
       </div>

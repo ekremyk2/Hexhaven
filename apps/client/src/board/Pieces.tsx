@@ -74,11 +74,15 @@ const ROBBER_HEIGHT = S * 0.16;
 const PIRATE_HEIGHT = S * 0.14;
 
 /** How much darker a piece's side/wall face is than its own base colour (0 = same, 1 = black) —
- *  the shadowed face, mirroring `palette.ts`'s `SKIRT_DARKEN_AMOUNT` for hex tiles. */
-const WALL_DARKEN = 0.35;
+ *  the shadowed face. T-1212: tuned to match `palette.ts`'s `SKIRT_DARKEN_AMOUNT` for hex tiles
+ *  exactly (was 0.35), so a piece's own shadow face reads at the same depth as the tile skirt it
+ *  stands on — one consistent shading language across the whole tilted board. */
+const WALL_DARKEN = 0.4;
 /** How much lighter a piece's roof/top face is than its own base colour (0 = same, 1 = white) —
- *  the sunlit face. */
-const ROOF_LIGHTEN = 0.3;
+ *  the sunlit face. T-1212: nudged up slightly (was 0.3) alongside `WALL_DARKEN` so the lit/shadow
+ *  contrast stays strong enough to read the tilt in both light and dark surrounding themes (the
+ *  board's own fills are deliberately theme-invariant, tokens.dark.css). */
+const ROOF_LIGHTEN = 0.34;
 
 export interface PiecesProps {
   geometry?: BoardGeometry;

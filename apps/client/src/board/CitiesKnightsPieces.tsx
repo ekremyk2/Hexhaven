@@ -17,9 +17,19 @@ import {
 } from '@hexhaven/shared';
 import { HEX_SIZE, PLAYER_COLORS, PLAYER_BADGES, contrastInk } from './palette';
 import { TRACK_COLOR, KNIGHT_INACTIVE_FILL, WALL_FILL, WALL_STROKE } from './citiesKnightsPalette';
+import { boardProjection, type BoardProjection } from './projection';
 
 const S = HEX_SIZE;
 const px = (n: number) => n * S;
+
+type Point = { x: number; y: number };
+
+// T-1212 "3D board" overlays: modest standing heights for C&K's piece-like markers, in the same
+// px/height convention `Pieces.tsx`'s T-1211 constants use (positive = raised toward the camera).
+// Local to this file (small magnitudes so a knight/metropolis reads as lifted off the tile without
+// dwarfing it). City walls stay flat-on-ground (height 0, like a real stone ring) per requirement 1.
+const KNIGHT_HEIGHT = S * 0.16;
+const METROPOLIS_HEIGHT = S * 0.58; // sits near where Pieces.tsx's raised city tower-top would be.
 
 export interface CitiesKnightsPiecesProps {
   geometry?: BoardGeometry;
@@ -39,6 +49,12 @@ export interface CitiesKnightsPiecesProps {
    * future engine addition) may want the engine to track the metropolis's actual vertex directly.
    */
   metropolises?: { vertex: VertexId; track: ImprovementTrack }[];
+  /** T-1212 "3D board": the shared affine tilt (`board/projection.ts`), matching `BoardView`/
+   *  `Pieces`' own default — every marker's anchor is projected through it. City walls (flat-on-
+   *  ground) always project at height 0; knights/metropolises (piece-like) stand a modest height
+   *  above the plane when enabled. `enabled === false` ⇒ identity map ⇒ every marker lands exactly
+   *  where it did pre-phase-13 (height is ignored entirely by the identity projection). */
+  projection?: BoardProjection;
 }
 
 /** Renders C&K board pieces as one <g>, geometry-driven exactly like `<Pieces>`. */
@@ -47,40 +63,52 @@ export function CitiesKnightsPieces({
   knights = [],
   walls = [],
   metropolises = [],
+  projection = boardProjection(true),
 }: CitiesKnightsPiecesProps) {
-  const vertex = (id: VertexId) => {
+  const vertexRaw = (id: VertexId): Point => {
     const v = geometry.vertices[id];
     if (!v) throw new Error(`BUG: vertex ${id}`);
     return { x: px(v.x), y: px(v.y) };
   };
+  const project = (raw: Point, height = 0): Point => {
+    const p = projection.project(raw.x, raw.y, height);
+    return { x: p.sx, y: p.sy };
+  };
 
   return (
     <g>
-      {/* City walls first — they sit UNDER the city as a base ring (C9.1: "built under a city"). */}
+      {/* City walls first — they sit UNDER the city as a base ring (C9.1: "built under a city"),
+          flat on the ground plane (height 0) like a real stone ring set into the tile. */}
       {walls.map(({ vertex: vid, seat }, i) => {
-        const p = vertex(vid);
+        const p = project(vertexRaw(vid), 0);
         return <CityWall key={`wl${vid}-${i}`} x={p.x} y={p.y} vertex={vid} seat={seat} />;
       })}
 
-      {/* Knights on intersections (C7.1) */}
+      {/* Knights on intersections (C7.1) — piece-like: stand `KNIGHT_HEIGHT` above the ground with a
+          pinned ground shadow when 3D is on, mirroring Pieces.tsx's T-1211 robber/pirate idiom. */}
       {knights.map(({ vertex: vid, seat, level, active }, i) => {
-        const p = vertex(vid);
+        const raw = vertexRaw(vid);
+        const ground = project(raw, 0);
+        const body = project(raw, KNIGHT_HEIGHT);
         return (
           <KnightPiece
             key={`kn${vid}-${i}`}
-            x={p.x}
-            y={p.y}
+            x={ground.x}
+            y={ground.y}
             vertex={vid}
             seat={seat}
             level={level}
             active={active}
+            raisedY={body.y}
+            extruded={projection.enabled}
           />
         );
       })}
 
-      {/* Metropolis gates (C4.6) — drawn above everything else so the crest reads on top of the city. */}
+      {/* Metropolis gates (C4.6) — drawn above everything else so the crest reads on top of the city;
+          raised toward `METROPOLIS_HEIGHT` so it pairs with a city's own raised tower when 3D is on. */}
       {metropolises.map(({ vertex: vid, track }, i) => {
-        const p = vertex(vid);
+        const p = project(vertexRaw(vid), METROPOLIS_HEIGHT);
         return <Metropolis key={`me${vid}-${i}`} x={p.x} y={p.y} vertex={vid} track={track} />;
       })}
     </g>
@@ -118,6 +146,8 @@ export function KnightPiece({
   seat,
   level,
   active,
+  raisedY,
+  extruded = false,
 }: {
   x: number;
   y: number;
@@ -125,13 +155,21 @@ export function KnightPiece({
   seat: Seat;
   level: KnightLevel;
   active: boolean;
+  /** T-1212: the shield's screen-y once raised `KNIGHT_HEIGHT` toward the camera (the aggregate's
+   *  `project(raw, KNIGHT_HEIGHT)`); only consulted when `extruded`. */
+  raisedY?: number;
+  /** T-1212 "3D board": stands the shield a modest height above the plane with a pinned ground
+   *  shadow, mirroring `Pieces.tsx`'s T-1211 robber/pirate idiom. `false` (the default — what every
+   *  pre-phase-13 caller/test gets) renders byte-identical to the original flat markup. */
+  extruded?: boolean;
 }) {
   const s = S * 0.24;
+  const bodyY = extruded && raisedY != null ? raisedY : y;
   const ownerColor = PLAYER_COLORS[seat];
   const fill = active ? ownerColor : KNIGHT_INACTIVE_FILL;
   const badgeFill = active ? contrastInk(seat) : '#f7f1e3'; // panel cream reads on the muted inactive fill
   // Shield: flat top, pointed base.
-  const pts = `${x - s},${y - s * 0.7} ${x + s},${y - s * 0.7} ${x + s},${y + s * 0.15} ${x},${y + s * 1.15} ${x - s},${y + s * 0.15}`;
+  const pts = `${x - s},${bodyY - s * 0.7} ${x + s},${bodyY - s * 0.7} ${x + s},${bodyY + s * 0.15} ${x},${bodyY + s * 1.15} ${x - s},${bodyY + s * 0.15}`;
   return (
     <g
       filter="url(#piece-shadow)"
@@ -141,15 +179,17 @@ export function KnightPiece({
       data-level={level}
       data-active={active}
     >
+      {/* Ground shadow, pinned to the plane, only when actually standing raised. */}
+      {extruded && <ellipse cx={x} cy={y + s * 0.3} rx={s * 0.9} ry={s * 0.28} fill="#00000033" />}
       <polygon points={pts} fill={fill} stroke={ownerColor} strokeWidth={active ? 1.5 : 2} />
       {/* Level chevrons (1/2/3 per basic/strong/mighty, C7.1) along the shield's top edge. */}
       <g stroke={badgeFill} strokeWidth={1.4} fill="none" opacity={0.9}>
         {Array.from({ length: level }).map((_, i) => {
-          const cy = y - s * 0.4 + i * s * 0.32;
+          const cy = bodyY - s * 0.4 + i * s * 0.32;
           return <path key={i} d={`M ${x - s * 0.5} ${cy + s * 0.14} L ${x} ${cy - s * 0.1} L ${x + s * 0.5} ${cy + s * 0.14}`} />;
         })}
       </g>
-      <Badge x={x} y={y + s * 0.55} seat={seat} size={s * 0.8} fill={badgeFill} />
+      <Badge x={x} y={bodyY + s * 0.55} seat={seat} size={s * 0.8} fill={badgeFill} />
     </g>
   );
 }

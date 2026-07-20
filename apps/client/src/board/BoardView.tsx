@@ -159,10 +159,33 @@ export function BoardView({
         <filter id="piece-shadow" x="-40%" y="-40%" width="180%" height="180%">
           <feDropShadow dx="0" dy="1.5" stdDeviation="1.6" floodColor="#000" floodOpacity="0.35" />
         </filter>
+        {/* T-1212 lighting polish: a soft ambient-occlusion blur for the board-shadow ellipse below —
+            baked into the SVG itself (not a CSS drop-shadow) so it reads identically whether the
+            surrounding page chrome is light or dark (docs/11 §2's table tokens flip between themes;
+            the island's own render deliberately doesn't, tokens.dark.css). */}
+        <filter id="board-shadow-blur" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation={TILE_THICKNESS * 0.4} />
+        </filter>
       </defs>
 
       {/* Sea backdrop */}
       <rect x={vbX} y={vbY} width={vbW} height={vbH} fill="url(#sea-grad)" />
+
+      {/* T-1212: a soft global shadow the raised island casts onto the sea in front of it — drawn
+          UNDER the hexes/skirts (they paint over its top half), so only the "spill" past the
+          island's front edge shows, selling the tabletop's depth. 3D-off has no raised slab to cast
+          one, so this is gated on `projection.enabled` (a no-op, byte-identical flat board). */}
+      {projection.enabled && (
+        <ellipse
+          data-testid="board-shadow"
+          cx={(minX + maxX) / 2}
+          cy={maxY - TILE_THICKNESS * 0.2}
+          rx={(maxX - minX) * 0.46}
+          ry={TILE_THICKNESS * 0.9}
+          fill="#00000048"
+          filter="url(#board-shadow-blur)"
+        />
+      )}
 
       {/* Coastline: thick sand stroke on the island's outer edges. */}
       <g stroke={COAST_SAND} strokeWidth={S * 0.34} strokeLinecap="round" opacity={0.9}>

@@ -200,13 +200,20 @@ export default function Game() {
             hexPieces={view.ext?.hexPieces?.pieces ?? []}
             projection={projection}
           />
-          {ep ? <ExplorersPiratesPieces geometry={geometry} harborSettlements={epHarborSettlements} /> : null}
+          {ep ? (
+            <ExplorersPiratesPieces
+              geometry={geometry}
+              harborSettlements={epHarborSettlements}
+              projection={projection}
+            />
+          ) : null}
           {ck ? (
             <CitiesKnightsPieces
               geometry={geometry}
               knights={ckKnights}
               walls={ckWalls}
               metropolises={ckMetropolises}
+              projection={projection}
             />
           ) : null}
           {tb ? (
@@ -224,6 +231,7 @@ export default function Game() {
               tradeHexes={tbExt?.tradeHexes ?? []}
               wagons={tbWagons}
               pathBarbarians={tbExt?.pathBarbarians ?? []}
+              projection={projection}
             />
           ) : null}
           <InteractionLayer

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { RoomConfig } from '@hexhaven/shared';
 import { Badge, Button, Card, Panel, PlayerChip } from '../ui';
+import { BugReportButton } from '../components/BugReportButton';
 import { useLobbyState, useStore } from '../store';
 import { gameModeSummary, isCkAddonOn } from '../options/OptionsPanel';
 import { buildInviteHash, canStartGame } from './lobbyForms';
@@ -194,6 +195,11 @@ export default function Lobby() {
         ) : null}
       </div>
       {isHost && !canStart ? <p className="font-ui text-12 text-ink-soft">{t('lobby:room.startHint')}</p> : null}
+
+      {/* Unobtrusive footer affordance — opens a prefilled GitHub issue (no API/token; static client). */}
+      <div className="flex justify-end">
+        <BugReportButton screen="lobby" details={{ roomCode: lobby.code, gameId: lobby.gameId }} />
+      </div>
     </main>
   );
 }

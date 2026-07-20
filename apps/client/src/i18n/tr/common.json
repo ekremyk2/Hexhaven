@@ -20,6 +20,13 @@
     "tagline": "3–6 oyuncu için takas ve yerleşim web oyunu.",
     "hotseatLink": "Sırayla oynama modunu dene"
   },
+  "bugReport": {
+    "button": "Hata bildir",
+    "title": "GitHub'da önceden doldurulmuş bir hata bildirimi aç",
+    "defaultTitle": "Hata bildirimi — {{screen}}",
+    "template": "Ne yaptınız:\nNe bekliyordunuz:\nNe oldu:",
+    "diagnosticsHeading": "Tanılama (otomatik dolduruldu)"
+  },
   "language": {
     "switcherLabel": "Dil",
     "en": "EN",

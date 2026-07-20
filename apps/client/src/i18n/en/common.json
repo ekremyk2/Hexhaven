@@ -20,6 +20,13 @@
     "tagline": "A web board game of trade and settlement, for 3–6 players.",
     "hotseatLink": "Try hot-seat mode"
   },
+  "bugReport": {
+    "button": "Report a bug",
+    "title": "Open a prefilled bug report on GitHub",
+    "defaultTitle": "Bug report — {{screen}}",
+    "template": "What you did:\nWhat you expected:\nWhat happened:",
+    "diagnosticsHeading": "Diagnostics (auto-filled)"
+  },
   "language": {
     "switcherLabel": "Language",
     "en": "EN",

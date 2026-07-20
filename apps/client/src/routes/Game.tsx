@@ -16,6 +16,7 @@
 // whose turn — now rides `hud/Scoreboard.tsx`'s header line instead of a standalone box.
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import type { OtherPlayerView, OwnPlayerView, PlayerView } from '@hexhaven/engine';
 import type { Seat } from '@hexhaven/shared';
 import { BoardView } from '../board/BoardView';
@@ -52,6 +53,7 @@ import { EpHud } from '../explorersPirates/EpHud';
 import { epHarborSettlementsFlattened, epOf, epShipsFlattened, isExplorersPiratesGame } from '../explorersPirates/epHelpers';
 import { ExplorersPiratesPieces } from '../board/ExplorersPiratesPieces';
 import { Panel, Tabs } from '../ui';
+import { BugReportButton } from '../components/BugReportButton';
 import { useGameView, useLobbyState, useStore, useUiMode } from '../store';
 import { useUiInteraction } from '../store/uiMode';
 
@@ -71,6 +73,7 @@ function RailSection({ active, className, children }: { active: boolean; classNa
 
 export default function Game() {
   const { t } = useTranslation('game');
+  const { gameId } = useParams<'gameId'>();
   const [railTab, setRailTab] = useState<RailTab>('play');
   // WIRE: T-204 — same workaround `hotseat/HotseatPage.tsx` documents: the wire-level `PlayerView`
   // type is still the `unknown` placeholder (packages/shared/src/protocol/messages.ts) until that
@@ -357,6 +360,11 @@ export default function Game() {
         <RailSection active={activeTab === 'chat'}>
           <ChatPanel />
         </RailSection>
+        {/* Compact bug-report affordance pinned to the sidebar footer — shrink-0 so it never grows the
+            fixed-viewport layout or steals space from the active (scrolling) rail section above it. */}
+        <div className="flex shrink-0 justify-end">
+          <BugReportButton screen="game" details={{ gameId }} />
+        </div>
       </aside>
 
       {/* Self-contained overlays: each renders only when the phase/state calls for it. */}

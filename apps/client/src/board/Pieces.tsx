@@ -1,6 +1,15 @@
 // Player pieces on the board (docs/11 §4): roads on edges, settlements/cities on vertices,
 // the robber on its hex. Pure, props-driven. Every piece carries its owner's shape badge so
 // players are distinguishable by shape as well as colour.
+//
+// T-1211 "3D board" (faux-3D standing pieces): every piece's anchor + body is run through the
+// shared `BoardProjection` (T-1210) so it lands on the correctly TILTED vertex/edge/hex, and
+// settlements/cities/roads/ships/robber/pirate render as raised, two-tone-shaded standing models
+// (a lit top/roof face + darker side walls, both derived from the piece's own base colour) rather
+// than flat painted silhouettes. `projection.enabled === false` collapses every one of those
+// branches — each piece function's FIRST branch is the untouched pre-T-1211 flat JSX, byte-
+// identical (see Pieces.test.ts's dedicated "3D off" suite), because `boardProjection(false)`'s
+// `project` is a pure identity passthrough (no arithmetic) regardless of what `height` is asked for.
 
 import { useEffect, useRef } from 'react';
 import {
@@ -12,14 +21,23 @@ import {
   type Seat,
   type VertexId,
 } from '@hexhaven/shared';
-import { HEX_SIZE, PLAYER_COLORS, PLAYER_BADGES, contrastInk } from './palette';
-import type { BoardProjection } from './projection';
+import { HEX_SIZE, PLAYER_COLORS, PLAYER_BADGES, contrastInk, darken, lighten } from './palette';
+import { boardProjection, type BoardProjection } from './projection';
 import { usePrefersReducedMotion } from '../theme/motion';
 import { RobberArt } from '../themes/ThemedPieces';
 import { DEFAULT_THEME_ID, THEMES, type ThemeId } from '../themes/themes';
 
 const S = HEX_SIZE;
 const px = (n: number) => n * S;
+
+/** A point in BoardView's scaled px space, pre-projection — the same convention `projection.ts`
+ *  documents (`project(px(v.x), px(v.y), height)`). */
+type Point = { x: number; y: number };
+/** Bound to one `BoardProjection` + raw point; callers ask for a `height` (0 = on the plane,
+ *  positive = raised toward the camera) and get back the projected screen point. Passed down to
+ *  the piece components below so THEY decide which heights their own silhouette needs, without
+ *  each one re-importing `BoardProjection`. */
+type ProjectFn = (raw: Point, height?: number) => Point;
 
 // Decorative glyph (referenced as an expression, like the Scoreboard's, so the i18n-guard doesn't
 // treat it as raw copy — it is a pictogram, not translatable text).
@@ -41,6 +59,26 @@ const HEX_PIECE_COLOR: Readonly<Record<HexPieceKindId, string>> = {
   banker: '#ca8a04',
   poaching: '#dc2626',
 };
+
+// T-1211: faux-3D piece heights + shading amounts, all fed through the shared `BoardProjection`'s
+// `height` convention (positive = raised toward the camera). Local to this file — BoardView's
+// `TILE_THICKNESS` (palette.ts) is a much larger, per-hex-TILE scale; these are the smaller
+// magnitudes that make a settlement/city/road/ship/robber read as a standing object without
+// dwarfing the tile it stands on.
+const SETTLEMENT_WALL_HEIGHT = S * 0.22;
+const SETTLEMENT_ROOF_HEIGHT = S * 0.16;
+const CITY_WALL_HEIGHT = S * 0.34;
+const CITY_TOWER_HEIGHT = S * 0.3;
+const CITY_TOWER2_HEIGHT = S * 0.16;
+const ROBBER_HEIGHT = S * 0.16;
+const PIRATE_HEIGHT = S * 0.14;
+
+/** How much darker a piece's side/wall face is than its own base colour (0 = same, 1 = black) —
+ *  the shadowed face, mirroring `palette.ts`'s `SKIRT_DARKEN_AMOUNT` for hex tiles. */
+const WALL_DARKEN = 0.35;
+/** How much lighter a piece's roof/top face is than its own base colour (0 = same, 1 = white) —
+ *  the sunlit face. */
+const ROOF_LIGHTEN = 0.3;
 
 export interface PiecesProps {
   geometry?: BoardGeometry;
@@ -64,17 +102,21 @@ export interface PiecesProps {
    *  Trader/Robin Hood/Banker/Poaching), each drawn as a small distinct marker at its hex center —
    *  from `view.ext.hexPieces.pieces`. Empty/absent while the `hexPieces` modifier is off. */
   hexPieces?: { hex: HexId; kind: HexPieceKindId }[];
-  /** T-1210 "3D board": accepted so `routes/Game.tsx` can thread the shared `BoardProjection`
-   *  through EVERY board layer without a follow-up task needing to touch its wiring again — pieces
-   *  still render flat on the board plane here (out of scope per T-1210; T-1211 stands them up
-   *  using this same prop). Unused in this task. */
+  /** T-1210/T-1211 "3D board": the shared affine tilt (`board/projection.ts`) — every piece's
+   *  anchor + body is projected through it so pieces land on the tilted vertex/edge/hex and, when
+   *  `enabled`, stand up as raised two-tone-shaded models (T-1211). Defaults to the tilted
+   *  projection, matching `BoardView`/`InteractionLayer`'s own defaults; pass `boardProjection(false)`
+   *  for the flat board, which renders every piece byte-identical to pre-T-1211. */
   projection?: BoardProjection;
 }
 
 /** docs/11 §5 "Robber move: arc hop between hexes, 400ms" — pure geometry, unit-testable without
  * rendering anything. Returns the CSS-var offsets `Robber` animates FROM (i.e. the previous hex's
  * position relative to the new one), or `null` when there's no previous hex to hop from (initial
- * placement, or the robber hasn't actually moved). */
+ * placement, or the robber hasn't actually moved). Deliberately computed in RAW (pre-tilt) board
+ * space, same as before T-1210/1211 existed — the hop is a short local flourish, not something
+ * that needs to be perspective-exact, and keeping it raw keeps this function's own tests (and its
+ * geometry) completely unaffected by whether the board is tilted. */
 export function robberHopOffset(
   prevHex: HexId | null,
   nextHex: HexId,
@@ -98,10 +140,7 @@ export function Pieces({
   islandChits = [],
   themeId = DEFAULT_THEME_ID,
   hexPieces = [],
-  // T-1210: `projection` is intentionally NOT destructured — it's part of `PiecesProps` (so
-  // `routes/Game.tsx` can pass it and T-1211 can start reading it without a signature change) but
-  // unused by this task; omitting it from the destructure avoids an unused-local-variable lint
-  // error while still accepting the prop.
+  projection = boardProjection(true),
 }: PiecesProps) {
   const reducedMotion = usePrefersReducedMotion();
   // Tracks the robber's PREVIOUS hex across renders so a move can hop from where it was (docs/11
@@ -112,21 +151,38 @@ export function Pieces({
     prevRobberHexRef.current = robber;
   }, [robber]);
 
-  const vertex = (id: VertexId) => {
+  /** Projects a raw px-space point through the board's shared tilt (T-1210/1211). `height` only
+   *  ever matters when `projection.enabled` — the identity projection ignores it entirely, so
+   *  passing any height here is always safe for the "3D off" byte-identical guarantee. */
+  const project: ProjectFn = (raw, height = 0) => {
+    const p = projection.project(raw.x, raw.y, height);
+    return { x: p.sx, y: p.sy };
+  };
+
+  const vertexRaw = (id: VertexId): Point => {
     const v = geometry.vertices[id];
     if (!v) throw new Error(`BUG: vertex ${id}`);
     return { x: px(v.x), y: px(v.y) };
   };
-  const edge = (id: EdgeId) => {
+  const edgeRec = (id: EdgeId) => {
     const e = geometry.edges[id];
     if (!e) throw new Error(`BUG: edge ${id}`);
     return e;
   };
-  const hex = (id: HexId) => {
+  const hexRaw = (id: HexId): Point => {
     const h = geometry.hexes[id];
     if (!h) throw new Error(`BUG: hex ${id}`);
     return { x: px(h.x), y: px(h.y) };
   };
+  const hexAnchor = (id: HexId, height = 0): Point => project(hexRaw(id), height);
+
+  /** Requirement 7 (painter's algorithm): within one piece layer, back-to-front by the RAW
+   *  (pre-tilt) board-space y — mirrors `BoardView`'s own hex depth-sort. A no-op re-sort with 3D
+   *  off (same order the array already carries), so the flat board's piece order — and therefore
+   *  its DOM — stays byte-identical to pre-T-1211. */
+  function byDepth<T>(items: T[], rawY: (item: T) => number): T[] {
+    return projection.enabled ? [...items].sort((a, b) => rawY(a) - rawY(b)) : items;
+  }
 
   const placementPop = reducedMotion ? '' : 'hexhaven-piece-pop';
   const hop = robber != null ? robberHopOffset(prevRobberHexRef.current, robber, geometry) : null;
@@ -134,84 +190,93 @@ export function Pieces({
   return (
     <g>
       {/* Roads (under buildings) */}
-      {roads.map(({ edge: eid, seat }, i) => {
-        const e = edge(eid);
-        const len = S * 0.66;
-        const w = S * 0.17;
+      {byDepth(roads, ({ edge: eid }) => edgeRec(eid).y).map(({ edge: eid, seat }, i) => {
+        const e = edgeRec(eid);
+        const a = project({ x: px(e.x), y: px(e.y) });
         return (
           // Outer <g> owns POSITIONING via the SVG transform attribute; the pop animation lives on
           // an INNER <g> so its CSS `transform: scale()` can't clobber the translate/rotate that
-          // pins the road to its edge (the bug where roads jumped to the corner).
-          <g
-            key={`r${eid}-${i}`}
-            transform={`translate(${px(e.x)} ${px(e.y)}) rotate(${e.angleDeg})`}
-            filter="url(#piece-shadow)"
-          >
+          // pins the road to its edge (the bug where roads jumped to the corner). The rotate stays
+          // at the FLAT `e.angleDeg` (per T-1211's spec) — only the anchor point is projected/tilted.
+          <g key={`r${eid}-${i}`} transform={`translate(${a.x} ${a.y}) rotate(${e.angleDeg})`} filter="url(#piece-shadow)">
             <g className={placementPop}>
-              <rect
-                x={-len / 2}
-                y={-w / 2}
-                width={len}
-                height={w}
-                rx={w * 0.4}
-                fill={PLAYER_COLORS[seat]}
-                stroke="#00000088"
-                strokeWidth={1.5}
-              />
+              <RoadBody seat={seat} extruded={projection.enabled} />
             </g>
           </g>
         );
       })}
 
       {/* Ships (Seafarers): on sea edges, like roads but a hull + sail silhouette. */}
-      {ships.map(({ edge: eid, seat }, i) => {
-        const e = edge(eid);
+      {byDepth(ships, ({ edge: eid }) => edgeRec(eid).y).map(({ edge: eid, seat }, i) => {
+        const e = edgeRec(eid);
+        const a = project({ x: px(e.x), y: px(e.y) });
         return (
           <g
             key={`sh${eid}-${i}`}
-            transform={`translate(${px(e.x)} ${px(e.y)}) rotate(${e.angleDeg})`}
+            transform={`translate(${a.x} ${a.y}) rotate(${e.angleDeg})`}
             filter="url(#piece-shadow)"
             data-testid={`ship-${eid}`}
             data-edge-id={eid}
             data-seat={seat}
           >
             <g className={placementPop}>
-              <Ship seat={seat} />
+              <Ship seat={seat} extruded={projection.enabled} />
             </g>
           </g>
         );
       })}
 
       {/* Settlements */}
-      {settlements.map(({ vertex: vid, seat }, i) => {
-        const p = vertex(vid);
-        return <Settlement key={`s${vid}-${i}`} x={p.x} y={p.y} seat={seat} pop={placementPop} />;
-      })}
+      {byDepth(settlements, ({ vertex: vid }) => vertexRaw(vid).y).map(({ vertex: vid, seat }, i) => (
+        <Settlement
+          key={`s${vid}-${i}`}
+          raw={vertexRaw(vid)}
+          project={project}
+          seat={seat}
+          pop={placementPop}
+          extruded={projection.enabled}
+        />
+      ))}
 
       {/* Cities */}
-      {cities.map(({ vertex: vid, seat }, i) => {
-        const p = vertex(vid);
-        return <City key={`ci${vid}-${i}`} x={p.x} y={p.y} seat={seat} pop={placementPop} />;
-      })}
+      {byDepth(cities, ({ vertex: vid }) => vertexRaw(vid).y).map(({ vertex: vid, seat }, i) => (
+        <City
+          key={`ci${vid}-${i}`}
+          raw={vertexRaw(vid)}
+          project={project}
+          seat={seat}
+          pop={placementPop}
+          extruded={projection.enabled}
+        />
+      ))}
 
       {/* Robber (T-907: reskinned per `themeId` via the shared `RobberArt`) */}
       {robber != null && (
         <Robber
-          {...hex(robber)}
+          ground={hexAnchor(robber, 0)}
+          body={hexAnchor(robber, ROBBER_HEIGHT)}
           hexId={robber}
           themeId={themeId}
           hopClass={reducedMotion || !hop ? '' : 'hexhaven-robber-hop'}
           hopDx={hop?.dx ?? 0}
           hopDy={hop?.dy ?? 0}
+          extruded={projection.enabled}
         />
       )}
 
       {/* Pirate (Seafarers): on its sea hex, distinct from the land robber. */}
-      {pirate != null && <Pirate {...hex(pirate)} hexId={pirate} />}
+      {pirate != null && (
+        <Pirate
+          ground={hexAnchor(pirate, 0)}
+          body={hexAnchor(pirate, PIRATE_HEIGHT)}
+          hexId={pirate}
+          extruded={projection.enabled}
+        />
+      )}
 
       {/* Island bonus-VP chits (Seafarers, S10.6): a small owner-coloured marker on the island. */}
       {islandChits.map(({ hex: hid, seat }, i) => {
-        const p = hex(hid);
+        const p = hexAnchor(hid);
         return <IslandChit key={`ch${hid}-${i}`} x={p.x} y={p.y} seat={seat} hexId={hid} />;
       })}
 
@@ -229,7 +294,7 @@ export function Pieces({
           kindsByHex.set(hid, list);
         }
         return hexPieces.map(({ hex: hid, kind }) => {
-          const p = hex(hid);
+          const p = hexAnchor(hid);
           const list = kindsByHex.get(hid)!;
           return (
             <HexPieceMarker
@@ -264,56 +329,156 @@ function Badge({ x, y, seat, size }: { x: number; y: number; seat: Seat; size: n
   );
 }
 
-function Settlement({ x, y, seat, pop }: { x: number; y: number; seat: Seat; pop: string }) {
+/** A settlement — flat single-fill house silhouette pre-T-1211; with 3D on, a standing house whose
+ *  walls sit on the vertex (ground, height 0) and rise to a lit roof peak (`SETTLEMENT_WALL_HEIGHT`
+ *  + `SETTLEMENT_ROOF_HEIGHT` above ground) — the two-tone shading requirement 2 asks for. */
+function Settlement({
+  raw,
+  project,
+  seat,
+  pop,
+  extruded,
+}: {
+  raw: Point;
+  project: ProjectFn;
+  seat: Seat;
+  pop: string;
+  extruded: boolean;
+}) {
   const s = S * 0.22;
-  const pts = `${x - s},${y + s} ${x - s},${y - s * 0.2} ${x},${y - s} ${x + s},${y - s * 0.2} ${x + s},${y + s}`;
+  const ground = project(raw, 0);
+  if (!extruded) {
+    const { x, y } = ground;
+    const pts = `${x - s},${y + s} ${x - s},${y - s * 0.2} ${x},${y - s} ${x + s},${y - s * 0.2} ${x + s},${y + s}`;
+    return (
+      <g filter="url(#piece-shadow)" className={pop}>
+        <polygon points={pts} fill={PLAYER_COLORS[seat]} stroke="#00000088" strokeWidth={1.5} />
+        <Badge x={x} y={y + s * 0.25} seat={seat} size={s * 0.9} />
+      </g>
+    );
+  }
+  const x = ground.x;
+  const groundY = ground.y;
+  const wallY = project(raw, SETTLEMENT_WALL_HEIGHT).y;
+  const roofY = project(raw, SETTLEMENT_WALL_HEIGHT + SETTLEMENT_ROOF_HEIGHT).y;
+  const color = PLAYER_COLORS[seat];
+  const wallPts = `${x - s},${groundY} ${x - s},${wallY} ${x + s},${wallY} ${x + s},${groundY}`;
+  const roofPts = `${x - s},${wallY} ${x},${roofY} ${x + s},${wallY}`;
   return (
     <g filter="url(#piece-shadow)" className={pop}>
-      <polygon points={pts} fill={PLAYER_COLORS[seat]} stroke="#00000088" strokeWidth={1.5} />
-      <Badge x={x} y={y + s * 0.25} seat={seat} size={s * 0.9} />
+      <polygon points={wallPts} fill={darken(color, WALL_DARKEN)} stroke="#00000088" strokeWidth={1.5} />
+      <polygon points={roofPts} fill={lighten(color, ROOF_LIGHTEN)} stroke="#00000088" strokeWidth={1.5} />
+      <Badge x={x} y={(groundY + wallY) / 2} seat={seat} size={s * 0.9} />
     </g>
   );
 }
 
-function City({ x, y, seat, pop }: { x: number; y: number; seat: Seat; pop: string }) {
+/** A city — flat wider-base + single-tower silhouette pre-T-1211; with 3D on, a taller MULTI-tower
+ *  building (requirement 3): a wide darker base wall, a shorter secondary tower (also in wall
+ *  shade), and a taller lit main tower — clearly bigger than a `Settlement`'s single wall+roof. */
+function City({
+  raw,
+  project,
+  seat,
+  pop,
+  extruded,
+}: {
+  raw: Point;
+  project: ProjectFn;
+  seat: Seat;
+  pop: string;
+  extruded: boolean;
+}) {
   const s = S * 0.26;
-  // wider base + tower
-  const base = `${x - s},${y + s} ${x - s},${y} ${x + s},${y} ${x + s},${y + s}`;
-  const tower = `${x - s},${y} ${x - s},${y - s * 0.9} ${x - s * 0.2},${y - s * 1.3} ${x + s * 0.4},${y - s * 0.9} ${x + s * 0.4},${y}`;
+  const ground = project(raw, 0);
+  if (!extruded) {
+    const { x, y } = ground;
+    const base = `${x - s},${y + s} ${x - s},${y} ${x + s},${y} ${x + s},${y + s}`;
+    const tower = `${x - s},${y} ${x - s},${y - s * 0.9} ${x - s * 0.2},${y - s * 1.3} ${x + s * 0.4},${y - s * 0.9} ${x + s * 0.4},${y}`;
+    return (
+      <g filter="url(#piece-shadow)" className={pop}>
+        <polygon points={base} fill={PLAYER_COLORS[seat]} stroke="#00000088" strokeWidth={1.5} />
+        <polygon points={tower} fill={PLAYER_COLORS[seat]} stroke="#00000088" strokeWidth={1.5} />
+        <rect x={x - s * 0.2} y={y - s * 1.34} width={s * 0.5} height={s * 0.28} fill="#c9a227" />
+        <Badge x={x} y={y + s * 0.45} seat={seat} size={s * 0.8} />
+      </g>
+    );
+  }
+  const x = ground.x;
+  const groundY = ground.y;
+  const wallY = project(raw, CITY_WALL_HEIGHT).y;
+  const towerY = project(raw, CITY_WALL_HEIGHT + CITY_TOWER_HEIGHT).y;
+  const tower2Y = project(raw, CITY_WALL_HEIGHT + CITY_TOWER2_HEIGHT).y;
+  const color = PLAYER_COLORS[seat];
+  const wallFill = darken(color, WALL_DARKEN);
+  const roofFill = lighten(color, ROOF_LIGHTEN);
+  const bodyPts = `${x - s},${groundY} ${x - s},${wallY} ${x + s},${wallY} ${x + s},${groundY}`;
+  const tower2Pts = `${x + s * 0.15},${wallY} ${x + s * 0.15},${tower2Y} ${x + s * 0.75},${tower2Y} ${x + s * 0.75},${wallY}`;
+  const towerPts = `${x - s},${wallY} ${x - s},${towerY} ${x - s * 0.2},${towerY - s * 0.35} ${x + s * 0.4},${towerY} ${x + s * 0.4},${wallY}`;
   return (
     <g filter="url(#piece-shadow)" className={pop}>
-      <polygon points={base} fill={PLAYER_COLORS[seat]} stroke="#00000088" strokeWidth={1.5} />
-      <polygon
-        points={tower}
-        fill={PLAYER_COLORS[seat]}
-        stroke="#00000088"
-        strokeWidth={1.5}
-      />
-      <rect x={x - s * 0.2} y={y - s * 1.34} width={s * 0.5} height={s * 0.28} fill="#c9a227" />
-      <Badge x={x} y={y + s * 0.45} seat={seat} size={s * 0.8} />
+      <polygon points={bodyPts} fill={wallFill} stroke="#00000088" strokeWidth={1.5} />
+      <polygon points={tower2Pts} fill={wallFill} stroke="#00000088" strokeWidth={1.5} />
+      <polygon points={towerPts} fill={roofFill} stroke="#00000088" strokeWidth={1.5} />
+      <rect x={x - s * 0.2} y={towerY - s * 0.4} width={s * 0.5} height={s * 0.28} fill="#c9a227" />
+      <Badge x={x} y={(groundY + wallY) / 2} seat={seat} size={s * 0.8} />
     </g>
+  );
+}
+
+/** A road's body, drawn in the edge-local space the caller's `<g transform>` already rotated to
+ *  `edge.angleDeg` (T-1211 keeps that flat rotation, per spec — only the anchor is tilted). Flat
+ *  pre-T-1211 markup is the single plain rect; with 3D on, a second darker rect offset toward the
+ *  bar's own "underside" reads as the bar's visible thickness (requirement 4), topped by a lighter
+ *  face. */
+function RoadBody({ seat, extruded }: { seat: Seat; extruded: boolean }) {
+  const len = S * 0.66;
+  const w = S * 0.17;
+  const color = PLAYER_COLORS[seat];
+  if (!extruded) {
+    return <rect x={-len / 2} y={-w / 2} width={len} height={w} rx={w * 0.4} fill={color} stroke="#00000088" strokeWidth={1.5} />;
+  }
+  const t = w * 0.55; // visible side-sliver thickness
+  return (
+    <>
+      <rect x={-len / 2} y={-w / 2 + t} width={len} height={w} rx={w * 0.4} fill={darken(color, WALL_DARKEN)} stroke="#00000088" strokeWidth={1.5} />
+      <rect x={-len / 2} y={-w / 2} width={len} height={w} rx={w * 0.4} fill={lighten(color, ROOF_LIGHTEN)} stroke="#00000088" strokeWidth={1.5} />
+    </>
   );
 }
 
 /** A ship silhouette (docs/11 §4: hull + sail) centred on its edge, owner-coloured, with the seat
- *  shape badge on the sail. Drawn in edge-local space (the parent <g> supplies translate+rotate). */
-function Ship({ seat }: { seat: Seat }) {
+ *  shape badge on the sail. Drawn in edge-local space (the parent <g> supplies translate+rotate).
+ *  With 3D on, a darker "freeboard" side-face hangs below the hull's waterline and the sail lightens
+ *  a touch — requirement 5's "hull with a little freeboard/side shading + sail". The hull itself
+ *  keeps its plain seat-colour fill in BOTH modes so this stays a real seat-colour hull, not just a
+ *  gradient-washed one. */
+function Ship({ seat, extruded }: { seat: Seat; extruded: boolean }) {
   const hullW = S * 0.6;
   const hullH = S * 0.2;
   const color = PLAYER_COLORS[seat];
-  // Hull: a shallow boat with a pointed bow; sail: a triangle rising from the deck.
   const hull = `M ${-hullW / 2} ${-hullH * 0.2} L ${hullW / 2} ${-hullH * 0.2} L ${hullW * 0.32} ${hullH} L ${-hullW * 0.42} ${hullH} Z`;
+  const sailFill = extruded ? lighten(color, ROOF_LIGHTEN) : color;
   return (
     <g>
       {/* Sail */}
       <polygon
         points={`${-S * 0.04},${-hullH * 0.4} ${-S * 0.04},${-S * 0.42} ${S * 0.22},${-hullH * 0.4}`}
-        fill={color}
+        fill={sailFill}
         stroke="#00000088"
         strokeWidth={1.5}
       />
       {/* Mast */}
       <line x1={-S * 0.04} y1={-hullH * 0.4} x2={-S * 0.04} y2={-S * 0.44} stroke="#00000088" strokeWidth={1.5} />
+      {/* Freeboard: a darker sliver hanging below the hull's waterline, visible thickness. */}
+      {extruded && (
+        <path
+          d={`M ${-hullW * 0.42} ${hullH} L ${hullW * 0.32} ${hullH} L ${hullW * 0.24} ${hullH * 1.55} L ${-hullW * 0.32} ${hullH * 1.55} Z`}
+          fill={darken(color, WALL_DARKEN)}
+          stroke="#00000088"
+          strokeWidth={1.5}
+        />
+      )}
       {/* Hull */}
       <path d={hull} fill={color} stroke="#00000088" strokeWidth={1.5} />
       <Badge x={0} y={hullH * 0.35} seat={seat} size={hullH * 0.9} />
@@ -322,22 +487,40 @@ function Ship({ seat }: { seat: Seat }) {
 }
 
 /** The pirate (Seafarers S8): a dark ship flying a flag, deliberately unlike the land robber so the
- *  two read as different threats on the same board. */
-function Pirate({ x, y, hexId }: { x: number; y: number; hexId: HexId }) {
+ *  two read as different threats on the same board. With 3D on, its body stands `PIRATE_HEIGHT`
+ *  above the shadow ellipse (pinned to the ground/hex), and the hull gets the same two-tone
+ *  freeboard shading as `Ship`. */
+function Pirate({
+  ground,
+  body,
+  hexId,
+  extruded,
+}: {
+  ground: Point;
+  body: Point;
+  hexId: HexId;
+  extruded: boolean;
+}) {
   const s = S * 0.36;
+  const { x, y } = body;
   const hull = `M ${x - s * 0.9} ${y} L ${x + s * 0.9} ${y} L ${x + s * 0.55} ${y + s * 0.5} L ${x - s * 0.7} ${y + s * 0.5} Z`;
   return (
-    <g
-      filter="url(#piece-shadow)"
-      data-testid="pirate"
-      data-hex-id={hexId}
-    >
-      <ellipse cx={x} cy={y + s * 0.65} rx={s * 0.85} ry={s * 0.22} fill="#00000033" />
+    <g filter="url(#piece-shadow)" data-testid="pirate" data-hex-id={hexId}>
+      <ellipse cx={ground.x} cy={ground.y + s * 0.65} rx={s * 0.85} ry={s * 0.22} fill="#00000033" />
       {/* Mast + black flag */}
       <line x1={x} y1={y} x2={x} y2={y - s * 1.1} stroke="#12100c" strokeWidth={2} />
       <polygon points={`${x},${y - s * 1.1} ${x + s * 0.7},${y - s * 0.9} ${x},${y - s * 0.7}`} fill="#12100c" />
       {/* Skull dot on the flag so it reads as a pirate, not just a dark boat. */}
       <circle cx={x + s * 0.28} cy={y - s * 0.9} r={s * 0.09} fill="#f7f1e3" />
+      {/* Freeboard: darker hull-side sliver, same shading language as Ship's. */}
+      {extruded && (
+        <path
+          d={`M ${x - s * 0.7} ${y + s * 0.5} L ${x + s * 0.55} ${y + s * 0.5} L ${x + s * 0.4} ${y + s * 0.72} L ${x - s * 0.55} ${y + s * 0.72} Z`}
+          fill={darken('#26221b', WALL_DARKEN)}
+          stroke="#000"
+          strokeWidth={1.5}
+        />
+      )}
       {/* Hull */}
       <path d={hull} fill="#26221b" stroke="#000" strokeWidth={1.5} />
     </g>
@@ -419,21 +602,23 @@ function HexPieceMarker({
 }
 
 function Robber({
-  x,
-  y,
+  ground,
+  body,
   hexId,
   themeId,
   hopClass,
   hopDx,
   hopDy,
+  extruded,
 }: {
-  x: number;
-  y: number;
+  ground: Point;
+  body: Point;
   hexId: HexId;
   themeId: ThemeId;
   hopClass: string;
   hopDx: number;
   hopDy: number;
+  extruded: boolean;
 }) {
   const s = S * 0.34;
   const theme = THEMES[themeId];
@@ -450,11 +635,14 @@ function Robber({
       data-theme-id={themeId}
       style={hopClass ? ({ '--hop-dx': `${hopDx}px`, '--hop-dy': `${hopDy}px` } as React.CSSProperties) : undefined}
     >
-      <ellipse cx={x} cy={y + s * 0.9} rx={s * 0.7} ry={s * 0.25} fill="#00000033" />
+      {/* T-1211: the shadow stays pinned to the GROUND anchor (height 0) even when the body above
+          stands raised — a piece's shadow never lifts off the plane it's cast on. */}
+      <ellipse cx={ground.x} cy={ground.y + s * 0.9} rx={s * 0.7} ry={s * 0.25} fill="#00000033" />
       {/* T-907 PM wiring: the SAME `RobberArt` the standalone `ThemedRobber` uses (themes/
           ThemedPieces.tsx), so the live board's robber reskins identically — `classic` renders the
-          exact base pawn body this used to draw inline. */}
-      <RobberArt art={theme.robberArt} x={x} y={y} s={s} accent={theme.accent} />
+          exact base pawn body this used to draw inline. T-1211: `body` is the raised anchor (equal
+          to `ground` when 3D is off), and `extruded` gates RobberArt's own two-tone body shading. */}
+      <RobberArt art={theme.robberArt} x={body.x} y={body.y} s={s} accent={theme.accent} extruded={extruded} />
     </g>
   );
 }

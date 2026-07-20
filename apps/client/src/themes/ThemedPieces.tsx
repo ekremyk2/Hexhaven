@@ -8,7 +8,7 @@
 
 import { useTranslation } from 'react-i18next';
 import { GEOMETRY, type BoardGeometry, type HexId } from '@hexhaven/shared';
-import { HEX_SIZE } from '../board/palette';
+import { HEX_SIZE, darken, lighten } from '../board/palette';
 import { THEMES, themedPieceLabelKey, type RobberArtId, type ThemedPieceKind, type ThemeId } from './themes';
 
 const S = HEX_SIZE;
@@ -23,12 +23,16 @@ export interface ThemedRobberProps {
   /** Optional: tags the rendered group with `data-hex-id`, mirroring `board/Pieces.tsx`'s Robber
    *  (useful for e2e/board-fingerprint assertions the same way that one is). */
   hexId?: HexId;
+  /** T-1211 "3D board": adds `RobberArt`'s two-tone body shading (a shadowed offset silhouette +
+   *  a lit head highlight). Defaults `false` so a caller that hasn't opted in (this standalone
+   *  preview piece has no board tilt of its own) renders byte-identical to before T-1211. */
+  extruded?: boolean;
 }
 
 /** The board robber, reskinned per `themeId`. Purely a `<g>` of SVG shapes at `x`/`y` — no
  *  positioning/animation logic (that stays in `board/Pieces.tsx`, which owns the live board and can
  *  wrap this in its own hop/placement handling if a later task wires themes into the live board). */
-export function ThemedRobber({ themeId, x, y, hexId }: ThemedRobberProps) {
+export function ThemedRobber({ themeId, x, y, hexId, extruded = false }: ThemedRobberProps) {
   const theme = THEMES[themeId];
   const s = S * 0.34;
   return (
@@ -41,7 +45,7 @@ export function ThemedRobber({ themeId, x, y, hexId }: ThemedRobberProps) {
       {...(hexId != null ? { 'data-hex-id': hexId } : {})}
     >
       <ellipse cx={x} cy={y + s * 0.9} rx={s * 0.7} ry={s * 0.25} fill="#00000033" />
-      <RobberArt art={theme.robberArt} x={x} y={y} s={s} accent={theme.accent} />
+      <RobberArt art={theme.robberArt} x={x} y={y} s={s} accent={theme.accent} extruded={extruded} />
     </g>
   );
 }
@@ -62,9 +66,40 @@ export function pawnBody(x: number, y: number, s: number): string {
   return `M ${x - s * 0.55} ${y + s} Q ${x - s * 0.7} ${y - s * 0.2} ${x} ${y - s * 0.4} Q ${x + s * 0.7} ${y - s * 0.2} ${x + s * 0.55} ${y + s} Z`;
 }
 
+/** T-1211 "3D board": a darker offset copy of the pawn's own silhouette, drawn UNDER the real body
+ *  — the classic "double-silhouette" faux-extrusion trick, reading as the body's shaded side/back
+ *  face without needing true per-vertex elevation for a shape this small. `fill` is the body's own
+ *  base colour (each `RobberArt` variant darkens ITS OWN body colour, not a hardcoded one). */
+function bodyShadow(x: number, y: number, s: number, fill: string) {
+  return <path d={pawnBody(x + s * 0.08, y + s * 0.08, s)} fill={darken(fill, 0.4)} />;
+}
+
+/** T-1211: a small lit highlight on the pawn's head — the "lit top face" half of the two-tone
+ *  shading `bodyShadow` provides the other half of, again derived from the head's own fill. */
+function headHighlight(x: number, y: number, s: number, fill: string) {
+  return <ellipse cx={x - s * 0.14} cy={y - s * 0.68} rx={s * 0.16} ry={s * 0.1} fill={lighten(fill, 0.5)} opacity={0.55} />;
+}
+
 /** Exported so `board/Pieces.tsx`'s live-board `Robber` can render the SAME per-theme art inside
- *  its own hop-animation wrapper, rather than duplicating the SVG per theme. */
-export function RobberArt({ art, x, y, s, accent }: { art: RobberArtId; x: number; y: number; s: number; accent: string }) {
+ *  its own hop-animation wrapper, rather than duplicating the SVG per theme. `extruded` (T-1211,
+ *  default `false` — byte-identical to pre-T-1211 when omitted) layers `bodyShadow`/`headHighlight`
+ *  on top of each variant's own body/head fill, so the "standing, shaded pawn" look is consistent
+ *  across every theme's reskin rather than only the classic one. */
+export function RobberArt({
+  art,
+  x,
+  y,
+  s,
+  accent,
+  extruded = false,
+}: {
+  art: RobberArtId;
+  x: number;
+  y: number;
+  s: number;
+  accent: string;
+  extruded?: boolean;
+}) {
   const body = pawnBody(x, y, s);
 
   if (art === 'piratePawn') {
@@ -72,8 +107,10 @@ export function RobberArt({ art, x, y, s, accent }: { art: RobberArtId; x: numbe
     // reads as a buccaneer, not a recolored robber.
     return (
       <>
+        {extruded && bodyShadow(x, y, s, '#31302c')}
         <path d={body} fill="#31302c" stroke="#000" strokeWidth={1} />
         <circle cx={x} cy={y - s * 0.55} r={s * 0.42} fill="#31302c" stroke="#000" strokeWidth={1} />
+        {extruded && headHighlight(x, y, s, '#31302c')}
         <path
           d={`M ${x - s * 0.5} ${y - s * 0.75} Q ${x} ${y - s * 1.15} ${x + s * 0.5} ${y - s * 0.75} Q ${x} ${y - s * 0.55} ${x - s * 0.5} ${y - s * 0.75} Z`}
           fill="#12100c"
@@ -90,6 +127,7 @@ export function RobberArt({ art, x, y, s, accent }: { art: RobberArtId; x: numbe
     // straw hat with a gold hatband — evokes a field scarecrow rather than a person.
     return (
       <>
+        {extruded && bodyShadow(x, y, s, '#7a6a44')}
         <path d={body} fill="#7a6a44" stroke="#000" strokeWidth={1} />
         <line
           x1={x - s * 0.65}
@@ -101,6 +139,7 @@ export function RobberArt({ art, x, y, s, accent }: { art: RobberArtId; x: numbe
           strokeLinecap="round"
         />
         <circle cx={x} cy={y - s * 0.55} r={s * 0.42} fill="#e3d5ae" stroke="#000" strokeWidth={1} />
+        {extruded && headHighlight(x, y, s, '#e3d5ae')}
         <ellipse cx={x} cy={y - s * 0.78} rx={s * 0.62} ry={s * 0.16} fill="#dfae3c" stroke={accent} strokeWidth={1.5} />
       </>
     );
@@ -109,8 +148,10 @@ export function RobberArt({ art, x, y, s, accent }: { art: RobberArtId; x: numbe
   // classicPawn: identical to board/Pieces.tsx's Robber — no reskin.
   return (
     <>
+      {extruded && bodyShadow(x, y, s, '#31302c')}
       <path d={body} fill="#31302c" stroke="#000" strokeWidth={1} />
       <circle cx={x} cy={y - s * 0.55} r={s * 0.42} fill="#31302c" stroke="#000" strokeWidth={1} />
+      {extruded && headHighlight(x, y, s, '#31302c')}
     </>
   );
 }

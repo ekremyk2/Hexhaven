@@ -112,3 +112,24 @@ export function darken(fill: string, amount: number): string {
   const b = clamp(n & 0xff);
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
+
+// --- 3D board (T-1211): faux-3D piece shading ------------------------------------------------
+// `darken` (above) already gives hex-tile skirts their shadow; standing PIECES (settlements,
+// cities, roads/ships, the robber/pirate) need the OTHER half of two-tone shading too — a
+// lightened "lit roof/top face" derived from the same seat colour, so a piece's raised body reads
+// as catching light on top and sitting in shadow on its sides without any hand-picked `*_LIT`
+// constant per seat. Symmetric with `darken`: same hex-only guard, same passthrough for non-hex
+// fills (e.g. a gradient url), same 0..1 amount convention (0 = unchanged, 1 = white).
+
+/** Lightens a `#rrggbb` color toward white by `amount` (0..1) — the roof/top-face counterpart to
+ *  `darken`'s skirt/wall shade. Non-hex fills pass through unchanged (see `darken`'s rationale). */
+export function lighten(fill: string, amount: number): string {
+  if (!/^#[0-9a-fA-F]{6}$/.test(fill)) return fill;
+  const n = parseInt(fill.slice(1), 16);
+  const clamp = (channel: number) =>
+    Math.max(0, Math.min(255, Math.round(channel + (255 - channel) * amount)));
+  const r = clamp((n >> 16) & 0xff);
+  const g = clamp((n >> 8) & 0xff);
+  const b = clamp(n & 0xff);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}

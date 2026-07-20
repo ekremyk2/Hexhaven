@@ -1,0 +1,159 @@
+{
+  "app": {
+    "title": "Hexhaven"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "connection": {
+    "connecting": "Connecting…",
+    "open": "Connected",
+    "reconnecting": "Reconnecting…",
+    "closed": "Disconnected"
+  },
+  "toast": {
+    "dismiss": "Dismiss",
+    "codeLabel": "[{{code}}]"
+  },
+  "home": {
+    "heading": "Hexhaven",
+    "tagline": "A web board game of trade and settlement, for 3–6 players.",
+    "hotseatLink": "Try hot-seat mode"
+  },
+  "language": {
+    "switcherLabel": "Language",
+    "en": "EN",
+    "tr": "TR",
+    "enName": "English",
+    "trName": "Turkish"
+  },
+  "theme": {
+    "switcherLabel": "Theme",
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme"
+  },
+  "ui": {
+    "modal": {
+      "close": "Close"
+    },
+    "on": "On",
+    "off": "Off"
+  },
+  "styleguide": {
+    "heading": "Design system — styleguide",
+    "tagline": "Every ui/ primitive in every state, side-by-side with the token palette (docs/11 §1-§2).",
+    "sections": {
+      "tokens": "Design tokens",
+      "buttons": "Buttons",
+      "surfaces": "Cards & panels",
+      "inputs": "Text inputs",
+      "modal": "Modal",
+      "segmented": "Segmented control",
+      "tooltip": "Tooltip",
+      "badges": "Badges",
+      "playerChips": "Player chips",
+      "tabs": "Tabs",
+      "meter": "Meter",
+      "iconButton": "Icon button",
+      "statTile": "Stat tile",
+      "panels": "Panel gallery"
+    },
+    "tokenGroups": {
+      "surfaces": "Surfaces & ink",
+      "seats": "Player seats",
+      "terrain": "Terrain"
+    },
+    "tokenNames": {
+      "tableA": "--table-a",
+      "tableB": "--table-b",
+      "panel": "--panel",
+      "panelEdge": "--panel-edge",
+      "ink": "--ink",
+      "inkSoft": "--ink-soft",
+      "accent": "--accent",
+      "accentGold": "--accent-gold",
+      "danger": "--danger",
+      "seat0": "--seat-0",
+      "seat1": "--seat-1",
+      "seat2": "--seat-2",
+      "seat3": "--seat-3",
+      "seat4": "--seat-4",
+      "seat5": "--seat-5",
+      "hills": "--t-hills",
+      "forest": "--t-forest",
+      "pasture": "--t-pasture",
+      "fields": "--t-fields",
+      "mountains": "--t-mountains",
+      "desert": "--t-desert"
+    },
+    "buttons": {
+      "primary": "Primary",
+      "subtle": "Subtle",
+      "danger": "Danger",
+      "disabled": "Disabled"
+    },
+    "surfaces": {
+      "cardBody": "A compact card surface for list items.",
+      "panelBody": "A larger parchment panel - side panel / hand tray treatment."
+    },
+    "inputs": {
+      "label": "Nickname",
+      "placeholder": "Enter a nickname",
+      "errorLabel": "Nickname (with error)",
+      "errorMessage": "That nickname is already taken."
+    },
+    "modal": {
+      "openButton": "Open example modal",
+      "title": "Example modal",
+      "body": "Escape closes this modal; Tab cycles focus between the elements inside it."
+    },
+    "segmented": {
+      "ariaLabel": "Example segmented control",
+      "optionA": "Option A",
+      "optionB": "Option B",
+      "optionC": "Option C"
+    },
+    "tooltip": {
+      "trigger": "Hover or focus me",
+      "content": "This is a tooltip."
+    },
+    "badges": {
+      "default": "Default",
+      "gold": "Award",
+      "danger": "Alert"
+    },
+    "playerChips": {
+      "sample0": "Alice",
+      "sample1": "Bilal",
+      "sample2": "Cem",
+      "sample3": "Derya",
+      "sample4": "Ege",
+      "sample5": "Fatma"
+    },
+    "tabs": {
+      "ariaLabel": "Example tabs",
+      "tab1": "Overview",
+      "tab2": "Details",
+      "tab3": "History"
+    },
+    "meter": {
+      "label": "Example track"
+    },
+    "iconButton": {
+      "sample1": "Build",
+      "sample2": "Move",
+      "sample3": "Cancel"
+    },
+    "statTile": {
+      "sample": "12 sample"
+    },
+    "panels": {
+      "citiesKnightsHeading": "Walls & Watchmen + Helpers modifier",
+      "modifiersHeading": "Card Mods modifier",
+      "viewportToggleLabel": "Preview viewport",
+      "viewportDesktop": "Desktop",
+      "viewportMobile": "Mobile (375px)"
+    }
+  }
+}

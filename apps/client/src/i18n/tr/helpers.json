@@ -1,0 +1,124 @@
+{
+  "hud": {
+    "title": "Yardımcılar",
+    "yourHelper": "Yardımcınız",
+    "side": "{{side}} yüzü",
+    "nameSide": "{{name}} — {{side}}",
+    "none": "Henüz yardımcınız yok",
+    "use": "Kullan",
+    "swap": "Değiştir",
+    "otherHelper": "{{name}}: {{helper}}",
+    "display": "Mevcut yardımcılar ({{count}})",
+    "auto": "Otomatik — işlem gerekmez"
+  },
+  "name": {
+    "mayor": "Belediye Başkanı",
+    "general": "General",
+    "explorer": "Kaşif",
+    "mendicant": "Dilenci",
+    "robberBride": "Haydut Gelini",
+    "merchant": "Tüccar",
+    "captain": "Kaptan",
+    "noblewoman": "Asilzade",
+    "architect": "Mimar",
+    "priest": "Rahip"
+  },
+  "desc": {
+    "mayor": "Bir atış size hiçbir şey kazandırmadığında istediğiniz 1 kaynak kartını alın.",
+    "general": "7 geldiğinde asla kart atmak zorunda kalmazsınız.",
+    "explorer": "Çıkmaz sokaktaki yollarınızdan birini başka bir yere taşıyın.",
+    "mendicant": "Yol inşa ederken, maliyetindeki tuğla veya kereste yerine istediğiniz kaynağı verin.",
+    "robberBride": "Haydutu çöle gönderin ve terk ettiği altıgenden 1 kaynak alın.",
+    "merchant": "En fazla 2 oyuncudan bir kaynak talep edin; her aldığınız için karşılığında 1 kart verin.",
+    "captain": "Turun geri kalanında seçtiğiniz bir kaynağı bankayla 2:1 takas edin.",
+    "noblewoman": "Sizden kesinlikle daha fazla zafer puanına sahip bir oyuncudan 1 kaynak çalın.",
+    "architect": "Gelişim kartı satın alırken, gereken 1 kart yerine istediğiniz kaynağı verin ve üstteki 3 karta bakıp seçin.",
+    "priest": "İndirimli maliyetle yerleşim veya şehir inşa etmek için bir Şövalye kartı atın."
+  },
+  "reason": {
+    "notYourTurn": "Sıra sizde değil",
+    "wrongPhase": "Şu anda kullanılamaz",
+    "alreadyUsed": "Bu turda zaten kullanıldı",
+    "justAcquired": "Aldığınız tur bir yardımcıyı kullanamazsınız",
+    "notEligible": "Şu anda uygun değil",
+    "noLegalTargets": "Şu anda uygun hedef yok",
+    "cantAfford": "{{need}} {{type}} gerekli (elinizde {{have}} var)."
+  },
+  "swap": {
+    "title": "Yardımcı değiştir",
+    "instructions": "Kullanım hakkı harcamadan mevcut yardımcınızı sergideki biriyle değiştirin.",
+    "confirm": "Değiştir"
+  },
+  "dialog": {
+    "resourceOption": "Kaynak",
+    "edgeOption": "Yol {{n}}",
+    "vertexOption": "Nokta {{n}}",
+    "boardTargetPending": "Hedefi tahtada seçin.",
+    "boardTargetCancel": "İptal",
+    "mayor": {
+      "title": "Belediye Başkanı",
+      "instructions": "Bu atış size hiçbir şey kazandırmadı — bankadan istediğiniz 1 kaynağı alın.",
+      "confirm": "Kaynağı al"
+    },
+    "explorer": {
+      "title": "Kaşif",
+      "instructions": "Taşınacak çıkmaz sokak yolunuzu, ardından gideceği yeri seçin.",
+      "fromLabel": "Taşınacak yol",
+      "toLabel": "Yeni yer",
+      "confirm": "Yolu taşı"
+    },
+    "mendicant": {
+      "title": "Dilenci",
+      "instructions": "Normalde maliyetindeki tuğla veya kereste yerine istediğiniz kaynağı vererek bir yol inşa edin.",
+      "edgeLabel": "Nereye inşa edilecek",
+      "replaceLabel": "Değiştirilecek maliyet kartı",
+      "substituteLabel": "Yerine ödenecek kaynak",
+      "confirm": "Yol inşa et"
+    },
+    "robberBride": {
+      "title": "Haydut Gelini",
+      "instructions": "Haydutu çöle gönderin ve terk ettiği altıgenden 1 kaynak alın.",
+      "targetLabel": "Kimden çalınacak",
+      "noTargetNote": "Haydutun mevcut altıgeninin yanında kimse yok — sadece taşınacak.",
+      "confirm": "Onayla"
+    },
+    "merchant": {
+      "title": "Tüccar",
+      "instructions": "En fazla 2 oyuncudan bir kaynak talep edin. Kimde varsa, karşılığında seçtiğiniz 1 kartı verin.",
+      "targetsLabel": "Talep edilecekler (en fazla 2)",
+      "demandLabel": "Talep ettiğiniz kaynak",
+      "giveBackLabel": "{{name}} kişisine verilecek",
+      "confirm": "Talep et"
+    },
+    "captain": {
+      "title": "Kaptan",
+      "instructions": "Bu turun geri kalanında bankayla 2:1 takas edeceğiniz bir kaynak seçin.",
+      "confirm": "Etkinleştir"
+    },
+    "noblewoman": {
+      "title": "Asilzade",
+      "instructions": "Sizden kesinlikle daha fazla zafer puanına sahip bir oyuncu seçin — ondan 1 kaynak çalarsınız.",
+      "targetLabel": "Kimden çalınacak",
+      "confirm": "Onayla"
+    },
+    "architect": {
+      "title": "Mimar",
+      "instructions": "Üstteki 3 gelişim kartına bakıp birini seçin; gereken 1 kart yerine istediğiniz kaynağı verin.",
+      "pickLabel": "Alınacak kart",
+      "replaceLabel": "Değiştirilecek maliyet kartı",
+      "substituteLabel": "Yerine ödenecek kaynak",
+      "cardOption": "Kart {{n}}",
+      "peeking": "Üstteki 3 karta bakılıyor…",
+      "confirm": "Satın al"
+    },
+    "priest": {
+      "title": "Rahip",
+      "instructions": "Şövalye kartınızı atarak indirimli maliyetle yerleşim veya şehir inşa edin.",
+      "buildLabel": "İnşa edilecek",
+      "buildSettlement": "Yerleşim (1 tuğla + 1 kereste)",
+      "buildCity": "Şehir (2 maden + 1 buğday)",
+      "vertexLabel": "Nereye",
+      "confirm": "İnşa et"
+    }
+  }
+}

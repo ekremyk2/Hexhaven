@@ -1,0 +1,87 @@
+{
+  "combo": {
+    "title": "Özel oynamalar",
+    "empty": "Mevcut elinizle oynanabilecek özel bir kombinasyon yok.",
+    "play": "Oyna",
+    "name": {
+      "rideByNight": "Gece Baskını",
+      "nightOfPlenty": "Bolluk Gecesi",
+      "monorail": "Monoray",
+      "megaKnight": "Mega Şövalye",
+      "superSettle": "Süper Yerleşim"
+    },
+    "desc": {
+      "rideByNight": "Şövalye + Yol Yapımı birlikte: haydutu taşıyıp çalın, ardından 1 bedava yol inşa edin.",
+      "nightOfPlenty": "Şövalye + Bolluk Yılı birlikte: haydutu taşıyıp çalın, ardından 1 bedava kaynak alın.",
+      "monorail": "Tekel + Yol Yapımı birlikte: diğer tüm oyunculardan tüm kereste ve tuğlayı alın, ardından 1-2 bedava yol inşa edin.",
+      "megaKnight": "Aynı anda 2 Şövalye oynayın: haydutu taşıyıp seçtiğiniz bir rakipten (kaynak değil) bir gelişim kartı çalın.",
+      "superSettle": "Bir yerleşimi bedava olarak doğrudan şehre yükseltmek için bir Zafer Puanı kartı atın."
+    },
+    "reason": {
+      "notYourTurn": "Sıra sizde değil",
+      "wrongPhase": "Şu anda kullanılamaz",
+      "cardNotHeld": "Bu kombinasyonun gerektirdiği kartlara sahip değilsiniz",
+      "noLegalTargets": "Şu anda uygun hedef yok"
+    }
+  },
+  "dialog": {
+    "hexOption": "Altıgen {{n}}",
+    "edgeOption": "Yol {{n}}",
+    "boardTargetPending": "Oynamak için kartın hedefini tahtada seçin.",
+    "boardTargetCancel": "İptal",
+    "merchantsBoon": {
+      "title": "Tüccar Lütfu",
+      "instructions": "Bankayla tek bir 2:1 takas yapın. Vereceğinizi (2) ve alacağınızı (1) seçin.",
+      "giveLabel": "Ver (2)",
+      "receiveLabel": "Al (1)",
+      "confirm": "Takas et"
+    },
+    "roadToll": {
+      "title": "Yol Vergisi",
+      "instructions": "Bir kaynak adı verin. Ona sahip her oyuncu size 1 tane verir.",
+      "confirm": "Vergiyi topla"
+    },
+    "trailblazer": {
+      "title": "Öncü",
+      "instructions": "Boş herhangi bir yere 1 bedava yol inşa edin — ağınıza bağlı olması gerekmez.",
+      "confirm": "Yol inşa et"
+    },
+    "highwayman": {
+      "title": "Eşkıya",
+      "instructions": "Haydutu yeni bir altıgene taşıyın. Çalma yok.",
+      "confirm": "Haydutu taşı"
+    },
+    "rideByNight": {
+      "title": "Gece Baskını",
+      "instructions": "Haydutu taşıyıp bir çalma çözün, ardından bedava yolunuzu yerleştirin.",
+      "hexLabel": "Haydutu taşı",
+      "edgeLabel": "Bedava yol",
+      "confirm": "Onayla"
+    },
+    "nightOfPlenty": {
+      "title": "Bolluk Gecesi",
+      "instructions": "Haydutu taşıyıp bir çalma çözün, ardından bankadan 1 bedava kaynak alın.",
+      "hexLabel": "Haydutu taşı",
+      "resourceLabel": "Bedava kaynak",
+      "confirm": "Onayla"
+    },
+    "monorail": {
+      "title": "Monoray",
+      "instructions": "Diğer tüm oyunculardan tüm kereste ve tuğlayı alın, ardından 1 veya 2 bedava yol inşa edin.",
+      "edgeLabel": "Bedava yol(lar) — 1 veya 2 seçin",
+      "confirm": "Onayla"
+    },
+    "megaKnight": {
+      "title": "Mega Şövalye",
+      "instructions": "Bir rakip seçin — rastgele bir gelişim kartını çalarsınız.",
+      "targetLabel": "Rakip",
+      "confirm": "Onayla"
+    },
+    "superSettle": {
+      "title": "Süper Yerleşim",
+      "instructions": "Zafer Puanı kartınızı atın ve bedava şehre yükseltilecek bir yerleşim seçin.",
+      "vertexLabel": "Yükseltilecek yerleşim",
+      "confirm": "Onayla"
+    }
+  }
+}

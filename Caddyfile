@@ -1,0 +1,17 @@
+# T-503 — optional TLS/WSS reverse proxy for an internet-reachable private box (docs/09-runbook.md
+# "Internet-reachable private box"). Not needed on a trusted LAN (plain http:// + ws:// is fine
+# there — see the runbook). Caddy gets you automatic Let's Encrypt certs with no manual renewal.
+#
+# Replace hexhaven.example.com with your real domain (must resolve to this box; ports 80 + 443 open).
+# Caddy's reverse_proxy forwards WebSocket upgrades transparently — no extra config needed for
+# /ws. Run alongside the app container (see docs/09-runbook.md for the two-container compose).
+
+hexhaven.example.com {
+	reverse_proxy localhost:8080
+}
+
+# No domain / self-signed for testing on a bare IP instead of a hostname:
+# :443 {
+#   tls internal
+#   reverse_proxy localhost:8080
+# }

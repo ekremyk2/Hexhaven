@@ -1,0 +1,79 @@
+{
+  "hud": {
+    "title": "Roads & Raiders",
+    "fishLine": "Fish: {{count}}",
+    "coinsLine": "Gold coins: {{count}}",
+    "camelsRemaining": "{{count}} camels left in supply",
+    "capturedBarbariansLine": "Barbarians captured: {{count}}",
+    "goldLine": "Gold: {{count}}",
+    "deliveriesLine": "Deliveries: {{count}}"
+  },
+  "scoreboard": {
+    "oldBoot": "Holds the Old Boot (+1 VP to win)",
+    "wealthiest": "Wealthiest Settler (+1 VP)",
+    "poorest": "Poorest Settler (-2 VP)"
+  },
+  "reason": {
+    "notYourTurn": "Not your turn",
+    "notMainPhase": "Only after you roll",
+    "cantAfford": "Need {{need}} {{unit}} (have {{have}})",
+    "noLegalTargets": "No legal targets right now",
+    "notHeld": "You don't hold it",
+    "noTarget": "No legal target right now",
+    "voteNotOpen": "No vote is open right now",
+    "notResolvedYet": "The vote hasn't resolved yet"
+  },
+  "fishermen": {
+    "title": "Fish exchange",
+    "exchange": {
+      "removeRobber": "Remove the robber ({{cost}} fish)",
+      "steal": "Steal a resource ({{cost}} fish)",
+      "bankResource": "Take a resource ({{cost}} fish)",
+      "freeRoad": "Free road ({{cost}} fish)",
+      "devCard": "Free development card ({{cost}} fish)"
+    },
+    "pickSteal": "Choose who to steal from",
+    "pickResource": "Choose a resource",
+    "pickRoadHint": "click an edge on the board",
+    "passOldBoot": "Pass the Old Boot"
+  },
+  "rivers": {
+    "title": "Rivers",
+    "buildBridge": "Build bridge",
+    "tradeCoins": "Trade coins",
+    "tradeRate": "rate {{rate}} : 1",
+    "pickReceive": "Choose the resource to receive"
+  },
+  "caravans": {
+    "title": "Caravans",
+    "camelsRemaining": "{{count}} camels left in supply",
+    "bidLabel": "Your bid",
+    "grain": "Grain",
+    "wool": "Wool",
+    "submitBid": "Submit bid",
+    "youWon": "You won the vote — place a camel",
+    "placeCamelHint": "Click a caravan-route edge on the board",
+    "winnerIs": "{{name}} won the vote — waiting for them to place a camel",
+    "waitingForOthers": "Waiting for other bids…"
+  },
+  "barbarianAttack": {
+    "title": "Barbarian Attack",
+    "recruitKnight": "Recruit knight",
+    "moveKnight": "Move knight",
+    "extendHint": "A far highlighted target costs 1 grain (extended range)."
+  },
+  "main": {
+    "title": "Wagons",
+    "noWagons": "No wagons yet — build a city to place one.",
+    "wagonAt": "Wagon at spot {{vertex}}",
+    "loadLabel": "Load",
+    "loadNone": "Nothing",
+    "destination": "Move here — {{mp}} MP, {{gold}} gold toll",
+    "commodity": {
+      "marble": "Marble",
+      "glass": "Glass",
+      "sand": "Sand",
+      "tools": "Tools"
+    }
+  }
+}

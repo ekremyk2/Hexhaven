@@ -1,0 +1,246 @@
+{
+  "tabs": {
+    "groupLabel": "Walls & Watchmen eylemleri",
+    "improvements": "Gelişmeler",
+    "knights": "Şövalyeler",
+    "cards": "Kartlar"
+  },
+  "knight": {
+    "level_1": "Temel şövalye",
+    "level_2": "Güçlü şövalye",
+    "level_3": "Kudretli şövalye",
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "track": {
+    "trade": "Ticaret",
+    "politics": "Politika",
+    "science": "Bilim"
+  },
+  "commodity": {
+    "paper": "Kağıt",
+    "cloth": "Kumaş",
+    "coin": "Sikke"
+  },
+  "wall": {
+    "label": "Şehir suru"
+  },
+  "metropolis": {
+    "label": "{{track}} metropolü"
+  },
+  "barbarianTrack": {
+    "title": "Barbar gemisinin ilerleyişi",
+    "step": "{{total}} adımdan {{step}}",
+    "imminent": "Saldırı yakın!",
+    "hexhaven": "Hexhaven"
+  },
+  "defenderOfHexhaven": {
+    "label": "Hexhaven'ın Savunucusu (+1 Zafer Puanı)",
+    "badge": "🛡️+{{count}}"
+  },
+  "hud": {
+    "yourCommodities": "Emtialarınız",
+    "yourImprovements": "Gelişmeleriniz"
+  },
+  "banner": {
+    "defended": "Hexhaven savunuldu! {{name}} yeni Hexhaven'ın Savunucusu oldu (+1 Zafer Puanı).",
+    "defendedTie": "Hexhaven savunuldu (en güçlü savunucular berabere — her biri bir gelişim kartı çeker).",
+    "pillaged": "Barbarlar kazandı! {{names}} bir şehrini yağmaya kaybetti.",
+    "pillagedNone": "Barbarlar kazandı, ancak yağmalanacak bir şehir yoktu.",
+    "listSeparator": ", "
+  },
+  "reason": {
+    "cantAfford": "{{need}} {{type}} gerekli (elinizde {{have}} var).",
+    "noCityOwned": "En az bir şehre sahip olmalısınız.",
+    "maxLevel": "Zaten en üst seviyede.",
+    "noLegalTargets": "Şu anda geçerli bir hedef yok.",
+    "notMainPhase": "Yalnızca zar attıktan sonra.",
+    "notYourTurn": "Sıra sizde değil",
+    "robberLocked": "Hırsız, ilk barbar saldırısına kadar kilitli.",
+    "noKnightSpot": "Şu anda şövalye için bağlı bir yer yok.",
+    "noInactiveKnight": "Aktive edilecek pasif bir şövalyeniz yok.",
+    "noPromotableKnight": "Şu anda terfi ettirilebilecek bir şövalye yok (bir sonraki seviye dolu ya da güçlü → kudretli için Kale gerekiyor).",
+    "noMovableKnight": "Şu anda hareket ettirilebilecek aktif bir şövalye yok.",
+    "noDisplaceableKnight": "Şu anda daha zayıf bir rakibi yerinden edebilecek aktif bir şövalye yok.",
+    "noKnightNextToRobber": "Hırsızın yanında aktif bir şövalye gerekiyor.",
+    "noEligibleCity": "Sur için uygun bir şehir yok (surlanmamış bir şehir gerekiyor, sınırın altında)."
+  },
+  "improvements": {
+    "title": "Şehir gelişmeleri",
+    "buy": "Satın al ({{cost}} {{commodity}})",
+    "maxed": "Maksimum",
+    "ability": {
+      "trade": "Seviye 3 — Ticarethane: bir emtiayı bankayla 2:1 oranında takas edin.",
+      "politics": "Seviye 3 — Kale: şövalyeleriniz güçlü → kudretliye terfi ettirilebilir.",
+      "science": "Seviye 3 — Su Kemeri: size hiçbir şey vermeyen bir atış 1 bedava kaynak sağlar."
+    },
+    "abilityShort": {
+      "trade": "Sv3: 2:1 banka takası",
+      "politics": "Sv3: kudretli şövalye",
+      "science": "Sv3: bedava kaynak"
+    },
+    "metropolisHint": "Sv4 yolun Metropolünü kazandırır (şehir +2 ZP); Sv5 onu geri alabilir."
+  },
+  "knightControls": {
+    "title": "Şövalyeler ve şehir surları",
+    "build": "Şövalye inşa et",
+    "activate": "Şövalyeyi aktive et",
+    "promote": "Şövalyeyi terfi ettir",
+    "move": "Şövalyeyi taşı",
+    "displace": "Şövalyeyi yerinden et",
+    "chaseRobber": "Hırsızı kovala",
+    "buildWall": "Şehir suru inşa et",
+    "pickSourceHint": "Vurgulanan şövalyelerinizden birine, ardından hedefine tıklayın."
+  },
+  "commodityTrade": {
+    "trigger": "Emtia takas et",
+    "title": "Bankayla emtia takas et",
+    "giveLabel": "Ver",
+    "receiveLabel": "Al",
+    "rate": "Oran: {{rate}}:1",
+    "confirm": "Takası onayla",
+    "resourceLabel": "Kaynak",
+    "commodityLabel": "Emtia"
+  },
+  "progressHand": {
+    "title": "Gelişim kartları",
+    "empty": "Henüz gelişim kartınız yok.",
+    "count": "{{count}} kart",
+    "count_other": "{{count}} kart",
+    "play": "Oyna",
+    "revealed": "Açığa çıktı (+1 Zafer Puanı)",
+    "revealedLine": "{{names}} — Açığa çıktı (+1 Zafer Puanı)",
+    "beforeRollOnly": "Simyacı, zar atmadan önce oynanmalı.",
+    "afterRollOnly": "Yalnızca zar attıktan sonra.",
+    "dialogPending": "Oynamak için kartın hedefini seçin.",
+    "notWiredYet": "Bu kartı oynamak istemci tarafında henüz bağlanmadı.",
+    "cancel": "İptal"
+  },
+  "dialog": {
+    "resourceMonopoly": {
+      "title": "Kaynak Tekeli",
+      "instructions": "Diğer her oyuncu size seçtiğiniz kaynaktan 2 tane verir.",
+      "confirm": "Onayla"
+    },
+    "commodityMonopoly": {
+      "title": "Emtia Tekeli",
+      "instructions": "Diğer her oyuncu size seçtiğiniz emtiadan 1 tane verir.",
+      "confirm": "Onayla"
+    },
+    "crane": {
+      "title": "Vinç",
+      "instructions": "Bir şehir gelişmesini 1 eksik emtiayla inşa edin. Yolu seçin.",
+      "confirm": "Onayla"
+    },
+    "hexOption": "Altıgen {{n}}",
+    "vertexOption": "Nokta {{n}}",
+    "edgeOption": "Yol {{n}}",
+    "alchemist": {
+      "title": "Simyacı",
+      "instructions": "Bu turun atışı için sarı ve kırmızı zar değerlerini seçin.",
+      "yellowLabel": "Sarı zar",
+      "redLabel": "Kırmızı zar",
+      "confirm": "Zarları ayarla"
+    },
+    "engineer": {
+      "title": "Mühendis",
+      "instructions": "Şehirlerinizden birinin altına bedava bir şehir suru inşa edin.",
+      "confirm": "Sur inşa et"
+    },
+    "inventor": {
+      "title": "Mucit",
+      "instructions": "İki altıgenin sayı jetonlarını takas edin (6 ve 8 taşınamaz).",
+      "aLabel": "Birinci altıgen",
+      "bLabel": "İkinci altıgen",
+      "confirm": "Jetonları takas et"
+    },
+    "medicine": {
+      "title": "Tıp",
+      "instructions": "Kasabalarınızdan birini 2 maden + 1 tahıl karşılığında şehre yükseltin.",
+      "confirm": "Yükselt"
+    },
+    "merchant": {
+      "title": "Tüccar",
+      "instructions": "Tüccarı kasabanıza veya şehrinize komşu bir altıgene yerleştirin.",
+      "confirm": "Tüccarı yerleştir"
+    },
+    "merchantFleet": {
+      "title": "Tüccar Filosu",
+      "instructions": "Bu tur bir kez 2:1 banka takası yapın. Ne verip ne alacağınızı seçin.",
+      "giveLabel": "Ver (2)",
+      "receiveLabel": "Al (1)",
+      "confirm": "Takas et"
+    },
+    "commercialHarbor": {
+      "title": "Ticaret Limanı",
+      "instructions": "Her rakipten seçtiğiniz bir kaynağı alın, karşılığında her birine seçtiğiniz bir emtiayı verin.",
+      "resourceLabel": "Aldığınız kaynak",
+      "commodityLabel": "Verdiğiniz emtia",
+      "confirm": "Onayla"
+    },
+    "masterMerchant": {
+      "title": "Usta Tüccar",
+      "instructions": "Sizden fazla zafer puanı olan bir oyuncudan seçtiğiniz 2 kartı alın.",
+      "confirm": "Onayla"
+    },
+    "bishop": {
+      "title": "Piskopos",
+      "instructions": "Hırsızı taşıyın; yeni altıgenine komşu her oyuncudan 1 kart çalın.",
+      "confirm": "Hırsızı taşı"
+    },
+    "deserter": {
+      "title": "Asi",
+      "instructions": "Bir rakip bir şövalyesini kaldırır; siz aynı seviyede bedava yeni bir şövalye yerleştirirsiniz.",
+      "knightLabel": "Kaldırılacak rakip şövalye",
+      "knightOption": "{{name}} Sv {{level}} (nokta {{n}})",
+      "placementLabel": "Yeni şövalyenizin yeri",
+      "confirm": "Onayla"
+    },
+    "diplomat": {
+      "title": "Diplomat",
+      "instructions": "Açık bir yolu kaldırın. Sizinse bedava yeniden inşa edersiniz.",
+      "confirm": "Yolu kaldır"
+    },
+    "intrigue": {
+      "title": "Entrika",
+      "instructions": "Yolunuz üzerindeki bir rakip şövalyeyi güç kuralını yok sayarak yerinden edin.",
+      "confirm": "Yerinden et"
+    },
+    "spy": {
+      "title": "Casus",
+      "instructions": "Bir rakip seçin, ardından elindeki kartlardan birini alın.",
+      "seatLabel": "Rakip",
+      "cardLabel": "Hangi kart alınacak",
+      "peeking": "Eline bakılıyor…",
+      "cardOption": "Kart {{n}}",
+      "confirm": "Kartı al"
+    }
+  },
+  "card": {
+    "alchemist": { "name": "Simyacı", "desc": "Zar atmadan önce sarı ve kırmızı zar değerlerini kendiniz seçin." },
+    "crane": { "name": "Vinç", "desc": "Bir şehir gelişmesini 1 eksik emtiayla inşa edin." },
+    "engineer": { "name": "Mühendis", "desc": "Bedava bir şehir suru inşa edin." },
+    "inventor": { "name": "Mucit", "desc": "İki altıgenin sayı jetonlarını takas edin (6 veya 8 hariç)." },
+    "irrigation": { "name": "Sulama", "desc": "Sınırdaki her tarla altıgeni için 2 tahıl kazanın." },
+    "medicine": { "name": "Tıp", "desc": "Bir kasabayı 2 maden + 1 tahıl karşılığında şehre yükseltin." },
+    "mining": { "name": "Madencilik", "desc": "Sınırdaki her dağ altıgeni için 2 maden kazanın." },
+    "printer": { "name": "Matbaa", "desc": "Hemen açığa çıkar: +1 Zafer Puanı." },
+    "roadBuilding": { "name": "Yol Yapımı", "desc": "Bedava 2 yol inşa edin." },
+    "smith": { "name": "Demirci", "desc": "En fazla 2 şövalyeyi birer seviye, bedava terfi ettirin." },
+    "merchant": { "name": "Tüccar", "desc": "Tüccarı kasabanıza/şehrinize komşu bir altıgene yerleştirin: orada 2:1 takas, elinizdeyken +1 Zafer Puanı." },
+    "merchantFleet": { "name": "Tüccar Filosu", "desc": "Seçtiğiniz bir kaynağı/emtiayı bankayla bir kez 2:1 takas edin." },
+    "commercialHarbor": { "name": "Ticaret Limanı", "desc": "Diğer her oyuncu size seçtiğiniz bir kaynağı, kendi emtialarından biri karşılığında verir." },
+    "masterMerchant": { "name": "Usta Tüccar", "desc": "Sizden fazla Zafer Puanı olan bir oyuncudan seçtiğiniz 2 kartı alın." },
+    "resourceMonopoly": { "name": "Kaynak Tekeli", "desc": "Diğer her oyuncu size belirttiğiniz kaynaktan 2 tane verir." },
+    "commodityMonopoly": { "name": "Emtia Tekeli", "desc": "Diğer her oyuncu size belirttiğiniz emtiadan 1 tane verir." },
+    "bishop": { "name": "Piskopos", "desc": "Hırsızı taşıyın ve ona komşu her oyuncudan 1 kart çalın." },
+    "constitution": { "name": "Anayasa", "desc": "Hemen açığa çıkar: +1 Zafer Puanı." },
+    "deserter": { "name": "Asi", "desc": "Bir rakip bir şövalyesini kaldırır; siz aynı seviyede bedava yeni bir şövalye yerleştirirsiniz." },
+    "diplomat": { "name": "Diplomat", "desc": "Açık bir yolu kaldırın; sizinse bedava yeniden inşa edin." },
+    "intrigue": { "name": "Entrika", "desc": "Yolunuz üzerindeki bir rakip şövalyeyi güç kuralını yok sayarak yerinden edin." },
+    "saboteur": { "name": "Sabotajcı", "desc": "Sizin kadar veya sizden fazla Zafer Puanı olan her oyuncu elinin yarısını atar." },
+    "spy": { "name": "Casus", "desc": "Başka bir oyuncunun gelişim kartlarına bakın ve 1 tanesini alın." },
+    "warlord": { "name": "Savaş Lordu", "desc": "Tüm şövalyelerinizi bedava aktive edin." },
+    "wedding": { "name": "Düğün", "desc": "Sizden fazla Zafer Puanı olan her oyuncu size seçtiğiniz 2 kaynak/emtia verir." }
+  }
+}

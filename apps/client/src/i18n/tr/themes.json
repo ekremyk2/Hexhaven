@@ -1,0 +1,37 @@
+{
+  "switcherLabel": "Tahta teması",
+  "theme": {
+    "classic": {
+      "name": "Klasik",
+      "description": "Geleneksel Hexhaven görünümü — yeniden giydirme yok, aynı adlar ve görsel."
+    },
+    "pirates": {
+      "name": "Korsan Koyu",
+      "description": "Kabadayı bir görünüm: soyguncu bir korsana dönüşür, yerleşimler ileri karakol olur."
+    },
+    "harvest": {
+      "name": "Hasat Bayramı",
+      "description": "Sıcak bir hasat teması: soyguncu gezgin bir korkuluğa dönüşür."
+    }
+  },
+  "piece": {
+    "classic": {
+      "robber": "Soyguncu",
+      "settlement": "Yerleşim",
+      "city": "Şehir",
+      "road": "Yol"
+    },
+    "pirates": {
+      "robber": "Korsan",
+      "settlement": "İleri Karakol",
+      "city": "Kale",
+      "road": "Patika"
+    },
+    "harvest": {
+      "robber": "Korkuluk",
+      "settlement": "Çiftlik Evi",
+      "city": "Malikane",
+      "road": "Keçiyolu"
+    }
+  }
+}

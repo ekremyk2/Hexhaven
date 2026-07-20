@@ -1,0 +1,161 @@
+/* Motion catalog (T-409, docs/11 §5). Every keyframe here is transform/opacity-only (compositor
+   friendly, docs/11 §6) and is applied by components via `theme/motion.ts`'s
+   `usePrefersReducedMotion()`/`motionClass()` — the class names below are only ever attached when
+   motion is fine. The `@media (prefers-reduced-motion: reduce)` block underneath is a pure-CSS
+   backstop (belt-and-suspenders): even if a class slips through, the animation still collapses to
+   a no-op under the OS setting. */
+
+@keyframes hexhaven-dice-tumble {
+  0% { transform: rotate(0deg) scale(0.7); opacity: 0.5; }
+  40% { transform: rotate(-18deg) scale(1.12); }
+  70% { transform: rotate(9deg) scale(0.96); }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+.hexhaven-dice-tumble { animation: hexhaven-dice-tumble 600ms ease-out; }
+
+@keyframes hexhaven-piece-pop {
+  0% { transform: scale(1.08); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+/* `transform-box: fill-box` makes `transform-origin: center` resolve to the ELEMENT's own bounding
+ * box (not the SVG viewport), so the pop scales in place instead of flying in from the viewport
+ * centre. Roads additionally keep their positioning transform on a SEPARATE outer <g> (see
+ * board/Pieces.tsx) because a CSS `transform` here would otherwise override the SVG transform
+ * attribute that positions them. */
+.hexhaven-piece-pop { animation: hexhaven-piece-pop 200ms ease-out; transform-origin: center; transform-box: fill-box; }
+
+@keyframes hexhaven-robber-hop {
+  0% { transform: translate(calc(-1 * var(--hop-dx, 0px)), calc(-1 * var(--hop-dy, 0px))) scale(0.9); opacity: 0.75; }
+  50% { transform: translate(calc(-0.5 * var(--hop-dx, 0px)), calc(-0.5 * var(--hop-dy, 0px) - 16px)) scale(1.08); }
+  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+.hexhaven-robber-hop { animation: hexhaven-robber-hop 400ms ease-out; }
+
+@keyframes hexhaven-resource-pop {
+  0% { transform: scale(1) translateY(0); }
+  35% { transform: scale(1.15) translateY(-3px); }
+  100% { transform: scale(1) translateY(0); }
+}
+.hexhaven-resource-pop { animation: hexhaven-resource-pop 450ms cubic-bezier(0.33, 1, 0.68, 1); }
+
+@keyframes hexhaven-resource-chip-fly {
+  0% { transform: translateY(6px) scale(0.6); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateY(-18px) scale(1); opacity: 0; }
+}
+.hexhaven-resource-chip-fly { animation: hexhaven-resource-chip-fly 450ms cubic-bezier(0.33, 1, 0.68, 1) both; }
+
+@keyframes hexhaven-card-slide {
+  0% { transform: translateY(10px) scale(0.9) rotateX(35deg); opacity: 0; }
+  100% { transform: translateY(0) scale(1) rotateX(0deg); opacity: 1; }
+}
+.hexhaven-card-slide { animation: hexhaven-card-slide 350ms ease-out; transform-origin: bottom center; }
+
+@keyframes hexhaven-award-glow {
+  0% { box-shadow: 0 0 0 0 rgba(201, 162, 39, 0.9); transform: scale(1); }
+  40% { box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.35); transform: scale(1.12); }
+  100% { box-shadow: 0 0 0 0 rgba(201, 162, 39, 0); transform: scale(1); }
+}
+.hexhaven-award-glow { animation: hexhaven-award-glow 500ms ease-out; }
+
+/* Toasts mount top-center (Priority 2 UI overhaul) and slide down in from off-screen above,
+   reversing on exit — same class names as before (`ui/Toast.tsx`'s two states), only the
+   direction changed so every existing "does this class exist" test still passes untouched. */
+@keyframes hexhaven-toast-enter {
+  0% { transform: translateY(-16px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.hexhaven-toast-enter { animation: hexhaven-toast-enter 200ms ease-out; }
+
+@keyframes hexhaven-toast-exit {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-16px); opacity: 0; }
+}
+.hexhaven-toast-exit { animation: hexhaven-toast-exit 180ms ease-in forwards; }
+
+@keyframes hexhaven-modal-enter {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.hexhaven-modal-enter { animation: hexhaven-modal-enter 200ms ease-out; }
+
+@keyframes hexhaven-modal-exit {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.97); opacity: 0; }
+}
+.hexhaven-modal-exit { animation: hexhaven-modal-exit 180ms ease-in forwards; }
+
+@keyframes hexhaven-backdrop-enter {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.hexhaven-backdrop-enter { animation: hexhaven-backdrop-enter 200ms ease-out; }
+
+@keyframes hexhaven-victory-drop {
+  0% { transform: translateY(-24px) scale(0.96); opacity: 0; }
+  70% { transform: translateY(4px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+.hexhaven-victory-drop { animation: hexhaven-victory-drop 500ms cubic-bezier(0.25, 0.8, 0.4, 1); }
+
+@keyframes hexhaven-confetti-fall {
+  0% { transform: translateY(-12px) rotate(0deg); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(48px) rotate(var(--confetti-spin, 180deg)); opacity: 0; }
+}
+.hexhaven-confetti-piece { animation: hexhaven-confetti-fall 1.2s ease-in both; }
+
+/* Dice-roll CENTER-SCREEN overlay (Priority 3 UI overhaul): the big tumbling pair reuses
+   `.hexhaven-dice-tumble` at a larger size (hud/DiceRollOverlay.tsx), then this class fades the whole
+   overlay out once the settle+hold is over. `usePrefersReducedMotion()` skips straight to a short
+   hold + fade (no tumble) — see that component for the JS side of the split. */
+@keyframes hexhaven-dice-overlay-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.hexhaven-dice-overlay-fade { animation: hexhaven-dice-overlay-fade 300ms ease-in forwards; }
+
+/* Mobile bottom-sheet (Priority 4): below 768px every `Modal` (discard/gold/steal/trade/robber/card
+   dialogs, Modifiers, expansions) slides up from the bottom edge instead of scaling in from center
+   — `ui/Modal.tsx` only swaps layout classes (items-end + full-width/rounded-top panel); the SAME
+   `hexhaven-modal-enter`/`hexhaven-modal-exit` class names just resolve to a different keyframe here, so
+   no component logic needs to know which shape it's animating.  */
+@media (max-width: 767px) {
+  @keyframes hexhaven-modal-enter {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes hexhaven-modal-exit {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(100%); opacity: 0; }
+  }
+}
+
+/* Turn-change glow (docs/11 §5: "active panel glow crossfade, 250ms") is a plain CSS *transition*
+   on box-shadow/ring, not a keyframe — it fires automatically whenever the "active" class swap
+   changes that property, no JS retrigger needed. Still gated so `prefers-reduced-motion` collapses
+   it to an instant swap rather than a crossfade. */
+.hexhaven-turn-glow { transition: box-shadow 250ms ease, background-color 250ms ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hexhaven-dice-tumble,
+  .hexhaven-piece-pop,
+  .hexhaven-robber-hop,
+  .hexhaven-resource-pop,
+  .hexhaven-resource-chip-fly,
+  .hexhaven-card-slide,
+  .hexhaven-award-glow,
+  .hexhaven-toast-enter,
+  .hexhaven-toast-exit,
+  .hexhaven-modal-enter,
+  .hexhaven-modal-exit,
+  .hexhaven-backdrop-enter,
+  .hexhaven-victory-drop,
+  .hexhaven-confetti-piece,
+  .hexhaven-dice-overlay-fade {
+    animation: none !important;
+  }
+  .hexhaven-turn-glow {
+    transition: none !important;
+  }
+}

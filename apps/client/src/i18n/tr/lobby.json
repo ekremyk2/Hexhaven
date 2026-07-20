@@ -1,0 +1,343 @@
+{
+  "home": {
+    "nicknameLabel": "Takma ad",
+    "nicknamePlaceholder": "Bir takma ad girin",
+    "passwordLabel": "Sunucu şifresi",
+    "passwordPlaceholder": "Sunucu şifresini girin",
+    "validation": {
+      "nicknameInvalid": "Bir takma ad girin (1-20 karakter).",
+      "codeInvalid": "Oda kodları 5 karakterdir: A-Z ve 2-9 (O, 0, I veya 1 yok)."
+    },
+    "createCard": {
+      "title": "Oyun oluştur",
+      "submit": "Oyun oluştur"
+    },
+    "joinCard": {
+      "title": "Oyuna katıl",
+      "codeLabel": "Oda kodu",
+      "codePlaceholder": "ABCDE",
+      "submit": "Oyuna katıl"
+    }
+  },
+  "options": {
+    "presets": {
+      "heading": "Kayıtlı ayarlar",
+      "empty": "Henüz kayıtlı ayar yok — aşağıdan seçenekleri ayarlayın, adlandırın ve Kaydet'e basın.",
+      "saveLabel": "Geçerli ayarı şu adla kaydet…",
+      "savePlaceholder": "örn. 6 oyunculu W&W",
+      "saveButton": "Kaydet",
+      "deleteAria": "{{name}} kayıtlı ayarını sil"
+    },
+    "gameMode": {
+      "title": "Oyununu seç",
+      "chooseGame": "Oyun",
+      "base": { "name": "Temel oyun" },
+      "addonHint": "Oyununla birleştir",
+      "ckBadge": "+ W&W",
+      "scenarioLabel": "Senaryo",
+      "fieldLabel": "Oyun modu",
+      "fieldPlayers": "{{count}} oyuncu"
+    },
+    "playerCountLabel": "Oyuncular",
+    "playerCountAria": "Oyuncu sayısı",
+    "boardLabel": "Tahta",
+    "boardAria": "Tahta kurulumu",
+    "board": {
+      "random": {
+        "name": "Rastgele",
+        "description": "Araziler, sayı jetonları ve limanlar her oyunda karıştırılır."
+      },
+      "beginner": {
+        "name": "Başlangıç",
+        "description": "Kural kitabındaki resmi sabit başlangıç tahtası — her oyunda aynı düzen (yalnızca temel tahta)."
+      },
+      "fiveSixNewPlayers": {
+        "name": "5-6 Yeni Oyuncu",
+        "description": "Resmi sabit 5-6 başlangıç tahtası. Yakında."
+      },
+      "headingForNewShores": {
+        "name": "İlk Yolculuk",
+        "description": "Open Seas giriş senaryosu: ana ada ve dış adalar. 14 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "newWorld": {
+        "name": "Açık Ufuklar",
+        "description": "Sadece 5-6 oyuncu: rastgele kurulan bir ana ada ve dış adalar, daha kalabalık bir kadro için büyütülmüş. 14 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "throughTheDesert": {
+        "name": "Büyük Yarık",
+        "description": "Sadece 5-6 oyuncu: bir çöl şeridiyle ikiye bölünmüş tek bir ana ada ve ötesindeki dış adalar. 14 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "forgottenTribe": {
+        "name": "Kayıp Adalar",
+        "description": "Sadece 5-6 oyuncu: birçok küçük adayla çevrili tek bir ana ada; her adanın ilk yerleşimcisi kendine özgü bir ödül kazanır. 14 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "sixIslands": {
+        "name": "Altı Ada",
+        "description": "Sadece 5-6 oyuncu: hiç ana ada yok — bunun yerine yerleşilecek altı eşit büyüklükte ada var. 18 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "fogIslands": {
+        "name": "Puslu Adalar",
+        "description": "Sadece 5-6 oyuncu: haritanın büyük bölümü gizli başlar. Keşfettikçe kapalı arazi ve numara karolarını ortaya çıkarmak için gemilerinizi yüzdürün."
+      },
+      "clothForHexhaven": {
+        "name": "Hexhaven İçin Kumaş",
+        "description": "Sadece 5-6 oyuncu: küçük adalardaki köyler, numaraları geldiğinde kumaş dokur. Her 2 kumaş 1 galibiyet puanı değerindedir."
+      },
+      "pirateIslands": {
+        "name": "Korsan Koyları",
+        "description": "Sadece 5-6 oyuncu: korsan gemisi her tur sabit bir rota üzerinde ilerleyerek yakındaki gemileri engeller. Bonus galibiyet puanı için küçük adalardaki korsan inlerini yağmalayın."
+      },
+      "wondersOfHexhaven": {
+        "name": "Hexhaven'ın Harikaları",
+        "description": "Sadece 5-6 oyuncu: bir harikayı aşama aşama yükseltmek için yerleşim ve şehir inşa etmeye devam edin. Her aşamayı tamamlamak anında galibiyet getirir, ya da her zamanki galibiyet puanı hedefine doğru yarışın."
+      },
+      "size": {
+        "standard": "Standart 19 altıgenli tahta.",
+        "large": "Büyük 30 altıgenli tahta (5-6 oyunculu genişleme).",
+        "seafarers": "Deniz, gemiler ve korsan içeren Open Seas senaryo tahtası."
+      }
+    },
+    "expansionsHeading": "Genişlemeler",
+    "comingSoonBadge": "Yakında",
+    "expansions": {
+      "fiveSix": {
+        "name": "5-6 Oyunculu Genişleme",
+        "description": "Masada altı kişiye kadar oyna."
+      },
+      "seafarers": {
+        "name": "Open Seas",
+        "description": "Gemiler, adalar ve korsan."
+      },
+      "citiesKnights": {
+        "name": "Walls & Watchmen",
+        "description": "Emtialar, şövalyeler ve barbar."
+      },
+      "tradersBarbarians": {
+        "name": "Roads & Raiders",
+        "description": "Beş bağımsız senaryo: balık, nehirler, deve kervanları, bir barbar istilası veya ticaret vagonları."
+      },
+      "explorersPirates": {
+        "name": "Sails & Scoundrels",
+        "description": "Ana adandan sisin içinden denize aç, yeni yerleşimler kur ve şehirler yerine liman yerleşimleri inşa et."
+      }
+    },
+    "epScenario": {
+      "label": "Sails & Scoundrels senaryosu",
+      "aria": "Sails & Scoundrels senaryosu",
+      "landHo": {
+        "name": "Karaya Çıkış",
+        "description": "Giriş senaryosu: gemileri hareket ettir, sisi keşfet, yerleşim/liman yerleşimi kur. 8 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "fishForHexhaven": {
+        "name": "Hexhaven İçin Balık",
+        "description": "Karaya Çıkış'ın yolculuğu, ayrıca sisteki balık sürüleri: varışta balık topla ve bonus galibiyet puanı için konseye teslim et. 10 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "spicesForHexhaven": {
+        "name": "Hexhaven İçin Baharat",
+        "description": "Karaya Çıkış'ın yolculuğu, ayrıca ticaret köyleri: bir köyde baharat takas et, ardından bonus galibiyet puanı ve daha geniş gemi menzili için konseye teslim et. 10 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "pirateLairs": {
+        "name": "Korsan İnleri",
+        "description": "Karaya Çıkış'ın yolculuğu, ayrıca sisteki korsan inleri: mürettebat inşa et, bir ine indir ve diğer kaşiflerle birlikte bonus galibiyet puanı için ele geçir. 10 galibiyet puanına ilk ulaşan kazanır."
+      },
+      "fullCampaign": {
+        "name": "Sails & Scoundrels",
+        "description": "Tam kampanya: Karaya Çıkış'ın yolculuğu, balık, baharat ve korsan inlerinin hepsi birlikte oyunda. 17 galibiyet puanına ilk ulaşan kazanır."
+      }
+    },
+    "tbScenario": {
+      "label": "Roads & Raiders senaryosu",
+      "aria": "Roads & Raiders senaryosu",
+      "fishermen": {
+        "name": "Balıkçılar",
+        "description": "Bir Göl ve balık avlama alanları balık jetonu dağıtır — bunları tek seferlik avantajlarla takas et. Eski Çizmeye dikkat et."
+      },
+      "rivers": {
+        "name": "Nehirler",
+        "description": "Nehirler adayı böler. Kıyılarına yerleşmek veya köprü kurmak altın sikke kazandırır — En Zengin ve En Yoksul Yerleşimci bonus/ceza galibiyet puanı kazanır."
+      },
+      "caravans": {
+        "name": "Kervanlar",
+        "description": "Çöl bir Vahaya dönüşür. Her yeni yerleşim, bir sonraki devenin nereye konacağına dair bir teklif oylaması açar. 12 galibiyet puanına kadar oyna."
+      },
+      "barbarianAttack": {
+        "name": "Barbar Saldırısı",
+        "description": "Barbarlar her zar atışında adaya yürür. Yağmadan önce onları durdurmak için şövalye topla ve hareket ettir."
+      },
+      "tradersBarbarians": {
+        "name": "Roads & Raiders",
+        "description": "Üç ticaret altıgeni emtiaları altına çevirir. Her şehirle bir vagon inşa et ve teslimat için barbarların yanından geçir."
+      }
+    },
+    "modifiersHeading": "Değiştiriciler",
+    "modifiersButton": "Değiştiriciler ({{count}})",
+    "modifiersButtonAria": "Değiştiriciler menüsünü aç",
+    "winnability": {
+      "warning": "Bu ayar kazanılamaz olabilir — ulaşılabilecek en yüksek puan ~{{max}} galibiyet puanı. Hedef galibiyet puanını düşürün veya sınırları yükseltin.",
+      "endless": "Sonsuz oyun — otomatik kazanan yok."
+    },
+    "modifierGroups": {
+      "robberPieces": "Hırsız & parçalar",
+      "cards": "Kartlar",
+      "houseRules": "Ev kuralları",
+      "board": "Tahta kurulumu"
+    },
+    "modifiers": {
+      "customTargetVp": {
+        "name": "Özel hedef galibiyet puanı",
+        "description": "Kazanmak için gereken galibiyet puanı sayısını değiştir.",
+        "paramLabel": "Hedef galibiyet puanı"
+      },
+      "combine2sAnd12s": {
+        "name": "2'leri ve 12'leri birleştir",
+        "description": "2 atıldığında 12 altıgenleri de, 12 atıldığında 2 altıgenleri de üretim yapar."
+      },
+      "eventCards": {
+        "name": "Olay Kartları",
+        "description": "İki zarı, zar olasılıklarıyla eşleşen ama art arda gelmeyen, karıştırılmış 36 kartlık bir olay destesiyle değiştirir."
+      },
+      "friendlyRobber": {
+        "name": "Dost Canlısı Hırsız",
+        "description": "Hırsız, 2 veya daha az galibiyet puanına sahip bir oyuncudan çalamaz; 1. turda atılan 7 hiç kimseyi etkilemez."
+      },
+      "playDevSameTurn": {
+        "name": "Aynı turda gelişim kartı oyna",
+        "description": "Gelişim kartları satın alındıkları turda oynanabilir."
+      },
+      "harbormaster": {
+        "name": "Liman Amiri",
+        "description": "En çok liman binasına sahip oyuncu (yerleşim 1, şehir 2; en az 3) Uzun Yol gibi çalınabilen +2 galibiyet puanı kartını elinde tutar."
+      },
+      "cardMods": {
+        "name": "Kart Modları",
+        "description": "Desteye karışan 6 özel yeni gelişim kartı, artı 5 birleşik kart oynayışı (ör. Şövalye + Yol Yapımı aynı anda)."
+      },
+      "helpers": {
+        "name": "Hexhaven Yardımcıları",
+        "description": "Her oyuncu, tur-dönüşü başına en fazla bir kez kullanılabilen özel bir yetenek veren bir Yardımcı kartı tutar."
+      },
+      "hexPieces": {
+        "name": "Çoklu-parça altıgen çerçevesi",
+        "description": "Hırsızın yanında altıgenlerde oturan ek hırsız benzeri parçalar. Hangilerinin oyunda olacağını aşağıdan seçin. 7 atıldığında, oynayan kişi hırsızı VEYA aktif parçalardan birini taşıyabilir.",
+        "selectedCount": "{{count}} seçili",
+        "kindsHeading": "Altıgen parçaları",
+        "robberNote": "Hırsız her zaman oyundadır — aşağıdan ek taşınabilir parçalar seçin ya da hiç seçmeyin.",
+        "kinds": {
+          "wizard": {
+            "name": "Büyücü",
+            "description": "Parçanın bulunduğu altıgenin numarası atıldığında, o altıgene komşu her yerleşim/şehir +1 kaynak kazanır."
+          },
+          "trader": {
+            "name": "Tüccar",
+            "description": "Bulunduğu altıgene komşu her yerleşim/şehir için (rakipler dahil) 3:1 banka limanı gibi çalışır. Taşındığı her seferinde taşıyan kişi 1 kaynak çeker."
+          },
+          "robinHood": {
+            "name": "Robin Hood",
+            "description": "Taşındığında en zengin oyuncudan 1 kaynak kartı alıp en yoksul oyuncuya verir."
+          },
+          "banker": {
+            "name": "Bankacı",
+            "description": "Altıgeninin numarası her atıldığında, onu en son taşıyan oyuncu için o altıgenin kaynağını üretir."
+          },
+          "poaching": {
+            "name": "Avlanma",
+            "description": "Taşındığı her seferinde taşıyan kişi, vardığı altıgenin ürettiği kaynaktan 1 tane çeker."
+          }
+        }
+      },
+      "customConstants": {
+        "name": "Özel oyun",
+        "description": "Üretim verimini, Yol Yapımı/Bolluk Yılı sayılarını, başlangıç kaynaklarını, elden atma sınırını, yapım maliyetlerini ve banka miktarını ayarla.",
+        "panelHeading": "Özel oyun ayarları",
+        "rangeHint": "{{min}}–{{max}}",
+        "startingResourcesLabel": "Başlangıç kaynakları (her oyuncu)",
+        "startingResourcesHint": "Her biri 0–{{max}} (banka ÷ oyuncu sayısı ile sınırlı).",
+        "costsLabel": "Yapım maliyetleri",
+        "fields": {
+          "productionMultiplier": "Üretim çarpanı",
+          "roadBuildingCount": "Yol Yapımı sayısı",
+          "yearOfPlentyCount": "Bolluk Yılı sayısı",
+          "discardHandLimit": "Elden atma sınırı",
+          "bankPerResource": "Kaynak başına banka miktarı",
+          "targetVp": "Hedef galibiyet puanı (veya sonsuz)",
+          "maxSettlements": "Azami yerleşim sayısı",
+          "maxCities": "Azami şehir sayısı",
+          "maxRoads": "Azami yol sayısı",
+          "maxCityWalls": "Azami şehir suru sayısı (Walls & Watchmen)",
+          "maxKnightsPerLevel": "Seviye başına azami şövalye sayısı (Walls & Watchmen)",
+          "maxProgressCards": "Elde azami ilerleme kartı sayısı (Walls & Watchmen)"
+        },
+        "limitsLabel": "Sınırlar",
+        "limitlessLabel": "Sınırsız",
+        "limitlessAria": "{{field}}: sınırsız",
+        "costItems": {
+          "road": "Yol",
+          "settlement": "Yerleşim",
+          "city": "Şehir",
+          "devCard": "Gelişim kartı"
+        },
+        "resourceNames": {
+          "brick": "Tuğla",
+          "lumber": "Kereste",
+          "wool": "Yün",
+          "grain": "Buğday",
+          "ore": "Maden"
+        }
+      },
+      "shuffleNumbers": {
+        "name": "Sayıları karıştır",
+        "description": "Hangi altıgenin hangi sayıyı alacağını rastgele belirle; her sayının adedi aynı kalır (yine de iki 6 veya 8 yan yana gelmez)."
+      },
+      "hiddenSetupNumbers": {
+        "name": "Kör yerleşim",
+        "description": "Tüm başlangıç yerleşimleri kurulana kadar her altıgenin sayısını gizle, sonra göster — ilk yerleşimlerini olasılıkları bilmeden kur."
+      },
+      "incompatibleReasons": {
+        "eventCardsVsCitiesKnights": "Walls & Watchmen'in olay zarıyla uyumlu değil."
+      }
+    },
+    "timersLabel": "Tur zamanlayıcıları",
+    "timersAria": "Tur zamanlayıcıları",
+    "turnRule": {
+      "label": "Ek inşa kuralı",
+      "aria": "5-6 oyuncu ek inşa kuralı",
+      "sbp": {
+        "name": "Özel İnşa Aşaması",
+        "description": "2015 kuralı: turlar arasında diğer tüm oyuncular saat yönünde inşa edebilir veya gelişim kartı alabilir — takas yok, gelişim kartı oynama yok, kazanma yok."
+      },
+      "pairedPlayers": {
+        "name": "Eşli Oyuncular",
+        "description": "2022 kuralı: oyuncu 1'den sonra ikinci bir \"oyuncu 2\" kısmi tur oynar — bankayla takas, inşa ve bir gelişim kartı (ve hatta kazanabilir)."
+      }
+    }
+  },
+  "room": {
+    "heading": "Lobi",
+    "codeLabel": "Oda kodu:",
+    "copyCode": "Kodu kopyala",
+    "copyLink": "Davet bağlantısını kopyala",
+    "copied": "Kopyalandı!",
+    "hostBadge": "Lobi sahibi",
+    "connected": "Bağlı",
+    "disconnected": "Bağlantı kesildi",
+    "readyBadge": "Hazır",
+    "notReadyBadge": "Hazır değil",
+    "seatEmpty": "Bir oyuncu bekleniyor…",
+    "botBadge": "Bot",
+    "botName": "Bot {{number}}",
+    "addBotButton": "Bot ekle",
+    "removeBotButton": "Kaldır",
+    "summaryHeading": "Seçenekler",
+    "summaryPlayers": "{{count}} oyuncu",
+    "summaryExpansionsOn": "Genişlemeler etkin",
+    "summaryExpansionsNone": "Yalnızca temel oyun",
+    "summaryTimersOn": "Tur zamanlayıcıları açık",
+    "summaryTimersOff": "Tur zamanlayıcıları kapalı",
+    "summaryTurnRule": "Ek inşa kuralı: {{rule}}",
+    "summaryUnavailable": "Tüm seçenekler, katılan oyunculara henüz gösterilmiyor.",
+    "readyToggleOn": "Hazırım",
+    "readyToggleOff": "Henüz hazır değilim",
+    "startButton": "Oyunu başlat",
+    "startHint": "Oyun başlamadan önce tüm koltuklar dolu ve hazır olmalı."
+  }
+}

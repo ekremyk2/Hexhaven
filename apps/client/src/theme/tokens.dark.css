@@ -1,0 +1,30 @@
+/* Dark theme token values (T-505 dark mode). Only the SURFACE + INK + shadow tokens flip here;
+   the board palette (terrain/seat/token tokens) and the brand fills (--accent, --accent-gold,
+   --danger-solid, --on-accent) keep their light values so the SVG island, filled buttons, and
+   award/victory gold read identically across themes. The stable "on-fixed-surface" inks
+   (--ink-ondark/--ink-onlight/--danger-solid) and --field's light value live in tokens.css and are
+   deliberately NOT overridden here.
+
+   Applied by stamping data-theme="dark" on <html> — set before first paint by the inline no-FOUC
+   script in index.html and kept in sync by theme/theme.ts. The `[data-theme='dark']` attribute
+   selector outranks the base `:root` block regardless of import order. Contrast for every
+   text-on-surface pair is asserted against the merged palette in tokens.dark.test.ts. */
+:root[data-theme='dark'] {
+  /* Surfaces & ink */
+  --table-a: #16303f;
+  --table-b: #0d1f2b;
+  --panel: #2a251d;
+  --panel-edge: #48412f;
+  --ink: #ece3d0;
+  --ink-soft: #b9ac8f;
+
+  /* Danger AS TEXT/border (warnings, errors, low-bank, the error input border) must read on the
+     dark panel, so it brightens here — the filled danger button/badge keeps using --danger-solid. */
+  --danger: #f08579;
+
+  /* Text-input surface: a touch darker than --panel so fields read as recessed on dark panels. */
+  --field: #201c15;
+
+  /* Shadows go black + a little deeper so parchment panels still lift off the dark ocean. */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.55), 0 6px 16px rgba(0, 0, 0, 0.45);
+}

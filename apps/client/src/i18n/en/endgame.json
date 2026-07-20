@@ -1,0 +1,27 @@
+{
+  "banner": {
+    "youWon": "You won! 🎉",
+    "winner": "{{name}} wins!"
+  },
+  "standings": {
+    "heading": "Final standings",
+    "headers": {
+      "player": "Player",
+      "settlements": "Settlements",
+      "cities": "Cities",
+      "awards": "Awards",
+      "vpCards": "VP cards",
+      "total": "Total"
+    },
+    "vpCardsHidden": "🔒 hidden",
+    "vpCardsNone": "0",
+    "vpCardsRevealed": "+{{count}} 🔒 revealed!",
+    "winnerBadge": "Winner",
+    "youBadge": "You"
+  },
+  "actions": {
+    "rematch": "Rematch",
+    "backHome": "Back home"
+  },
+  "reopen": "View final standings"
+}

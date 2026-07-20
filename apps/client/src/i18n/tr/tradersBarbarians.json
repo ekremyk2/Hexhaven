@@ -1,0 +1,79 @@
+{
+  "hud": {
+    "title": "Roads & Raiders",
+    "fishLine": "Balık: {{count}}",
+    "coinsLine": "Altın sikke: {{count}}",
+    "camelsRemaining": "Stokta {{count}} deve kaldı",
+    "capturedBarbariansLine": "Yakalanan barbarlar: {{count}}",
+    "goldLine": "Altın: {{count}}",
+    "deliveriesLine": "Teslimatlar: {{count}}"
+  },
+  "scoreboard": {
+    "oldBoot": "Eski Çizme'yi tutuyor (kazanmak için +1 galibiyet puanı)",
+    "wealthiest": "En Zengin Yerleşimci (+1 galibiyet puanı)",
+    "poorest": "En Yoksul Yerleşimci (-2 galibiyet puanı)"
+  },
+  "reason": {
+    "notYourTurn": "Sıra sende değil",
+    "notMainPhase": "Sadece zar attıktan sonra",
+    "cantAfford": "{{need}} {{unit}} gerekiyor (elinde {{have}} var)",
+    "noLegalTargets": "Şu an geçerli hedef yok",
+    "notHeld": "Onu tutmuyorsun",
+    "noTarget": "Şu an geçerli hedef yok",
+    "voteNotOpen": "Şu an açık bir oylama yok",
+    "notResolvedYet": "Oylama henüz sonuçlanmadı"
+  },
+  "fishermen": {
+    "title": "Balık takası",
+    "exchange": {
+      "removeRobber": "Haydutu kaldır ({{cost}} balık)",
+      "steal": "Bir kaynak çal ({{cost}} balık)",
+      "bankResource": "Bir kaynak al ({{cost}} balık)",
+      "freeRoad": "Bedava yol ({{cost}} balık)",
+      "devCard": "Bedava gelişim kartı ({{cost}} balık)"
+    },
+    "pickSteal": "Kimden çalacağını seç",
+    "pickResource": "Bir kaynak seç",
+    "pickRoadHint": "tahtada bir kenara tıkla",
+    "passOldBoot": "Eski Çizmeyi devret"
+  },
+  "rivers": {
+    "title": "Nehirler",
+    "buildBridge": "Köprü inşa et",
+    "tradeCoins": "Sikke takas et",
+    "tradeRate": "oran {{rate}} : 1",
+    "pickReceive": "Alacağın kaynağı seç"
+  },
+  "caravans": {
+    "title": "Kervanlar",
+    "camelsRemaining": "Stokta {{count}} deve kaldı",
+    "bidLabel": "Teklifin",
+    "grain": "Buğday",
+    "wool": "Yün",
+    "submitBid": "Teklifi gönder",
+    "youWon": "Oylamayı kazandın — bir deve yerleştir",
+    "placeCamelHint": "Tahtada bir kervan yolu kenarına tıkla",
+    "winnerIs": "{{name}} oylamayı kazandı — deve yerleştirmesi bekleniyor",
+    "waitingForOthers": "Diğer teklifler bekleniyor…"
+  },
+  "barbarianAttack": {
+    "title": "Barbar Saldırısı",
+    "recruitKnight": "Şövalye topla",
+    "moveKnight": "Şövalyeyi hareket ettir",
+    "extendHint": "Uzaktaki vurgulanan bir hedef 1 buğdaya mal olur (genişletilmiş menzil)."
+  },
+  "main": {
+    "title": "Vagonlar",
+    "noWagons": "Henüz vagon yok — birini yerleştirmek için bir şehir inşa et.",
+    "wagonAt": "{{vertex}} numaralı noktada vagon",
+    "loadLabel": "Yükle",
+    "loadNone": "Hiçbiri",
+    "destination": "Buraya git — {{mp}} HP, {{gold}} altın geçiş ücreti",
+    "commodity": {
+      "marble": "Mermer",
+      "glass": "Cam",
+      "sand": "Kum",
+      "tools": "Alet"
+    }
+  }
+}

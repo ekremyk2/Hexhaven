@@ -1,0 +1,246 @@
+{
+  "tabs": {
+    "groupLabel": "City & Knights actions",
+    "improvements": "Improvements",
+    "knights": "Knights",
+    "cards": "Cards"
+  },
+  "knight": {
+    "level_1": "Basic knight",
+    "level_2": "Strong knight",
+    "level_3": "Mighty knight",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "track": {
+    "trade": "Trade",
+    "politics": "Politics",
+    "science": "Science"
+  },
+  "commodity": {
+    "paper": "Paper",
+    "cloth": "Cloth",
+    "coin": "Coin"
+  },
+  "wall": {
+    "label": "City wall"
+  },
+  "metropolis": {
+    "label": "{{track}} metropolis"
+  },
+  "barbarianTrack": {
+    "title": "Barbarian ship progress",
+    "step": "Step {{step}} of {{total}}",
+    "imminent": "Attack imminent!",
+    "hexhaven": "Hexhaven"
+  },
+  "defenderOfHexhaven": {
+    "label": "Defender of Hexhaven (+1 VP)",
+    "badge": "🛡️+{{count}}"
+  },
+  "hud": {
+    "yourCommodities": "Your commodities",
+    "yourImprovements": "Your improvements"
+  },
+  "banner": {
+    "defended": "Hexhaven is defended! {{name}} is the new Defender of Hexhaven (+1 VP).",
+    "defendedTie": "Hexhaven is defended (tied strongest defenders — each draws a progress card).",
+    "pillaged": "The barbarians win! {{names}} lost a city to pillage.",
+    "pillagedNone": "The barbarians win, but no city could be pillaged.",
+    "listSeparator": ", "
+  },
+  "reason": {
+    "cantAfford": "Need {{need}} {{type}} (have {{have}}).",
+    "noCityOwned": "You need at least one city.",
+    "maxLevel": "Already at the top level.",
+    "noLegalTargets": "No legal targets right now.",
+    "notMainPhase": "Only after you roll.",
+    "notYourTurn": "Not your turn",
+    "robberLocked": "The robber is locked until the first barbarian attack.",
+    "noKnightSpot": "No connected spot for a knight right now.",
+    "noInactiveKnight": "You have no inactive knight to activate.",
+    "noPromotableKnight": "No knight can be promoted right now (next level full, or Fortress needed for strong → mighty).",
+    "noMovableKnight": "No active knight can move right now.",
+    "noDisplaceableKnight": "No active knight can displace a weaker opponent right now.",
+    "noKnightNextToRobber": "Need an active knight next to the robber.",
+    "noEligibleCity": "No eligible city for a wall (needs an unwalled city, under the cap)."
+  },
+  "improvements": {
+    "title": "City improvements",
+    "buy": "Buy ({{cost}} {{commodity}})",
+    "maxed": "Maxed",
+    "ability": {
+      "trade": "Level 3 — Trading House: trade a commodity 2:1 with the bank.",
+      "politics": "Level 3 — Fortress: your knights may be promoted strong → mighty.",
+      "science": "Level 3 — Aqueduct: a roll that gives you nothing grants 1 free resource."
+    },
+    "abilityShort": {
+      "trade": "L3: 2:1 bank trade",
+      "politics": "L3: knights → mighty",
+      "science": "L3: free resource"
+    },
+    "metropolisHint": "L4 claims that track's Metropolis (city +2 VP); L5 can recapture it."
+  },
+  "knightControls": {
+    "title": "Knights & city walls",
+    "build": "Build knight",
+    "activate": "Activate knight",
+    "promote": "Promote knight",
+    "move": "Move knight",
+    "displace": "Displace knight",
+    "chaseRobber": "Chase the robber",
+    "buildWall": "Build city wall",
+    "pickSourceHint": "Click one of your highlighted knights, then its target."
+  },
+  "commodityTrade": {
+    "trigger": "Trade commodities",
+    "title": "Trade commodities with the bank",
+    "giveLabel": "Give",
+    "receiveLabel": "Receive",
+    "rate": "Rate: {{rate}}:1",
+    "confirm": "Confirm trade",
+    "resourceLabel": "Resource",
+    "commodityLabel": "Commodity"
+  },
+  "progressHand": {
+    "title": "Progress cards",
+    "empty": "No progress cards yet.",
+    "count": "{{count}} card",
+    "count_other": "{{count}} cards",
+    "play": "Play",
+    "revealed": "Revealed (+1 VP)",
+    "revealedLine": "{{names}} — Revealed (+1 VP)",
+    "beforeRollOnly": "Alchemist must be played before you roll.",
+    "afterRollOnly": "Only after you roll.",
+    "dialogPending": "Choose the card's target to play it.",
+    "notWiredYet": "Playing this card isn't wired up in the client yet.",
+    "cancel": "Cancel"
+  },
+  "dialog": {
+    "resourceMonopoly": {
+      "title": "Resource Monopoly",
+      "instructions": "Every other player gives you 2 of the resource you choose.",
+      "confirm": "Confirm"
+    },
+    "commodityMonopoly": {
+      "title": "Commodity Monopoly",
+      "instructions": "Every other player gives you 1 of the commodity you choose.",
+      "confirm": "Confirm"
+    },
+    "crane": {
+      "title": "Crane",
+      "instructions": "Build a city improvement for 1 fewer commodity. Choose the track.",
+      "confirm": "Confirm"
+    },
+    "hexOption": "Hex {{n}}",
+    "vertexOption": "Spot {{n}}",
+    "edgeOption": "Road {{n}}",
+    "alchemist": {
+      "title": "Alchemist",
+      "instructions": "Choose the yellow and red number-die values for this turn's roll.",
+      "yellowLabel": "Yellow die",
+      "redLabel": "Red die",
+      "confirm": "Set the dice"
+    },
+    "engineer": {
+      "title": "Engineer",
+      "instructions": "Build a free city wall under one of your cities.",
+      "confirm": "Build wall"
+    },
+    "inventor": {
+      "title": "Inventor",
+      "instructions": "Swap the number tokens on two hexes (6 and 8 can't be moved).",
+      "aLabel": "First hex",
+      "bLabel": "Second hex",
+      "confirm": "Swap tokens"
+    },
+    "medicine": {
+      "title": "Medicine",
+      "instructions": "Upgrade one of your settlements to a city for 2 ore + 1 grain.",
+      "confirm": "Upgrade"
+    },
+    "merchant": {
+      "title": "Merchant",
+      "instructions": "Place the merchant on a hex next to your settlement or city.",
+      "confirm": "Place merchant"
+    },
+    "merchantFleet": {
+      "title": "Merchant Fleet",
+      "instructions": "Make one 2:1 bank trade this turn. Pick what you give and what you receive.",
+      "giveLabel": "Give (2)",
+      "receiveLabel": "Receive (1)",
+      "confirm": "Trade"
+    },
+    "commercialHarbor": {
+      "title": "Commercial Harbor",
+      "instructions": "Take one resource of your choice from each opponent, giving each a commodity of your choice in return.",
+      "resourceLabel": "Resource you take",
+      "commodityLabel": "Commodity you give",
+      "confirm": "Confirm"
+    },
+    "masterMerchant": {
+      "title": "Master Merchant",
+      "instructions": "Take 2 cards of your choice from a player who has more victory points than you.",
+      "confirm": "Confirm"
+    },
+    "bishop": {
+      "title": "Bishop",
+      "instructions": "Move the robber; steal 1 card from every player next to its new hex.",
+      "confirm": "Move robber"
+    },
+    "deserter": {
+      "title": "Deserter",
+      "instructions": "An opponent removes one knight; you place a new knight of the same level for free.",
+      "knightLabel": "Opponent knight to remove",
+      "knightOption": "{{name}} Lvl {{level}} (spot {{n}})",
+      "placementLabel": "Where your new knight goes",
+      "confirm": "Confirm"
+    },
+    "diplomat": {
+      "title": "Diplomat",
+      "instructions": "Remove an open road. If it's yours, you rebuild it for free.",
+      "confirm": "Remove road"
+    },
+    "intrigue": {
+      "title": "Intrigue",
+      "instructions": "Displace an opponent's knight sitting on your road, ignoring the strength rule.",
+      "confirm": "Displace"
+    },
+    "spy": {
+      "title": "Spy",
+      "instructions": "Pick an opponent, then take one of their progress cards.",
+      "seatLabel": "Opponent",
+      "cardLabel": "Which card to take",
+      "peeking": "Peeking at their hand…",
+      "cardOption": "Card {{n}}",
+      "confirm": "Take card"
+    }
+  },
+  "card": {
+    "alchemist": { "name": "Alchemist", "desc": "Before rolling, choose the yellow & red die values yourself." },
+    "crane": { "name": "Crane", "desc": "Build a city improvement for 1 fewer commodity." },
+    "engineer": { "name": "Engineer", "desc": "Build a city wall for free." },
+    "inventor": { "name": "Inventor", "desc": "Swap the number tokens on two hexes (not 6 or 8)." },
+    "irrigation": { "name": "Irrigation", "desc": "Gain 2 grain per fields hex you border." },
+    "medicine": { "name": "Medicine", "desc": "Upgrade a settlement to a city for 2 ore + 1 grain." },
+    "mining": { "name": "Mining", "desc": "Gain 2 ore per mountains hex you border." },
+    "printer": { "name": "Printer", "desc": "Revealed immediately: +1 Victory Point." },
+    "roadBuilding": { "name": "Road Building", "desc": "Build 2 roads for free." },
+    "smith": { "name": "Smith", "desc": "Promote up to 2 knights one level each, for free." },
+    "merchant": { "name": "Merchant", "desc": "Place the merchant on a hex next to your settlement/city: 2:1 trade there, +1 VP while you hold it." },
+    "merchantFleet": { "name": "Merchant Fleet", "desc": "Trade one chosen resource/commodity 2:1 with the bank, once." },
+    "commercialHarbor": { "name": "Commercial Harbor", "desc": "Each other player gives you a resource of your choice for a commodity of theirs." },
+    "masterMerchant": { "name": "Master Merchant", "desc": "Take 2 cards of your choice from a player with more VP than you." },
+    "resourceMonopoly": { "name": "Resource Monopoly", "desc": "Every other player gives you 2 of a named resource." },
+    "commodityMonopoly": { "name": "Commodity Monopoly", "desc": "Every other player gives you 1 of a named commodity." },
+    "bishop": { "name": "Bishop", "desc": "Move the robber and steal 1 card from every player adjacent to it." },
+    "constitution": { "name": "Constitution", "desc": "Revealed immediately: +1 Victory Point." },
+    "deserter": { "name": "Deserter", "desc": "An opponent removes a knight; you place a new one of the same level for free." },
+    "diplomat": { "name": "Diplomat", "desc": "Remove an open road; rebuild it free if it was yours." },
+    "intrigue": { "name": "Intrigue", "desc": "Displace an opponent's knight on your road, ignoring the strength rule." },
+    "saboteur": { "name": "Saboteur", "desc": "Every player with at least your VP discards half their hand." },
+    "spy": { "name": "Spy", "desc": "Look at another player's progress-card hand and take 1." },
+    "warlord": { "name": "Warlord", "desc": "Activate all your knights for free." },
+    "wedding": { "name": "Wedding", "desc": "Every player with more VP than you gives you 2 resources/commodities of your choice." }
+  }
+}

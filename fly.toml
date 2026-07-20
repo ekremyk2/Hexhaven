@@ -1,0 +1,39 @@
+# T-503 — optional cloud-container alternative (docs/09-runbook.md "cloud-container alternatives").
+# Private-server (LAN/VPS via compose.yaml) is the primary target (D-031); this is for anyone who'd
+# rather not manage a box at all. `fly launch` will offer to overwrite this — decline and reuse it.
+#
+#   fly deploy
+#   fly secrets set LOBBY_PASSWORD=changeme   # optional, D-031
+#
+# One instance only (D-014/D-024 — games are in-memory, no horizontal scaling): don't raise
+# min/max machines above 1, and note a `fly deploy` restart drops any running games.
+
+app = "hexhaven-web"
+primary_region = "iad" # change to whatever region is closest to your players
+
+[build]
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off" # in-memory games would be dropped on scale-to-zero
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
+[checks]
+  [checks.health]
+    grace_period = "10s"
+    interval = "15s"
+    method = "GET"
+    path = "/health"
+    port = 8080
+    timeout = "3s"
+    type = "http"

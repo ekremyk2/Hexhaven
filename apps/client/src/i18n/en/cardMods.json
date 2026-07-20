@@ -1,0 +1,87 @@
+{
+  "combo": {
+    "title": "Special plays",
+    "empty": "No special plays available with your current hand.",
+    "play": "Play",
+    "name": {
+      "rideByNight": "Ride by Night",
+      "nightOfPlenty": "Night of Plenty",
+      "monorail": "Monorail",
+      "megaKnight": "Mega Knight",
+      "superSettle": "Super-Settle"
+    },
+    "desc": {
+      "rideByNight": "Knight + Road Building together: move the robber and steal, then build 1 free road.",
+      "nightOfPlenty": "Knight + Year of Plenty together: move the robber and steal, then take 1 free resource.",
+      "monorail": "Monopoly + Road Building together: take all lumber and brick from every other player, then build 1-2 free roads.",
+      "megaKnight": "Play 2 Knights at once: move the robber and steal a development card (not a resource) from a chosen opponent.",
+      "superSettle": "Discard a Victory Point card to upgrade a settlement straight to a city for free."
+    },
+    "reason": {
+      "notYourTurn": "Not your turn",
+      "wrongPhase": "Not available right now",
+      "cardNotHeld": "You don't hold the cards this combo needs",
+      "noLegalTargets": "No legal targets right now"
+    }
+  },
+  "dialog": {
+    "hexOption": "Hex {{n}}",
+    "edgeOption": "Road {{n}}",
+    "boardTargetPending": "Choose the card's target on the board to play it.",
+    "boardTargetCancel": "Cancel",
+    "merchantsBoon": {
+      "title": "Merchant's Boon",
+      "instructions": "Make one 2:1 trade with the bank. Pick what you give (2) and what you receive (1).",
+      "giveLabel": "Give (2)",
+      "receiveLabel": "Receive (1)",
+      "confirm": "Trade"
+    },
+    "roadToll": {
+      "title": "Road Toll",
+      "instructions": "Name a resource. Every other player holding it gives you 1.",
+      "confirm": "Collect toll"
+    },
+    "trailblazer": {
+      "title": "Trailblazer",
+      "instructions": "Build 1 free road anywhere empty — no connection to your network required.",
+      "confirm": "Build road"
+    },
+    "highwayman": {
+      "title": "Highwayman",
+      "instructions": "Relocate the robber to a new hex. No steal.",
+      "confirm": "Move robber"
+    },
+    "rideByNight": {
+      "title": "Ride by Night",
+      "instructions": "Move the robber and resolve a steal, then place your free road.",
+      "hexLabel": "Move the robber to",
+      "edgeLabel": "Free road",
+      "confirm": "Confirm"
+    },
+    "nightOfPlenty": {
+      "title": "Night of Plenty",
+      "instructions": "Move the robber and resolve a steal, then take 1 free resource from the bank.",
+      "hexLabel": "Move the robber to",
+      "resourceLabel": "Free resource",
+      "confirm": "Confirm"
+    },
+    "monorail": {
+      "title": "Monorail",
+      "instructions": "Take all lumber and brick from every other player, then build 1 or 2 free roads.",
+      "edgeLabel": "Free road(s) — pick 1 or 2",
+      "confirm": "Confirm"
+    },
+    "megaKnight": {
+      "title": "Mega Knight",
+      "instructions": "Choose an opponent — you steal one of their development cards at random.",
+      "targetLabel": "Opponent",
+      "confirm": "Confirm"
+    },
+    "superSettle": {
+      "title": "Super-Settle",
+      "instructions": "Discard your Victory Point card and choose a settlement to upgrade to a city for free.",
+      "vertexLabel": "Settlement to upgrade",
+      "confirm": "Confirm"
+    }
+  }
+}

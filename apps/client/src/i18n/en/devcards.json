@@ -1,0 +1,70 @@
+{
+  "title": "Development Cards",
+  "empty": "No development cards yet.",
+  "newBadge": "NEW",
+  "play": "Play",
+  "dropToPlay": "Drop here to play",
+  "count": "×{{count}}",
+  "vpHint": "Counts toward your {{target}} VP — never played (R9.8).",
+  "card": {
+    "knight": "Knight",
+    "roadBuilding": "Road Building",
+    "yearOfPlenty": "Year of Plenty",
+    "monopoly": "Monopoly",
+    "victoryPoint": "Victory Point",
+    "bumperCrop": "Bumper Crop",
+    "merchantsBoon": "Merchant's Boon",
+    "roadToll": "Road Toll",
+    "trailblazer": "Trailblazer",
+    "windfall": "Windfall",
+    "highwayman": "Highwayman"
+  },
+  "desc": {
+    "knight": "Move the robber and steal 1 resource from an adjacent player. 3 played knights earn you the Largest Army.",
+    "roadBuilding_one": "Build {{count}} road for free, right now.",
+    "roadBuilding_other": "Build {{count}} roads for free, right now.",
+    "yearOfPlenty_one": "Take any {{count}} resource of your choice from the bank.",
+    "yearOfPlenty_other": "Take any {{count}} resources of your choice from the bank.",
+    "monopoly": "Name a resource — every other player must hand over all of theirs.",
+    "victoryPoint": "Worth 1 victory point. Kept hidden — this card is never played.",
+    "bumperCrop": "Gain 1 of every resource type the bank can still supply (cardMods).",
+    "merchantsBoon": "A one-shot 2:1 trade with the bank (cardMods).",
+    "roadToll": "Every other player holding the named resource gives you 1 of it (cardMods).",
+    "trailblazer": "Build 1 free road with no connectivity requirement (cardMods).",
+    "windfall": "Draw the top 2 development cards into your hand for free (cardMods).",
+    "highwayman": "Relocate the robber with no steal at all (cardMods)."
+  },
+  "reason": {
+    "notYourTurn": "Not your turn",
+    "wrongPhase": "Not available right now",
+    "alreadyPlayed": "Already played a card this turn",
+    "boughtThisTurn": "Bought this turn",
+    "cannotPlay": "No road pieces, or nowhere legal to build",
+    "bankEmpty": "Bank is empty",
+    "cardNotHeld": "You don't hold this card",
+    "cantAfford": "Need {{need}} of some resource (have at most {{have}})."
+  },
+  "roadBuilding": {
+    "banner_one": "Road Building: place {{count}} more free road.",
+    "banner_other": "Road Building: place {{count}} more free roads."
+  },
+  "yearOfPlenty": {
+    "title": "Year of Plenty",
+    "instructions": "Pick {{count}} resources to take from the bank — repeats are fine.",
+    "pickLabel": "Pick {{n}}",
+    "confirm": "Take resources"
+  },
+  "monopoly": {
+    "title": "Monopoly",
+    "instructions": "Pick a resource. Every other player hands over all of it.",
+    "confirm": "Declare monopoly"
+  },
+  "toast": {
+    "playedOther": "{{name}} played a {{card}}.",
+    "boughtOther": "{{name}} bought a development card.",
+    "monopolySelf": "You collected {{total}} {{glyph}} ({{breakdown}}).",
+    "monopolyOther": "{{name}}'s Monopoly collected {{total}} {{glyph}} ({{breakdown}}).",
+    "breakdownEntry": "{{name}} {{count}}",
+    "listSeparator": ", "
+  }
+}

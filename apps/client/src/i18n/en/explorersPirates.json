@@ -1,0 +1,61 @@
+{
+  "hud": {
+    "title": "Sails & Scoundrels",
+    "goldLine": "Gold: {{count}}",
+    "harborSettlementsLine": "Harbor settlements: {{count}}",
+    "settlerReserveLine": "Settlers in reserve: {{count}}"
+  },
+  "reason": {
+    "notYourTurn": "Not your turn",
+    "notMainPhase": "Only after you roll",
+    "cantAfford": "Need {{need}} {{unit}} (have {{have}})",
+    "noLegalTargets": "No legal targets right now",
+    "maxShips": "Already at the ship limit",
+    "noOwnSettlements": "You have no settlement to upgrade",
+    "noReserve": "None in reserve — build one first",
+    "noShipHere": "No eligible ship at one of your own coastal buildings",
+    "noHarborSettlement": "You need a harbor settlement to build a crew"
+  },
+  "landHo": {
+    "title": "Landfall",
+    "buildShip": "Build ship",
+    "moveShip": "Move ship",
+    "moveShipHint": "Click one of your ships, then its destination",
+    "buildSettler": "Build settler",
+    "foundSettlement": "Found settlement",
+    "foundSettlementHint": "Click a coastal spot on discovered land",
+    "upgradeToHarbor": "Upgrade to harbor settlement",
+    "upgradeToHarborHint": "Click one of your settlements",
+    "shipsTitle": "Ships",
+    "shipAt": "Ship at edge {{edge}} — {{cargo}}",
+    "cargoEmpty": "empty",
+    "cargoSettler": "settler",
+    "cargoCrew": "crew",
+    "cargoFish": "fish",
+    "cargoSpice": "spice",
+    "loadSettler": "Load settler",
+    "unloadSettler": "Unload settler",
+    "noShips": "No ships yet — build one to start exploring.",
+    "noSettlerReserve": "No settler in reserve — build one first."
+  },
+  "fish": {
+    "title": "Fish for Hexhaven",
+    "deliverFish": "Deliver fish to the council"
+  },
+  "spice": {
+    "title": "Spices for Hexhaven",
+    "tradeSpice": "Trade for spice at a village",
+    "villageAt": "Village at hex {{hex}}",
+    "deliverSpice": "Deliver spice to the council"
+  },
+  "pirateLairs": {
+    "title": "The Pirate Lairs",
+    "buildCrew": "Build crew",
+    "loadCrew": "Load crew onto a ship",
+    "placeCrewOnLair": "Land crew on a pirate lair",
+    "lairAt": "Lair at hex {{hex}} — {{crews}} crew(s) landed"
+  },
+  "gold": {
+    "shipGold": "Ship gold to the council for 1 VP"
+  }
+}

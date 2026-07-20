@@ -1,0 +1,74 @@
+{
+  "discard": {
+    "title": "Discard {{count}} cards",
+    "selectedCount": "{{selected}} / {{required}} selected",
+    "haveCount": "{{count}} in hand",
+    "increment": "Add one {{resource}}",
+    "decrement": "Remove one {{resource}}",
+    "auto": "Auto-fill",
+    "minus": "−",
+    "plus": "+",
+    "confirm": "Confirm discard",
+    "pendingBar": "Waiting for {{names}} to discard…"
+  },
+  "moveRobber": {
+    "banner": "Move the robber to a new hex."
+  },
+  "movePirate": {
+    "banner": "Move the pirate to a sea hex.",
+    "chooseRobber": "Robber",
+    "choosePirate": "Pirate"
+  },
+  "moveHexPiece": {
+    "banner": "Move the {{name}} to a new hex.",
+    "kindName": {
+      "wizard": "Wizard",
+      "trader": "Trader",
+      "robinHood": "Robin Hood",
+      "banker": "Banker",
+      "poaching": "Poaching"
+    }
+  },
+  "gold": {
+    "title": "Choose {{count}} gold resource(s)",
+    "selectedCount": "{{selected}} / {{required}} selected",
+    "bankCount": "{{count}} in bank",
+    "increment": "Add one {{resource}}",
+    "decrement": "Remove one {{resource}}",
+    "minus": "−",
+    "plus": "+",
+    "confirm": "Take resources"
+  },
+  "steal": {
+    "title": "Choose who to steal from",
+    "cardCount_one": "{{count}} card",
+    "cardCount_other": "{{count}} cards"
+  },
+  "resourceName": {
+    "brick": "Brick",
+    "lumber": "Lumber",
+    "wool": "Wool",
+    "grain": "Grain",
+    "ore": "Ore"
+  },
+  "resource": {
+    "brick_one": "{{count}} brick",
+    "brick_other": "{{count}} bricks",
+    "lumber_one": "{{count}} lumber",
+    "lumber_other": "{{count}} lumber",
+    "wool_one": "{{count}} wool",
+    "wool_other": "{{count}} wool",
+    "grain_one": "{{count}} grain",
+    "grain_other": "{{count}} grain",
+    "ore_one": "{{count}} ore",
+    "ore_other": "{{count}} ore"
+  },
+  "toast": {
+    "discardSelf": "You discarded {{resources}}.",
+    "discardOther": "{{name}} discarded {{count}} cards.",
+    "stolenThief": "You stole {{resource}} from {{name}}.",
+    "stolenVictim": "{{name}} stole your {{resource}}.",
+    "stolenOthers": "{{name}} stole a card from {{victim}}.",
+    "listSeparator": ", "
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Gelişim Kartları",
+  "empty": "Henüz gelişim kartınız yok.",
+  "newBadge": "YENİ",
+  "play": "Oyna",
+  "dropToPlay": "Oynamak için buraya bırakın",
+  "count": "×{{count}}",
+  "vpHint": "{{target}} puanınıza sayılır — asla oynanmaz (R9.8).",
+  "card": {
+    "knight": "Şövalye",
+    "roadBuilding": "Yol Yapımı",
+    "yearOfPlenty": "Bolluk Yılı",
+    "monopoly": "Tekel",
+    "victoryPoint": "Zafer Puanı",
+    "bumperCrop": "Bereketli Hasat",
+    "merchantsBoon": "Tüccar Lütfu",
+    "roadToll": "Yol Vergisi",
+    "trailblazer": "Öncü",
+    "windfall": "Beklenmedik Kazanç",
+    "highwayman": "Eşkıya"
+  },
+  "desc": {
+    "knight": "Haydutu taşıyın ve komşu bir oyuncudan 1 kaynak çalın. Oynadığınız 3. şövalye ile En Büyük Ordu unvanını kazanırsınız.",
+    "roadBuilding_one": "Hemen, bedava {{count}} yol inşa edin.",
+    "roadBuilding_other": "Hemen, bedava {{count}} yol inşa edin.",
+    "yearOfPlenty_one": "Bankadan istediğiniz {{count}} kaynağı alın.",
+    "yearOfPlenty_other": "Bankadan istediğiniz {{count}} kaynağı alın.",
+    "monopoly": "Bir kaynak adı verin — diğer tüm oyuncular o kaynağın tamamını size vermek zorunda.",
+    "victoryPoint": "1 zafer puanı değerindedir. Gizli tutulur — bu kart asla oynanmaz.",
+    "bumperCrop": "Bankanın verebildiği her kaynaktan 1 tane kazanın (cardMods).",
+    "merchantsBoon": "Bankayla tek seferlik 2:1 takas (cardMods).",
+    "roadToll": "Belirtilen kaynağa sahip her oyuncu size 1 tane verir (cardMods).",
+    "trailblazer": "Bağlantı şartı olmadan 1 bedava yol inşa edin (cardMods).",
+    "windfall": "Gelişim destesinin üstündeki 2 kartı bedava çekin (cardMods).",
+    "highwayman": "Haydutu çalmadan taşıyın (cardMods)."
+  },
+  "reason": {
+    "notYourTurn": "Sıra sizde değil",
+    "wrongPhase": "Şu anda kullanılamaz",
+    "alreadyPlayed": "Bu tur zaten bir kart oynadınız",
+    "boughtThisTurn": "Bu tur satın alındı",
+    "cannotPlay": "Yol parçası yok veya inşa edilecek uygun yer yok",
+    "bankEmpty": "Banka boş",
+    "cardNotHeld": "Bu karta sahip değilsiniz",
+    "cantAfford": "Bir kaynaktan en az {{need}} tane gerekli (en fazla {{have}} adediniz var)."
+  },
+  "roadBuilding": {
+    "banner_one": "Yol Yapımı: {{count}} bedava yol daha yerleştirin.",
+    "banner_other": "Yol Yapımı: {{count}} bedava yol daha yerleştirin."
+  },
+  "yearOfPlenty": {
+    "title": "Bolluk Yılı",
+    "instructions": "Bankadan alacağınız {{count}} kaynağı seçin — tekrarlar sorun değil.",
+    "pickLabel": "{{n}}. seçim",
+    "confirm": "Kaynakları al"
+  },
+  "monopoly": {
+    "title": "Tekel",
+    "instructions": "Bir kaynak seçin. Diğer tüm oyuncular bu kaynağın tamamını verir.",
+    "confirm": "Tekeli ilan et"
+  },
+  "toast": {
+    "playedOther": "{{name}} bir {{card}} oynadı.",
+    "boughtOther": "{{name}} bir gelişim kartı satın aldı.",
+    "monopolySelf": "{{total}} {{glyph}} topladınız ({{breakdown}}).",
+    "monopolyOther": "{{name}} kişisinin Tekeli {{total}} {{glyph}} topladı ({{breakdown}}).",
+    "breakdownEntry": "{{name}} {{count}}",
+    "listSeparator": ", "
+  }
+}

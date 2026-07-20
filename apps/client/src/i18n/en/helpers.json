@@ -1,0 +1,124 @@
+{
+  "hud": {
+    "title": "Helpers",
+    "yourHelper": "Your helper",
+    "side": "Side {{side}}",
+    "nameSide": "{{name}} — {{side}}",
+    "none": "No helper yet",
+    "use": "Use",
+    "swap": "Swap",
+    "otherHelper": "{{name}}: {{helper}}",
+    "display": "Available helpers ({{count}})",
+    "auto": "Automatic — no action needed"
+  },
+  "name": {
+    "mayor": "Mayor",
+    "general": "General",
+    "explorer": "Explorer",
+    "mendicant": "Mendicant",
+    "robberBride": "Robber Bride",
+    "merchant": "Merchant",
+    "captain": "Captain",
+    "noblewoman": "Noblewoman",
+    "architect": "Architect",
+    "priest": "Priest"
+  },
+  "desc": {
+    "mayor": "When a roll earns you nothing, take any 1 resource card.",
+    "general": "On a 7, you never have to discard.",
+    "explorer": "Relocate one of your dead-end roads elsewhere.",
+    "mendicant": "Building a road, substitute any resource for the brick or lumber it costs.",
+    "robberBride": "Send the robber to the desert and take 1 resource from the hex it left.",
+    "merchant": "Demand a resource from up to 2 players; give back 1 card for each you receive.",
+    "captain": "Trade one chosen resource at 2:1 with the bank for the rest of the turn.",
+    "noblewoman": "Steal 1 resource from a player with strictly more victory points than you.",
+    "architect": "Buying a development card, substitute any resource for 1 required card and look at the top 3 before choosing.",
+    "priest": "Discard a Knight card to build a settlement or city at a reduced cost."
+  },
+  "reason": {
+    "notYourTurn": "Not your turn",
+    "wrongPhase": "Not available right now",
+    "alreadyUsed": "Already used this rotation",
+    "justAcquired": "You can't use a helper the turn you received it",
+    "notEligible": "Not eligible right now",
+    "noLegalTargets": "No legal targets right now",
+    "cantAfford": "Need {{need}} {{type}} (have {{have}})."
+  },
+  "swap": {
+    "title": "Swap helper",
+    "instructions": "Trade your current helper for one from the display, without spending a use.",
+    "confirm": "Swap"
+  },
+  "dialog": {
+    "resourceOption": "Resource",
+    "edgeOption": "Road {{n}}",
+    "vertexOption": "Spot {{n}}",
+    "boardTargetPending": "Choose the target on the board.",
+    "boardTargetCancel": "Cancel",
+    "mayor": {
+      "title": "Mayor",
+      "instructions": "This roll earned you nothing — take any 1 resource from the bank.",
+      "confirm": "Take resource"
+    },
+    "explorer": {
+      "title": "Explorer",
+      "instructions": "Pick one of your dead-end roads to relocate, then where it goes.",
+      "fromLabel": "Road to relocate",
+      "toLabel": "New spot",
+      "confirm": "Relocate road"
+    },
+    "mendicant": {
+      "title": "Mendicant",
+      "instructions": "Build a road, substituting any resource for the brick or lumber it normally costs.",
+      "edgeLabel": "Where to build",
+      "replaceLabel": "Cost card to replace",
+      "substituteLabel": "Resource to pay instead",
+      "confirm": "Build road"
+    },
+    "robberBride": {
+      "title": "Robber Bride",
+      "instructions": "Send the robber to the desert and take 1 resource from the hex it left.",
+      "targetLabel": "Steal from",
+      "noTargetNote": "No one is adjacent to the robber's current hex — it will just move.",
+      "confirm": "Confirm"
+    },
+    "merchant": {
+      "title": "Merchant",
+      "instructions": "Demand a resource from up to 2 players. For each who has it, give back 1 card of your choice.",
+      "targetsLabel": "Demand from (up to 2)",
+      "demandLabel": "Resource you demand",
+      "giveBackLabel": "Give back to {{name}}",
+      "confirm": "Demand"
+    },
+    "captain": {
+      "title": "Captain",
+      "instructions": "Choose one resource to trade at 2:1 with the bank for the rest of this turn.",
+      "confirm": "Activate"
+    },
+    "noblewoman": {
+      "title": "Noblewoman",
+      "instructions": "Choose a player with strictly more victory points than you — you steal 1 resource from them.",
+      "targetLabel": "Steal from",
+      "confirm": "Confirm"
+    },
+    "architect": {
+      "title": "Architect",
+      "instructions": "Look at the top 3 development cards and choose one, substituting any resource for 1 required card.",
+      "pickLabel": "Card to take",
+      "replaceLabel": "Cost card to replace",
+      "substituteLabel": "Resource to pay instead",
+      "cardOption": "Card {{n}}",
+      "peeking": "Peeking at the top 3…",
+      "confirm": "Buy"
+    },
+    "priest": {
+      "title": "Priest",
+      "instructions": "Discard your Knight card to build a settlement or city at a reduced cost.",
+      "buildLabel": "Build",
+      "buildSettlement": "Settlement (1 brick + 1 lumber)",
+      "buildCity": "City (2 ore + 1 grain)",
+      "vertexLabel": "Where",
+      "confirm": "Build"
+    }
+  }
+}

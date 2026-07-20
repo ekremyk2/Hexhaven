@@ -1,0 +1,27 @@
+{
+  "banner": {
+    "youWon": "Kazandın! 🎉",
+    "winner": "{{name}} kazandı!"
+  },
+  "standings": {
+    "heading": "Nihai sıralama",
+    "headers": {
+      "player": "Oyuncu",
+      "settlements": "Yerleşimler",
+      "cities": "Şehirler",
+      "awards": "Ödüller",
+      "vpCards": "Zafer puanı kartları",
+      "total": "Toplam"
+    },
+    "vpCardsHidden": "🔒 gizli",
+    "vpCardsNone": "0",
+    "vpCardsRevealed": "+{{count}} 🔒 açığa çıktı!",
+    "winnerBadge": "Kazanan",
+    "youBadge": "Sen"
+  },
+  "actions": {
+    "rematch": "Rövanş",
+    "backHome": "Ana sayfaya dön"
+  },
+  "reopen": "Nihai sıralamayı gör"
+}

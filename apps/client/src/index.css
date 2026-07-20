@@ -1,0 +1,8 @@
+@import './theme/tokens.css';
+@import './theme/tokens.dark.css';
+@import './theme/fonts.css';
+@import './theme/motion.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

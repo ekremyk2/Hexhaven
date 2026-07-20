@@ -1,0 +1,278 @@
+{
+  "heading": "Game",
+  "gameIdLabel": "Game ID:",
+  "comingSoon": "The real game UI arrives in later Phase-4 tasks. This page proves the store/ws wiring works.",
+  "debugTitle": "Debug: raw game state",
+  "waitingForGame": "Waiting for the game to start…",
+  "notify": {
+    "yourTurnTitle": "Your turn!",
+    "yourTurnBody": "It's your turn in Hexhaven."
+  },
+  "chat": {
+    "empty": "No messages yet — say hello!",
+    "inputLabel": "Message",
+    "placeholder": "Type a message…",
+    "send": "Send"
+  },
+  "hud": {
+    "player": {
+      "seatFallback": "Seat {{n}}",
+      "resourceCount_one": "{{count}} card",
+      "resourceCount_other": "{{count}} cards",
+      "devCardCount_one": "{{count}} dev card",
+      "devCardCount_other": "{{count}} dev cards",
+      "knightsPlayed_one": "{{count}} knight",
+      "knightsPlayed_other": "{{count}} knights",
+      "vp": "{{count}} VP",
+      "discardPending_one": "Discard {{count}} card",
+      "discardPending_other": "Discard {{count}} cards"
+    },
+    "awards": {
+      "longestRoad": "Longest Road",
+      "largestArmy": "Largest Army",
+      "harbormaster": "Harbormaster",
+      "cloth": "Cloth",
+      "lair": "Pirate Lair",
+      "wonder": "Wonder Stage",
+      "epFish": "Fish (delivered to the council)",
+      "epSpice": "Spice (delivered to the council, range level {{level}})",
+      "epLair": "Pirate Lairs (captured)",
+      "epGold": "Gold shipped to the council",
+      "epHarbor": "Harbor Settlements"
+    },
+    "connection": {
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "bank": {
+      "title": "Bank",
+      "devDeckCount_one": "{{count}} development card",
+      "devDeckCount_other": "{{count}} development cards"
+    },
+    "dice": {
+      "turnNumber": "Turn {{number}}",
+      "eventCard": "Event card",
+      "eventCardAria": "Drawn event card: {{total}}",
+      "rollOverlay": "{{name}} rolled {{total}}"
+    },
+    "turn": {
+      "indicator": "Turn {{number}} — {{name}}"
+    },
+    "rail": {
+      "tabsLabel": "Sidebar sections",
+      "playSetupHint": "Cards and special plays appear here once setup is done.",
+      "tabs": {
+        "play": "Play",
+        "players": "Players",
+        "bank": "Bank",
+        "citiesKnights": "W&W",
+        "tradersBarbarians": "R&R",
+        "explorersPirates": "S&S",
+        "log": "Log",
+        "chat": "Chat"
+      }
+    },
+    "footer": {
+      "cardsTabsLabel": "Card sections"
+    },
+    "phase": {
+      "setup": {
+        "settlement": "Waiting for {{name}} to place a settlement…",
+        "road": "Waiting for {{name}} to place a road…"
+      },
+      "preRoll": "Waiting for {{name}} to roll…",
+      "discard": "Waiting for discards…",
+      "moveRobber": "Waiting for {{name}} to move the robber…",
+      "steal": "Waiting for {{name}} to steal a card…",
+      "roadBuilding": "Waiting for {{name}} to place free roads…",
+      "chooseGoldResource": "Waiting for gold-field choices…",
+      "main": "Waiting for {{name}}…",
+      "specialBuild": "Special building phase…",
+      "caravanVote": "Waiting for the caravan vote…",
+      "ended": "The game has ended."
+    },
+    "hand": {
+      "resourcesTitle": "Your resources",
+      "devCardsTitle": "Your development cards",
+      "noDevCards": "No development cards yet.",
+      "newBadge": "NEW",
+      "hiddenVp": "🔒 1 VP"
+    },
+    "devCard": {
+      "knight": "Knight",
+      "roadBuilding": "Road Building",
+      "yearOfPlenty": "Year of Plenty",
+      "monopoly": "Monopoly",
+      "victoryPoint": "Victory Point"
+    },
+    "vp": {
+      "total": "{{count}} VP",
+      "breakdown": "{{settlements}} settlements + {{cities}} cities×2 + {{longestRoad}} longest road + {{largestArmy}} largest army + {{vpCards}} hidden VP",
+      "otherBreakdown": "+ {{count}} other awards"
+    },
+    "ep": {
+      "lairsCaptured_one": "{{count}} pirate lair captured so far",
+      "lairsCaptured_other": "{{count}} pirate lairs captured so far"
+    }
+  },
+  "controls": {
+    "roll": "Roll",
+    "build": {
+      "road": "Road",
+      "settlement": "Settlement",
+      "city": "City"
+    },
+    "buyDevCard": "Buy dev card",
+    "seafarersRoadHint": "🚢 Roads go on land — for a sea route, use Build ship.",
+    "trade": "Trade",
+    "ship": {
+      "buildShip": "Build ship",
+      "moveShip": "Move ship"
+    },
+    "freeBuild": {
+      "prompt": "Place {{count}} free piece(s): road or ship.",
+      "road": "Road",
+      "ship": "Ship"
+    },
+    "endTurn": "End turn",
+    "endTurnTradeWarning": "Ending your turn will cancel your open trade offer.",
+    "setup": {
+      "settlement": "Place your settlement.",
+      "road": "Place your road."
+    },
+    "specialBuild": {
+      "yourTurn": "Special building — build or buy, then pass.",
+      "pass": "Pass",
+      "waiting": "Special building — {{name}} is building…"
+    },
+    "pairedTurn": {
+      "indicator": "Paired turn (player 2)",
+      "restrictions": "Supply trade, build and one dev card — no player trades, no roll.",
+      "waiting": "Paired turn — {{name}} is building…",
+      "end": "End paired turn"
+    },
+    "pendingOtherUi": "Handled via the debug panel for now.",
+    "reason": {
+      "needResources": "Need {{list}}",
+      "listSeparator": ", ",
+      "noLegalTargets": "No legal spots",
+      "maxRoads": "Max roads",
+      "maxSettlements": "Max settlements",
+      "maxCities": "Max cities",
+      "maxShips": "Max ships",
+      "shipAlreadyMoved": "Already moved a ship",
+      "deckEmpty": "Deck empty",
+      "notRolledYet": "Roll first",
+      "comingSoon": "Coming soon"
+    },
+    "costCard": {
+      "trigger": "Building costs",
+      "title": "Building costs",
+      "items": {
+        "road": "Road",
+        "settlement": "Settlement",
+        "city": "City",
+        "devCard": "Development card"
+      }
+    },
+    "countdown": {
+      "label": "{{seconds}}s"
+    }
+  },
+  "hotseat": {
+    "heading": "Hot-seat",
+    "setup": {
+      "seedLabel": "seed",
+      "randomSeed": "random",
+      "tokenMethodLabel": "Number token method",
+      "tokenSpiral": "spiral",
+      "tokenShuffled": "shuffled",
+      "boardLabel": "Board setup",
+      "playerCountLabel": "Player count",
+      "turnRuleLabel": "5-6 extra-building rule",
+      "turnRuleSbp": "Special Building",
+      "turnRulePaired": "Paired Players",
+      "seafarersLabel": "Open Seas",
+      "seafarersOn": "Open Seas",
+      "seafarersOff": "Base",
+      "citiesKnightsLabel": "Walls & Watchmen",
+      "citiesKnightsOn": "Walls & Watchmen",
+      "citiesKnightsOff": "Base",
+      "newGame": "New game"
+    },
+    "seatBar": {
+      "ariaLabel": "Viewed seat",
+      "seatLabel": "Seat {{n}}",
+      "gameOver": "Game over"
+    },
+    "bot": {
+      "moveButton": "🤖 Bot move",
+      "untilMyTurnButton": "Bot until my next turn",
+      "noLegalAction": "The bot has no move for this phase — use the raw action box.",
+      "stopReason": {
+        "ended": "The game ended.",
+        "noLegalAction": "The bot got stuck — use the raw action box to continue.",
+        "maxActionsExceeded": "Stopped after too many bot actions — use the raw action box to continue."
+      }
+    },
+    "debug": {
+      "title": "Debug panel",
+      "collapse": "Collapse",
+      "expand": "Debug panel",
+      "actionsTitle": "Actions",
+      "roll": "Roll dice",
+      "endTurn": "End turn",
+      "pickRoad": "Place road",
+      "pickSettlement": "Place settlement",
+      "pickCity": "Upgrade to city",
+      "pickRobber": "Move robber",
+      "buildShip": "Build ship",
+      "moveShip": "Move ship",
+      "movePirate": "Move pirate",
+      "rawActionLabel": "Raw action (JSON)",
+      "rawActionPlaceholder": "{\"type\":\"discard\",\"cards\":{\"wool\":1}}",
+      "rawActionSubmit": "Send action",
+      "rawActionParseError": "That isn't valid JSON.",
+      "rawActionInvalid": "That isn't a valid action.",
+      "truthTitle": "Full state truth",
+      "table": {
+        "seat": "Seat",
+        "resources": "Resources",
+        "devCards": "Dev cards",
+        "vp": "VP"
+      },
+      "logTitle": "Action log",
+      "copyBundle": "Copy repro bundle",
+      "bundleCopied": "Repro bundle copied to clipboard.",
+      "replayLabel": "Replay bundle (paste JSON)",
+      "replayPlaceholder": "{\"seed\":\"...\",\"tokenMethod\":\"spiral\",\"actions\":[...]}",
+      "replaySubmit": "Replay",
+      "replayParseError": "That isn't valid JSON.",
+      "replayInvalid": "That isn't a valid repro bundle.",
+      "replayDone": "Replayed to stateVersion {{version}}."
+    }
+  },
+  "preview": {
+    "title": "HEXHAVEN",
+    "seedLabel": "seed",
+    "randomButton": "random",
+    "variant": {
+      "ariaLabel": "Board variant",
+      "base": "Base board",
+      "seafarers3": "Open Seas (3p)",
+      "seafarers4": "Open Seas (4p)",
+      "seafarersNote": "\"Maiden Voyage\" — sample ships, pirate and island chits (preview only; interactions arrive later)."
+    },
+    "interaction": {
+      "ariaLabel": "Interaction mode",
+      "modes": {
+        "setupSettlement": "Setup: settlement",
+        "road": "Build road",
+        "city": "Upgrade to city",
+        "robber": "Move robber"
+      },
+      "lastPick": "Last pick: {{value}}",
+      "lastPickNone": "—"
+    }
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "home": {
+    "nicknameLabel": "Nickname",
+    "nicknamePlaceholder": "Enter a nickname",
+    "passwordLabel": "Server password",
+    "passwordPlaceholder": "Enter the server password",
+    "validation": {
+      "nicknameInvalid": "Enter a nickname (1-20 characters).",
+      "codeInvalid": "Room codes are 5 characters: A-Z and 2-9 (no O, 0, I or 1)."
+    },
+    "createCard": {
+      "title": "Create a game",
+      "submit": "Create game"
+    },
+    "joinCard": {
+      "title": "Join a game",
+      "codeLabel": "Room code",
+      "codePlaceholder": "ABCDE",
+      "submit": "Join game"
+    }
+  },
+  "options": {
+    "presets": {
+      "heading": "Saved setups",
+      "empty": "No saved setups yet — configure options below, name it, and Save.",
+      "saveLabel": "Save current as…",
+      "savePlaceholder": "e.g. 6-player W&W",
+      "saveButton": "Save",
+      "deleteAria": "Delete saved setup {{name}}"
+    },
+    "gameMode": {
+      "title": "Choose your game",
+      "chooseGame": "Game",
+      "base": { "name": "Base game" },
+      "addonHint": "Combine with your game",
+      "ckBadge": "+ W&W",
+      "scenarioLabel": "Scenario",
+      "fieldLabel": "Game mode",
+      "fieldPlayers": "{{count}} players"
+    },
+    "playerCountLabel": "Players",
+    "playerCountAria": "Number of players",
+    "boardLabel": "Board",
+    "boardAria": "Board setup",
+    "board": {
+      "random": {
+        "name": "Random",
+        "description": "Terrain, number tokens and harbors are shuffled for every game."
+      },
+      "beginner": {
+        "name": "Beginner",
+        "description": "The official fixed starter board from the rulebook — the same layout every game (base board only)."
+      },
+      "fiveSixNewPlayers": {
+        "name": "5-6 New Players",
+        "description": "The official fixed 5-6 starter board. Coming soon."
+      },
+      "headingForNewShores": {
+        "name": "Maiden Voyage",
+        "description": "Open Seas intro scenario: main island plus outer isles. First to 14 VP wins."
+      },
+      "newWorld": {
+        "name": "Open Horizons",
+        "description": "5-6 players only: a randomly assembled main island plus outer isles, sized for a bigger crew. First to 14 VP wins."
+      },
+      "throughTheDesert": {
+        "name": "The Great Divide",
+        "description": "5-6 players only: one main island crossed by a band of desert, plus outer isles beyond. First to 14 VP wins."
+      },
+      "forgottenTribe": {
+        "name": "The Lost Isles",
+        "description": "5-6 players only: one main island surrounded by several small islands, each holding a reward for its first settler. First to 14 VP wins."
+      },
+      "sixIslands": {
+        "name": "The Six Islands",
+        "description": "5-6 players only: no home island at all — six equal-sized islands to settle instead. First to 18 VP wins."
+      },
+      "fogIslands": {
+        "name": "The Misted Isles",
+        "description": "5-6 players only: much of the map starts hidden. Sail your ships to reveal facedown terrain and number tiles as you explore."
+      },
+      "clothForHexhaven": {
+        "name": "Cloth for Hexhaven",
+        "description": "5-6 players only: small-island villages weave cloth when their number rolls. Every 2 cloth is worth 1 victory point."
+      },
+      "pirateIslands": {
+        "name": "Corsair Coves",
+        "description": "5-6 players only: the pirate ship patrols a fixed route every turn, blocking nearby ships. Raid its lairs on the small islands for bonus victory points."
+      },
+      "wondersOfHexhaven": {
+        "name": "The Wonders of Hexhaven",
+        "description": "5-6 players only: keep building settlements and cities to raise a wonder in stages. Complete every stage for an instant win, or race to the usual victory point target."
+      },
+      "size": {
+        "standard": "Standard 19-hex board.",
+        "large": "Large 30-hex board (5-6 player extension).",
+        "seafarers": "Open Seas scenario board with sea, ships and the pirate."
+      }
+    },
+    "expansionsHeading": "Expansions",
+    "comingSoonBadge": "Coming soon",
+    "expansions": {
+      "fiveSix": {
+        "name": "5-6 Player Extension",
+        "description": "Play with up to six around the table."
+      },
+      "seafarers": {
+        "name": "Open Seas",
+        "description": "Ships, islands and the pirate."
+      },
+      "citiesKnights": {
+        "name": "Walls & Watchmen",
+        "description": "Commodities, knights and the barbarian."
+      },
+      "tradersBarbarians": {
+        "name": "Roads & Raiders",
+        "description": "Five standalone scenarios: fish, rivers, camel caravans, a barbarian invasion, or trade wagons."
+      },
+      "explorersPirates": {
+        "name": "Sails & Scoundrels",
+        "description": "Sail beyond your home island through the fog, found new settlements, and build harbor settlements instead of cities."
+      }
+    },
+    "epScenario": {
+      "label": "Sails & Scoundrels scenario",
+      "aria": "Sails & Scoundrels scenario",
+      "landHo": {
+        "name": "Landfall",
+        "description": "The intro scenario: move ships, explore the fog, and found settlements/harbor settlements. First to 8 VP wins."
+      },
+      "fishForHexhaven": {
+        "name": "Fish for Hexhaven",
+        "description": "Landfall's voyage, plus fish shoals in the fog: haul fish on arrival and deliver it to the council for bonus VP. First to 10 VP wins."
+      },
+      "spicesForHexhaven": {
+        "name": "Spices for Hexhaven",
+        "description": "Landfall's voyage, plus trading villages: trade for spice at a village, then deliver it to the council for bonus VP and wider ship range. First to 10 VP wins."
+      },
+      "pirateLairs": {
+        "name": "The Pirate Lairs",
+        "description": "Landfall's voyage, plus pirate lairs in the fog: build crews, land them on a lair, and capture it with your fellow explorers for bonus VP. First to 10 VP wins."
+      },
+      "fullCampaign": {
+        "name": "The Sails & Scoundrels",
+        "description": "The full campaign: Landfall's voyage with fish, spices, and pirate lairs all in play together. First to 17 VP wins."
+      }
+    },
+    "tbScenario": {
+      "label": "Roads & Raiders scenario",
+      "aria": "Roads & Raiders scenario",
+      "fishermen": {
+        "name": "The Fishermen",
+        "description": "A Lake and fishing grounds hand out fish tokens — trade them for one-shot benefits. Watch out for the Old Boot."
+      },
+      "rivers": {
+        "name": "The Rivers",
+        "description": "Rivers cross the island. Settling or bridging their banks earns gold coins — the Wealthiest and Poorest Settler score bonus/penalty VP."
+      },
+      "caravans": {
+        "name": "The Caravans",
+        "description": "The desert becomes an Oasis. Every new settlement opens a bidding vote for where the next camel goes. Play to 12 VP."
+      },
+      "barbarianAttack": {
+        "name": "Barbarian Attack",
+        "description": "Barbarians march on the island every roll. Recruit and move knights to intercept them before they pillage."
+      },
+      "tradersBarbarians": {
+        "name": "Roads & Raiders",
+        "description": "Three trade hexes turn commodities into gold. Build a wagon with every city and route it past barbarians to deliver."
+      }
+    },
+    "modifiersHeading": "Modifiers",
+    "modifiersButton": "Modifiers ({{count}})",
+    "modifiersButtonAria": "Open the modifiers menu",
+    "winnability": {
+      "warning": "This setup may be unwinnable — the highest reachable score is ~{{max}} VP. Lower the VP target or raise the limits.",
+      "endless": "Endless game — no automatic winner."
+    },
+    "modifierGroups": {
+      "robberPieces": "Robber & pieces",
+      "cards": "Cards",
+      "houseRules": "House rules",
+      "board": "Board setup"
+    },
+    "modifiers": {
+      "customTargetVp": {
+        "name": "Custom target VP",
+        "description": "Change the number of victory points needed to win.",
+        "paramLabel": "Target VP"
+      },
+      "combine2sAnd12s": {
+        "name": "Combine 2s & 12s",
+        "description": "A roll of 2 also produces the 12 hexes, and a roll of 12 also produces the 2 hexes."
+      },
+      "eventCards": {
+        "name": "Event Cards",
+        "description": "Replace the two dice with a shuffled 36-card event deck matching the dice odds, without the streaks."
+      },
+      "friendlyRobber": {
+        "name": "Friendly Robber",
+        "description": "The robber can't steal from a player at 2 victory points or fewer, and a 7 rolled in round 1 moves nobody at all."
+      },
+      "playDevSameTurn": {
+        "name": "Play dev card same turn",
+        "description": "Development cards may be played the same turn they were bought."
+      },
+      "harbormaster": {
+        "name": "Harbormaster",
+        "description": "The player with the most harbor buildings (settlement 1, city 2; minimum 3) holds a +2 victory point card, stealable like Longest Road."
+      },
+      "cardMods": {
+        "name": "Card Mods",
+        "description": "6 curated new development cards mixed into the deck, plus 5 combined card plays (e.g. Knight + Road Building at once)."
+      },
+      "helpers": {
+        "name": "The Helpers of Hexhaven",
+        "description": "Each player holds one Helper card — a special ability usable at most once per turn-rotation."
+      },
+      "hexPieces": {
+        "name": "Multi-piece hex framework",
+        "description": "Extra robber-like pieces sit on hexes alongside the robber. Pick which ones are in play below. On a 7, the mover may move the robber OR any active piece.",
+        "selectedCount": "{{count}} selected",
+        "kindsHeading": "Hex pieces",
+        "robberNote": "The robber is always in play — pick any extra movable pieces below, or none.",
+        "kinds": {
+          "wizard": {
+            "name": "Wizard",
+            "description": "Every settlement/city adjacent to its hex gets +1 resource when that hex's number is rolled."
+          },
+          "trader": {
+            "name": "Trader",
+            "description": "Acts as a 3:1 bank port for any settlement/city adjacent to its hex, even opponents'. The mover draws 1 resource each time it's moved."
+          },
+          "robinHood": {
+            "name": "Robin Hood",
+            "description": "Moving it steals 1 resource card from the wealthiest player and gives it to the poorest."
+          },
+          "banker": {
+            "name": "Banker",
+            "description": "Produces its hex's resource for whoever last moved it there, each time that hex's number is rolled."
+          },
+          "poaching": {
+            "name": "Poaching",
+            "description": "The mover draws 1 of whatever resource the destination hex produces, each time it's moved."
+          }
+        }
+      },
+      "customConstants": {
+        "name": "Custom game",
+        "description": "Tune production yield, Road Building/Year of Plenty counts, starting resources, the discard limit, build costs and bank size.",
+        "panelHeading": "Custom game settings",
+        "rangeHint": "{{min}}–{{max}}",
+        "startingResourcesLabel": "Starting resources (each player)",
+        "startingResourcesHint": "Each 0–{{max}} (limited by the bank ÷ player count).",
+        "costsLabel": "Build costs",
+        "fields": {
+          "productionMultiplier": "Production multiplier",
+          "roadBuildingCount": "Road Building count",
+          "yearOfPlentyCount": "Year of Plenty count",
+          "discardHandLimit": "Discard hand limit",
+          "bankPerResource": "Bank per resource",
+          "targetVp": "Target VP (or endless)",
+          "maxSettlements": "Max settlements",
+          "maxCities": "Max cities",
+          "maxRoads": "Max roads",
+          "maxCityWalls": "Max city walls (Walls & Watchmen)",
+          "maxKnightsPerLevel": "Max knights per level (Walls & Watchmen)",
+          "maxProgressCards": "Max progress cards in hand (Walls & Watchmen)"
+        },
+        "limitsLabel": "Limits",
+        "limitlessLabel": "Limitless",
+        "limitlessAria": "{{field}}: limitless",
+        "costItems": {
+          "road": "Road",
+          "settlement": "Settlement",
+          "city": "City",
+          "devCard": "Development card"
+        },
+        "resourceNames": {
+          "brick": "Brick",
+          "lumber": "Lumber",
+          "wool": "Wool",
+          "grain": "Grain",
+          "ore": "Ore"
+        }
+      },
+      "shuffleNumbers": {
+        "name": "Shuffle numbers",
+        "description": "Randomize which hex gets which number, keeping the same count of each number (still no two 6s or 8s side by side)."
+      },
+      "hiddenSetupNumbers": {
+        "name": "Blind placement",
+        "description": "Hide every hex's number until all starting settlements are placed, then reveal them — place your first settlements without knowing the odds."
+      },
+      "incompatibleReasons": {
+        "eventCardsVsCitiesKnights": "Not compatible with Walls & Watchmen's event die."
+      }
+    },
+    "timersLabel": "Turn timers",
+    "timersAria": "Turn timers",
+    "turnRule": {
+      "label": "Extra-building rule",
+      "aria": "5-6 player extra-building rule",
+      "sbp": {
+        "name": "Special Building Phase",
+        "description": "2015 rule: between turns, every other player may build or buy dev cards in clockwise order — no trading, no dev-card plays, no winning."
+      },
+      "pairedPlayers": {
+        "name": "Paired Players",
+        "description": "2022 rule: a second \"player 2\" takes a partial turn after player 1 — supply trades, building and one dev card (and may even win)."
+      }
+    }
+  },
+  "room": {
+    "heading": "Lobby",
+    "codeLabel": "Room code:",
+    "copyCode": "Copy code",
+    "copyLink": "Copy invite link",
+    "copied": "Copied!",
+    "hostBadge": "Host",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "readyBadge": "Ready",
+    "notReadyBadge": "Not ready",
+    "seatEmpty": "Waiting for a player…",
+    "botBadge": "Bot",
+    "botName": "Bot {{number}}",
+    "addBotButton": "Add bot",
+    "removeBotButton": "Remove",
+    "summaryHeading": "Options",
+    "summaryPlayers": "{{count}} players",
+    "summaryExpansionsOn": "Expansions enabled",
+    "summaryExpansionsNone": "Base game only",
+    "summaryTimersOn": "Turn timers on",
+    "summaryTimersOff": "Turn timers off",
+    "summaryTurnRule": "Extra-building rule: {{rule}}",
+    "summaryUnavailable": "Full options aren't visible to joined players yet.",
+    "readyToggleOn": "I'm ready",
+    "readyToggleOff": "Not ready yet",
+    "startButton": "Start game",
+    "startHint": "All seats must be filled and ready before the game can start."
+  }
+}

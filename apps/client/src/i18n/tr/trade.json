@@ -1,0 +1,45 @@
+{
+  "trigger": "Takas",
+  "title": "Takas",
+  "tabs": {
+    "ariaLabel": "Takas türü",
+    "bank": "Banka",
+    "domestic": "Oyuncular"
+  },
+  "bank": {
+    "giveLabel": "Verilecek",
+    "receiveLabel": "Alınacak",
+    "rate": "{{rate}}:1",
+    "empty": "Banka boş",
+    "preview": "{{give}} ver → {{receive}} al",
+    "confirm": "Banka ile takas et"
+  },
+  "form": {
+    "giveLabel": "Vereceğiniz",
+    "receiveLabel": "İstediğiniz",
+    "blocked": {
+      "emptyGive": "Vermek için en az bir kart seçin.",
+      "emptyReceive": "İstemek için en az bir kart seçin.",
+      "overlap": "Verilen ve istenen aynı kaynak türünü paylaşamaz.",
+      "cantAfford": "Teklif ettiğiniz kartlara sahip değilsiniz."
+    },
+    "send": "Teklifi gönder"
+  },
+  "tracker": {
+    "pending": "Bekliyor",
+    "accepted": "Kabul edildi",
+    "declined": "Reddedildi",
+    "completeWith": "{{name}} ile tamamla",
+    "cancel": "Teklifi iptal et"
+  },
+  "incoming": {
+    "headline": "{{name}} bir takas teklif ediyor",
+    "accept": "Kabul et",
+    "decline": "Reddet",
+    "youAccepted": "Kabul ettiniz",
+    "youDeclined": "Reddettiniz",
+    "youGive": "Verirsin",
+    "youGet": "Alırsın",
+    "cantAccept": "İstedikleri sizde yok — yalnızca reddedebilirsiniz."
+  }
+}

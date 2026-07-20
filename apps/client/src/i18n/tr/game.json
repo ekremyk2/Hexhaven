@@ -1,0 +1,278 @@
+{
+  "heading": "Oyun",
+  "gameIdLabel": "Oyun Kimliği:",
+  "comingSoon": "Gerçek oyun arayüzü ilerideki Faz-4 görevlerinde eklenecek. Bu sayfa store/ws bağlantısının çalıştığını kanıtlıyor.",
+  "debugTitle": "Hata ayıklama: ham oyun durumu",
+  "waitingForGame": "Oyunun başlaması bekleniyor…",
+  "notify": {
+    "yourTurnTitle": "Sıra sende!",
+    "yourTurnBody": "Hexhaven'da sıra sende."
+  },
+  "chat": {
+    "empty": "Henüz mesaj yok — merhaba de!",
+    "inputLabel": "Mesaj",
+    "placeholder": "Bir mesaj yazın…",
+    "send": "Gönder"
+  },
+  "hud": {
+    "player": {
+      "seatFallback": "Koltuk {{n}}",
+      "resourceCount_one": "{{count}} kart",
+      "resourceCount_other": "{{count}} kart",
+      "devCardCount_one": "{{count}} gelişim kartı",
+      "devCardCount_other": "{{count}} gelişim kartı",
+      "knightsPlayed_one": "{{count}} şövalye",
+      "knightsPlayed_other": "{{count}} şövalye",
+      "vp": "{{count}} ZP",
+      "discardPending_one": "{{count}} kart iade etmeli",
+      "discardPending_other": "{{count}} kart iade etmeli"
+    },
+    "awards": {
+      "longestRoad": "En Uzun Yol",
+      "largestArmy": "En Büyük Ordu",
+      "harbormaster": "Liman Reisi",
+      "cloth": "Kumaş",
+      "lair": "Korsan İni",
+      "wonder": "Harika Aşaması",
+      "epFish": "Balık (konseye teslim edildi)",
+      "epSpice": "Baharat (konseye teslim edildi, menzil seviyesi {{level}})",
+      "epLair": "Korsan İnleri (ele geçirildi)",
+      "epGold": "Konseye gönderilen altın",
+      "epHarbor": "Liman Yerleşimleri"
+    },
+    "connection": {
+      "online": "Bağlı",
+      "offline": "Bağlı değil"
+    },
+    "bank": {
+      "title": "Banka",
+      "devDeckCount_one": "{{count}} gelişim kartı",
+      "devDeckCount_other": "{{count}} gelişim kartı"
+    },
+    "dice": {
+      "turnNumber": "Tur {{number}}",
+      "eventCard": "Olay kartı",
+      "eventCardAria": "Çekilen olay kartı: {{total}}",
+      "rollOverlay": "{{name}} {{total}} attı"
+    },
+    "turn": {
+      "indicator": "Tur {{number}} — {{name}}"
+    },
+    "rail": {
+      "tabsLabel": "Kenar çubuğu bölümleri",
+      "playSetupHint": "Kartlar ve özel oynamalar kurulum bitince burada görünür.",
+      "tabs": {
+        "play": "Oyna",
+        "players": "Oyuncular",
+        "bank": "Banka",
+        "citiesKnights": "W&W",
+        "tradersBarbarians": "R&R",
+        "explorersPirates": "S&S",
+        "log": "Günlük",
+        "chat": "Sohbet"
+      }
+    },
+    "footer": {
+      "cardsTabsLabel": "Kart bölümleri"
+    },
+    "phase": {
+      "setup": {
+        "settlement": "{{name}} yerleşim yerleştirecek…",
+        "road": "{{name}} yol yerleştirecek…"
+      },
+      "preRoll": "{{name}} zar atacak…",
+      "discard": "Kart iadeleri bekleniyor…",
+      "moveRobber": "{{name}} hırsızı taşıyacak…",
+      "steal": "{{name}} bir kart çalacak…",
+      "roadBuilding": "{{name}} bedava yol yerleştirecek…",
+      "chooseGoldResource": "Altın tarlası seçimleri bekleniyor…",
+      "main": "{{name}} oynuyor…",
+      "specialBuild": "Özel inşa aşaması…",
+      "caravanVote": "Kervan oylaması bekleniyor…",
+      "ended": "Oyun sona erdi."
+    },
+    "hand": {
+      "resourcesTitle": "Kaynaklarınız",
+      "devCardsTitle": "Gelişim kartlarınız",
+      "noDevCards": "Henüz gelişim kartınız yok.",
+      "newBadge": "YENİ",
+      "hiddenVp": "🔒 1 ZP"
+    },
+    "devCard": {
+      "knight": "Şövalye",
+      "roadBuilding": "Yol Yapımı",
+      "yearOfPlenty": "Bolluk Yılı",
+      "monopoly": "Tekel",
+      "victoryPoint": "Zafer Puanı"
+    },
+    "vp": {
+      "total": "{{count}} ZP",
+      "breakdown": "{{settlements}} yerleşim + {{cities}} şehir×2 + {{longestRoad}} en uzun yol + {{largestArmy}} en büyük ordu + {{vpCards}} gizli ZP",
+      "otherBreakdown": "+ {{count}} diğer ödül"
+    },
+    "ep": {
+      "lairsCaptured_one": "Şimdiye kadar {{count}} korsan ini ele geçirildi",
+      "lairsCaptured_other": "Şimdiye kadar {{count}} korsan ini ele geçirildi"
+    }
+  },
+  "controls": {
+    "roll": "Zar at",
+    "build": {
+      "road": "Yol",
+      "settlement": "Yerleşim",
+      "city": "Şehir"
+    },
+    "buyDevCard": "Gelişim kartı al",
+    "seafarersRoadHint": "🚢 Yollar karada olur — deniz yolu için Gemi inşa et'i kullanın.",
+    "trade": "Takas",
+    "ship": {
+      "buildShip": "Gemi inşa et",
+      "moveShip": "Gemi taşı"
+    },
+    "freeBuild": {
+      "prompt": "{{count}} bedava parça yerleştir: yol veya gemi.",
+      "road": "Yol",
+      "ship": "Gemi"
+    },
+    "endTurn": "Sırayı bitir",
+    "endTurnTradeWarning": "Sırayı bitirmek açık takas teklifinizi iptal edecek.",
+    "setup": {
+      "settlement": "Yerleşiminizi yerleştirin.",
+      "road": "Yolunuzu yerleştirin."
+    },
+    "specialBuild": {
+      "yourTurn": "Özel inşa — inşa edin veya kart alın, sonra pas geçin.",
+      "pass": "Pas",
+      "waiting": "Özel inşa — {{name}} inşa ediyor…"
+    },
+    "pairedTurn": {
+      "indicator": "Eşli tur (oyuncu 2)",
+      "restrictions": "Bankayla takas, inşa ve bir gelişim kartı — oyuncu takası yok, zar yok.",
+      "waiting": "Eşli tur — {{name}} inşa ediyor…",
+      "end": "Eşli turu bitir"
+    },
+    "pendingOtherUi": "Şimdilik hata ayıklama paneli üzerinden yönetiliyor.",
+    "reason": {
+      "needResources": "{{list}} gerekiyor",
+      "listSeparator": ", ",
+      "noLegalTargets": "Uygun yer yok",
+      "maxRoads": "Azami yol",
+      "maxSettlements": "Azami yerleşim",
+      "maxCities": "Azami şehir",
+      "maxShips": "Azami gemi",
+      "shipAlreadyMoved": "Zaten gemi taşındı",
+      "deckEmpty": "Deste boş",
+      "notRolledYet": "Önce zar atın",
+      "comingSoon": "Yakında"
+    },
+    "costCard": {
+      "trigger": "İnşaat maliyetleri",
+      "title": "İnşaat maliyetleri",
+      "items": {
+        "road": "Yol",
+        "settlement": "Yerleşim",
+        "city": "Şehir",
+        "devCard": "Gelişim kartı"
+      }
+    },
+    "countdown": {
+      "label": "{{seconds}}sn"
+    }
+  },
+  "hotseat": {
+    "heading": "Sırayla Oynama",
+    "setup": {
+      "seedLabel": "tohum",
+      "randomSeed": "rastgele",
+      "tokenMethodLabel": "Sayı jetonu yöntemi",
+      "tokenSpiral": "sarmal",
+      "tokenShuffled": "karıştırılmış",
+      "boardLabel": "Tahta kurulumu",
+      "playerCountLabel": "Oyuncu sayısı",
+      "turnRuleLabel": "5-6 ek inşa kuralı",
+      "turnRuleSbp": "Özel İnşa",
+      "turnRulePaired": "Eşli Oyuncular",
+      "seafarersLabel": "Open Seas",
+      "seafarersOn": "Open Seas",
+      "seafarersOff": "Temel",
+      "citiesKnightsLabel": "Walls & Watchmen",
+      "citiesKnightsOn": "Walls & Watchmen",
+      "citiesKnightsOff": "Temel",
+      "newGame": "Yeni oyun"
+    },
+    "seatBar": {
+      "ariaLabel": "Görüntülenen koltuk",
+      "seatLabel": "Koltuk {{n}}",
+      "gameOver": "Oyun bitti"
+    },
+    "bot": {
+      "moveButton": "🤖 Bot hamlesi",
+      "untilMyTurnButton": "Sıram gelene kadar bot oynasın",
+      "noLegalAction": "Bot bu aşamada hamle yapamıyor — ham eylem kutusunu kullanın.",
+      "stopReason": {
+        "ended": "Oyun bitti.",
+        "noLegalAction": "Bot takıldı — devam etmek için ham eylem kutusunu kullanın.",
+        "maxActionsExceeded": "Çok fazla bot hamlesinden sonra durduruldu — devam etmek için ham eylem kutusunu kullanın."
+      }
+    },
+    "debug": {
+      "title": "Hata ayıklama paneli",
+      "collapse": "Daralt",
+      "expand": "Hata ayıklama paneli",
+      "actionsTitle": "Eylemler",
+      "roll": "Zar at",
+      "endTurn": "Sırayı bitir",
+      "pickRoad": "Yol yerleştir",
+      "pickSettlement": "Yerleşim yerleştir",
+      "pickCity": "Şehre yükselt",
+      "pickRobber": "Hırsızı taşı",
+      "buildShip": "Gemi inşa et",
+      "moveShip": "Gemi taşı",
+      "movePirate": "Korsanı taşı",
+      "rawActionLabel": "Ham eylem (JSON)",
+      "rawActionPlaceholder": "{\"type\":\"discard\",\"cards\":{\"wool\":1}}",
+      "rawActionSubmit": "Eylemi gönder",
+      "rawActionParseError": "Geçerli bir JSON değil.",
+      "rawActionInvalid": "Geçerli bir eylem değil.",
+      "truthTitle": "Tam durum gerçeği",
+      "table": {
+        "seat": "Koltuk",
+        "resources": "Kaynaklar",
+        "devCards": "Gelişim kartları",
+        "vp": "Zafer Puanı"
+      },
+      "logTitle": "Eylem günlüğü",
+      "copyBundle": "Tekrar paketini kopyala",
+      "bundleCopied": "Tekrar paketi panoya kopyalandı.",
+      "replayLabel": "Paketi tekrar oynat (JSON yapıştır)",
+      "replayPlaceholder": "{\"seed\":\"...\",\"tokenMethod\":\"spiral\",\"actions\":[...]}",
+      "replaySubmit": "Tekrar oynat",
+      "replayParseError": "Geçerli bir JSON değil.",
+      "replayInvalid": "Geçerli bir tekrar paketi değil.",
+      "replayDone": "stateVersion {{version}} değerine tekrar oynatıldı."
+    }
+  },
+  "preview": {
+    "title": "HEXHAVEN",
+    "seedLabel": "tohum",
+    "randomButton": "rastgele",
+    "variant": {
+      "ariaLabel": "Tahta çeşidi",
+      "base": "Temel tahta",
+      "seafarers3": "Open Seas (3o)",
+      "seafarers4": "Open Seas (4o)",
+      "seafarersNote": "\"İlk Yolculuk\" — örnek gemiler, korsan ve ada fişleri (yalnızca önizleme; etkileşimler sonra gelecek)."
+    },
+    "interaction": {
+      "ariaLabel": "Etkileşim modu",
+      "modes": {
+        "setupSettlement": "Kuruluş: yerleşim",
+        "road": "Yol inşa et",
+        "city": "Şehre yükselt",
+        "robber": "Hırsızı taşı"
+      },
+      "lastPick": "Son seçim: {{value}}",
+      "lastPickNone": "—"
+    }
+  }
+}

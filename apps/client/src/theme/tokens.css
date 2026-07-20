@@ -1,0 +1,111 @@
+/* Design tokens — docs/11 §1. Single source of truth for colour/type/space.
+   (OFL Cinzel/Inter bundling: see theme/fonts.css — the @font-face rules are staged there but
+   commented out until the actual woff2 binaries + OFL.txt license files are added under
+   src/assets/fonts/. See T-307 Implementation notes: font binaries need an explicit download that
+   this session couldn't perform. Fallback stacks below render correctly in the meantime.) */
+
+:root {
+  /* Surfaces & ink */
+  --table-a: #2d5a73;
+  --table-b: #1e3f52;
+  --panel: #f7f1e3;
+  --panel-edge: #d9cdb0;
+  --ink: #2b2416;
+  --ink-soft: #6b5f47;
+  --accent: #b3541e;
+  --accent-gold: #c9a227;
+  /* Danger (destructive actions) — not spec'd by docs/11 (silent on this), chosen to sit near the
+     terracotta/seat0 family while clearing 4.5:1 against on-accent labels. */
+  --danger: #8c2a1f;
+  /* Label color for text sitting on --accent/--danger fills (button labels): --panel (cream) only
+     clears 4.4:1 on --accent (just under 4.5), so filled buttons use pure white instead. */
+  --on-accent: #ffffff;
+
+  /* Dark-mode plumbing (T-505 dark mode). `--panel`/`--ink` are OVERLOADED in the base theme:
+     `--panel` is both the parchment surface AND a light "on-dark" text color (headers on the
+     ocean, contrast ink on seat/resource fills, the inverted tooltip); `--ink` is both body text
+     AND the dark contrast ink on light fills (gold badges, the near-white seat2). Dark mode flips
+     the surface/body meaning, which would invert those *fixed-surface* usages — so those migrate to
+     the stable tokens below. Each value here EQUALS its light counterpart, and tokens.dark.css does
+     NOT override them, so they hold their (correct) value in both themes and LIGHT stays identical:
+       --ink-ondark   light ink for text on the always-dark ocean/table + on fixed seat/resource fills
+       --ink-onlight  dark ink for text on fixed light fills (gold badges, near-white seat2)
+       --danger-solid the danger *fill* under white button/badge labels (kept dark in both themes),
+                      separate from --danger which brightens in dark so danger *text* stays readable
+       --field        text-input background (white in light, a dark surface in tokens.dark.css) */
+  --ink-ondark: #f7f1e3;
+  --ink-onlight: #2b2416;
+  --danger-solid: #8c2a1f;
+  --field: #ffffff;
+
+  /* Terrain */
+  --t-hills: #b45d33;
+  --t-forest: #2f6b3c;
+  --t-pasture: #7fb05a;
+  --t-fields: #dfae3c;
+  --t-mountains: #8b8d93;
+  --t-desert: #e3d5ae;
+  --sea: #3d7ea6;
+  --sea-deep: #2f6480;
+  --coast-sand: #e8d9a8;
+
+  /* Number tokens */
+  --token-face: #f3e9cf;
+  --token-ring: #7a6a44;
+  --token-red: #c62828;
+
+  /* Player seats (paired with a shape badge — docs/11 §4) */
+  --seat-0: #c62828;
+  --seat-1: #1e5fb4;
+  --seat-2: #f5f0e6;
+  --seat-3: #e07b28;
+  --seat-4: #2e7d32;
+  --seat-5: #6d4c2f;
+
+  /* Type */
+  --font-display: 'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-ui: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Type scale (docs/11 §1: 12/14/16/20/28/40) */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 20px;
+  --text-xl: 28px;
+  --text-2xl: 40px;
+
+  /* Radius & shadow */
+  --radius-panel: 12px;
+  --radius-button: 8px;
+  --radius-card: 10px;
+  --shadow-soft: 0 1px 2px rgba(43, 36, 22, 0.18), 0 4px 12px rgba(43, 36, 22, 0.12);
+
+  /* Focus ring (docs/11 §6: visible focus rings, --accent 2px) reuses --accent directly — no
+     separate var so there's one color to keep in sync, and a11y.test.ts can read it as a plain
+     hex rather than resolving a var() chain. */
+}
+
+/* The table: deep-ocean backdrop the board and panels float on, with a subtle vignette
+   (docs/11 §2) darkening the edges so the parchment panels/board read as the focal point. */
+.hexhaven-table {
+  background:
+    radial-gradient(circle at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.35) 100%),
+    radial-gradient(circle at 50% 40%, var(--table-a), var(--table-b));
+  min-height: 100vh;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Parchment Panel treatment (docs/11 §1: bg, edge, radius, 2-layer shadow). ui/Panel.tsx applies
+   this class; kept here (not only as Tailwind utilities) so the recipe has one canonical home. */
+.hexhaven-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-soft);
+  color: var(--ink);
+}

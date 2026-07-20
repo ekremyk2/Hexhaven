@@ -1,0 +1,74 @@
+{
+  "discard": {
+    "title": "{{count}} kart iade edin",
+    "selectedCount": "{{selected}} / {{required}} seçildi",
+    "haveCount": "Elde {{count}}",
+    "increment": "Bir {{resource}} ekle",
+    "decrement": "Bir {{resource}} çıkar",
+    "auto": "Otomatik doldur",
+    "minus": "−",
+    "plus": "+",
+    "confirm": "İadeyi onayla",
+    "pendingBar": "{{names}} kart iade etmesini bekliyor…"
+  },
+  "moveRobber": {
+    "banner": "Hırsızı yeni bir altıgene taşıyın."
+  },
+  "movePirate": {
+    "banner": "Korsanı bir deniz altıgenine taşıyın.",
+    "chooseRobber": "Hırsız",
+    "choosePirate": "Korsan"
+  },
+  "moveHexPiece": {
+    "banner": "{{name}}'yı yeni bir altıgene taşıyın.",
+    "kindName": {
+      "wizard": "Büyücü",
+      "trader": "Tüccar",
+      "robinHood": "Robin Hood",
+      "banker": "Bankacı",
+      "poaching": "Avlanma"
+    }
+  },
+  "gold": {
+    "title": "{{count}} altın kaynağı seçin",
+    "selectedCount": "{{selected}} / {{required}} seçildi",
+    "bankCount": "bankada {{count}}",
+    "increment": "Bir {{resource}} ekle",
+    "decrement": "Bir {{resource}} çıkar",
+    "minus": "−",
+    "plus": "+",
+    "confirm": "Kaynakları al"
+  },
+  "steal": {
+    "title": "Kimden çalacağınızı seçin",
+    "cardCount_one": "{{count}} kart",
+    "cardCount_other": "{{count}} kart"
+  },
+  "resourceName": {
+    "brick": "Tuğla",
+    "lumber": "Kereste",
+    "wool": "Yün",
+    "grain": "Buğday",
+    "ore": "Maden"
+  },
+  "resource": {
+    "brick_one": "{{count}} tuğla",
+    "brick_other": "{{count}} tuğla",
+    "lumber_one": "{{count}} kereste",
+    "lumber_other": "{{count}} kereste",
+    "wool_one": "{{count}} yün",
+    "wool_other": "{{count}} yün",
+    "grain_one": "{{count}} buğday",
+    "grain_other": "{{count}} buğday",
+    "ore_one": "{{count}} maden",
+    "ore_other": "{{count}} maden"
+  },
+  "toast": {
+    "discardSelf": "{{resources}} iade ettiniz.",
+    "discardOther": "{{name}} {{count}} kart iade etti.",
+    "stolenThief": "{{name}} kişisinden {{resource}} çaldınız.",
+    "stolenVictim": "{{name}} senden {{resource}} çaldı.",
+    "stolenOthers": "{{name}}, {{victim}} kişisinden bir kart çaldı.",
+    "listSeparator": ", "
+  }
+}

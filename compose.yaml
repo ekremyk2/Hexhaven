@@ -1,0 +1,23 @@
+# T-503 — local/LAN/VPS single-service compose file (docs/09-runbook.md walks through this).
+#
+#   docker compose up --build            # open server (no password)
+#   LOBBY_PASSWORD=changeme docker compose up --build   # password-gated (D-031)
+#
+# Then open http://localhost:8080 (or http://<machine-ip>:8080 from another device on the LAN).
+
+services:
+  hexhaven:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: hexhaven-web:latest
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      # Empty string == unset == open server (apps/server/src/lobby.ts checkPassword: `!configured`
+      # short-circuits on both undefined and ""). Set LOBBY_PASSWORD in the shell/`.env` to gate.
+      LOBBY_PASSWORD: ${LOBBY_PASSWORD:-}
+    restart: unless-stopped
+    # Inherits the Dockerfile's HEALTHCHECK; compose surfaces it via `docker compose ps`.

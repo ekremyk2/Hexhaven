@@ -1,0 +1,159 @@
+{
+  "app": {
+    "title": "Hexhaven"
+  },
+  "settings": {
+    "title": "Ayarlar"
+  },
+  "connection": {
+    "connecting": "Bağlanıyor…",
+    "open": "Bağlandı",
+    "reconnecting": "Yeniden bağlanıyor…",
+    "closed": "Bağlantı kesildi"
+  },
+  "toast": {
+    "dismiss": "Kapat",
+    "codeLabel": "[{{code}}]"
+  },
+  "home": {
+    "heading": "Hexhaven",
+    "tagline": "3–6 oyuncu için takas ve yerleşim web oyunu.",
+    "hotseatLink": "Sırayla oynama modunu dene"
+  },
+  "language": {
+    "switcherLabel": "Dil",
+    "en": "EN",
+    "tr": "TR",
+    "enName": "İngilizce",
+    "trName": "Türkçe"
+  },
+  "theme": {
+    "switcherLabel": "Tema",
+    "light": "Açık tema",
+    "dark": "Koyu tema",
+    "system": "Sistem teması"
+  },
+  "ui": {
+    "modal": {
+      "close": "Kapat"
+    },
+    "on": "Açık",
+    "off": "Kapalı"
+  },
+  "styleguide": {
+    "heading": "Tasarım sistemi - stil kılavuzu",
+    "tagline": "Her ui/ bileşeni her durumuyla, token paletiyle yan yana (docs/11 §1-§2).",
+    "sections": {
+      "tokens": "Tasarım tokenları",
+      "buttons": "Butonlar",
+      "surfaces": "Kartlar ve paneller",
+      "inputs": "Metin girişleri",
+      "modal": "Modal",
+      "segmented": "Segmentli kontrol",
+      "tooltip": "İpucu",
+      "badges": "Rozetler",
+      "playerChips": "Oyuncu etiketleri",
+      "tabs": "Sekmeler",
+      "meter": "Gösterge",
+      "iconButton": "Simge düğmesi",
+      "statTile": "İstatistik karosu",
+      "panels": "Panel galerisi"
+    },
+    "tokenGroups": {
+      "surfaces": "Yüzeyler ve yazı rengi",
+      "seats": "Oyuncu koltukları",
+      "terrain": "Arazi"
+    },
+    "tokenNames": {
+      "tableA": "--table-a",
+      "tableB": "--table-b",
+      "panel": "--panel",
+      "panelEdge": "--panel-edge",
+      "ink": "--ink",
+      "inkSoft": "--ink-soft",
+      "accent": "--accent",
+      "accentGold": "--accent-gold",
+      "danger": "--danger",
+      "seat0": "--seat-0",
+      "seat1": "--seat-1",
+      "seat2": "--seat-2",
+      "seat3": "--seat-3",
+      "seat4": "--seat-4",
+      "seat5": "--seat-5",
+      "hills": "--t-hills",
+      "forest": "--t-forest",
+      "pasture": "--t-pasture",
+      "fields": "--t-fields",
+      "mountains": "--t-mountains",
+      "desert": "--t-desert"
+    },
+    "buttons": {
+      "primary": "Birincil",
+      "subtle": "İnce",
+      "danger": "Tehlike",
+      "disabled": "Devre dışı"
+    },
+    "surfaces": {
+      "cardBody": "Liste öğeleri için kompakt bir kart yüzeyi.",
+      "panelBody": "Daha büyük bir parşömen panel - yan panel / el tepsisi görünümü."
+    },
+    "inputs": {
+      "label": "Takma ad",
+      "placeholder": "Bir takma ad girin",
+      "errorLabel": "Takma ad (hatalı)",
+      "errorMessage": "Bu takma ad zaten alınmış."
+    },
+    "modal": {
+      "openButton": "Örnek modalı aç",
+      "title": "Örnek modal",
+      "body": "Escape bu modalı kapatır; Tab tuşu içindeki öğeler arasında odağı döndürür."
+    },
+    "segmented": {
+      "ariaLabel": "Örnek segmentli kontrol",
+      "optionA": "Seçenek A",
+      "optionB": "Seçenek B",
+      "optionC": "Seçenek C"
+    },
+    "tooltip": {
+      "trigger": "Üzerine gelin veya odaklanın",
+      "content": "Bu bir ipucudur."
+    },
+    "badges": {
+      "default": "Varsayılan",
+      "gold": "Ödül",
+      "danger": "Uyarı"
+    },
+    "playerChips": {
+      "sample0": "Alice",
+      "sample1": "Bilal",
+      "sample2": "Cem",
+      "sample3": "Derya",
+      "sample4": "Ege",
+      "sample5": "Fatma"
+    },
+    "tabs": {
+      "ariaLabel": "Örnek sekmeler",
+      "tab1": "Genel bakış",
+      "tab2": "Ayrıntılar",
+      "tab3": "Geçmiş"
+    },
+    "meter": {
+      "label": "Örnek parça"
+    },
+    "iconButton": {
+      "sample1": "Yap",
+      "sample2": "Taşı",
+      "sample3": "İptal"
+    },
+    "statTile": {
+      "sample": "12 örnek"
+    },
+    "panels": {
+      "citiesKnightsHeading": "Walls & Watchmen + Yardımcılar modifikatörü",
+      "modifiersHeading": "Kart Modları modifikatörü",
+      "viewportToggleLabel": "Önizleme görünümü",
+      "viewportDesktop": "Masaüstü",
+      "viewportMobile": "Mobil (375px)"
+    }
+  }
+}

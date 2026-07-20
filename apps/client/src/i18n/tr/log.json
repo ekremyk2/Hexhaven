@@ -1,0 +1,237 @@
+{
+  "gameStarted": "Oyun başladı!",
+  "setupPlaced": {
+    "settlement": "{{name}} bir köy kurdu.",
+    "road": "{{name}} bir yol yaptı."
+  },
+  "startingResources": "{{name}} {{resources}} aldı.",
+  "diceRolled": "{{name}} {{d1}} + {{d2}} = {{total}} attı.",
+  "production": {
+    "gain": "{{name}} {{resources}} topladı.",
+    "shortage": "Banka sıkıntısı: {{resources}} üretilemedi."
+  },
+  "discardRequired": "{{name}} {{amount}} kart atmalı.",
+  "discarded": {
+    "self": "{{resources}} attın.",
+    "other": "{{name}} {{count}} kart attı."
+  },
+  "robberMoved": "{{name}} hırsızı taşıdı.",
+  "stolen": {
+    "actor": "{{from}} adlı oyuncudan {{resource}} çaldın.",
+    "viewer": "{{name}} senden {{resource}} çaldı.",
+    "other": "{{name}}, {{from}} adlı oyuncudan bir kart çaldı."
+  },
+  "built": {
+    "road": "{{name}} yol inşa etti.",
+    "settlement": "{{name}} bir köy inşa etti.",
+    "city": "{{name}} bir şehir inşa etti."
+  },
+  "shipMoved": "{{name}} bir gemi taşıdı.",
+  "shipBuilt": "{{name}} bir gemi inşa etti.",
+  "pirateMoved": "{{name}} korsanı taşıdı.",
+  "goldChosen": "{{name}} altın tarlasından {{resources}} aldı.",
+  "islandSettled": "{{name}} yeni bir adaya yerleşti (+{{vp}} ZP).",
+  "devBought": {
+    "self": "{{card}} satın aldın.",
+    "other": "{{name}} bir gelişme kartı satın aldı."
+  },
+  "devPlayed": {
+    "knight": "{{name}} bir Şövalye kartı oynadı.",
+    "roadBuilding": "{{name}} Yol Yapımı kartı oynadı.",
+    "yearOfPlenty": "{{name}} Bolluk Yılı kartı oynadı.",
+    "monopoly": "{{name}} Tekel kartı oynadı.",
+    "victoryPoint": "{{name}} bir Zafer Puanı kartı açtı.",
+    "bumperCrop": "{{name}} Bereketli Hasat kartı oynadı.",
+    "merchantsBoon": "{{name}} Tüccar Lütfu kartı oynadı.",
+    "roadToll": "{{name}} Yol Vergisi kartı oynadı.",
+    "trailblazer": "{{name}} Öncü kartı oynadı.",
+    "windfall": "{{name}} Beklenmedik Kazanç kartı oynadı.",
+    "highwayman": "{{name}} Eşkıya kartı oynadı.",
+    "rideByNight": "{{name}} Gece Yolculuğu kartını oynadı.",
+    "nightOfPlenty": "{{name}} Bolluk Gecesi kartını oynadı.",
+    "monorail": "{{name}} Monoray kartını oynadı.",
+    "megaKnight": "{{name}} Mega Şövalye kartını oynadı.",
+    "superSettle": "{{name}} Süper Yerleşim kartını oynadı."
+  },
+  "monopolyResolved": "{{name}} Tekel kartıyla {{resources}} topladı.",
+  "bankTraded": "{{name}} bankaya {{gave}} verip karşılığında {{got}} aldı.",
+  "tradeOffered": "{{name}} {{receive}} karşılığında {{give}} teklif etti.",
+  "tradeResponded": {
+    "accepted": "{{name}} takası kabul etti.",
+    "declined": "{{name}} takası reddetti."
+  },
+  "tradeCompleted": "{{name}}, {{withName}} adlı oyuncuyla {{receive}} karşılığında {{give}} takas etti.",
+  "tradeCancelled": "Takas teklifi iptal edildi.",
+  "awardMoved": {
+    "longestRoad": "{{name}} En Uzun Yol ödülünü aldı ({{value}} yol).",
+    "longestRoadCleared": "En Uzun Yol artık kimsede değil.",
+    "largestArmy": "{{name}} En Büyük Ordu ödülünü aldı ({{value}} şövalye).",
+    "largestArmyCleared": "En Büyük Ordu artık kimsede değil.",
+    "harbormaster": "{{name}} Liman Reisi ödülünü aldı ({{value}} liman puanı).",
+    "harbormasterCleared": "Liman Reisi artık kimsede değil."
+  },
+  "turnEnded": "{{name}} turunu bitirdi — sıra {{nextName}} adlı oyuncuda.",
+  "specialBuildStarted": "Özel inşa — {{name}} inşa edebilir.",
+  "specialBuildPassed": "{{name}} özel inşayı pas geçti.",
+  "pairedBuildStarted": "Eşli tur — {{name}} kısmi tur oynuyor.",
+  "pairedBuildEnded": "{{name}} eşli turunu bitirdi.",
+  "gameWon": "{{name}} {{vp}} Zafer Puanıyla oyunu kazandı!",
+  "commodityProduction": {
+    "gain": "{{name}} lüks eşya üretti.",
+    "shortage": "Lüks eşya sıkıntısı: hiçbir şey üretilemedi."
+  },
+  "aqueductGranted": "{{name}} Su Kemeri ile {{resource}} aldı.",
+  "improvementBuilt": "{{name}} bir şehir gelişimini ilerletti.",
+  "metropolisPlaced": "{{name}} bir Büyükşehir inşa etti.",
+  "metropolisCaptured": "{{name}}, {{fromName}} adlı oyuncudan bir Büyükşehir ele geçirdi.",
+  "commodityTraded": "{{name}} bankayla lüks eşya takas etti.",
+  "eventDieRolled": "{{name}} olay zarını attı.",
+  "barbarianAdvanced": "Barbar gemisi ilerledi ({{position}}).",
+  "progressGateOpened": "Bir gelişim kartı kapısı açıldı.",
+  "barbarianAttackResolved": {
+    "defended": "Hexhaven barbarlara karşı savunuldu.",
+    "defeated": "Barbarlar Hexhaven'ı yağmaladı!"
+  },
+  "knightBuilt": "{{name}} bir şövalye inşa etti.",
+  "knightActivated": "{{name}} bir şövalyeyi aktif etti.",
+  "knightPromoted": "{{name}} bir şövalyeyi terfi ettirdi.",
+  "knightMoved": "{{name}} bir şövalyeyi hareket ettirdi.",
+  "knightDisplaced": "{{name}} bir şövalyeyi yerinden etti.",
+  "progressCardDrawn": {
+    "self": "Bir gelişim kartı çektin.",
+    "other": "{{name}} bir gelişim kartı çekti."
+  },
+  "progressCardRevealed": "{{name}} +1 ZP'lik bir gelişim kartını açtı.",
+  "progressCardDiscarded": "{{name}} bir gelişim kartı attı.",
+  "progressCardPlayed": "{{name}} bir gelişim kartı oynadı.",
+  "progressCardsTransferred": "{{name}}, {{fromName}} adlı oyuncudan kart aldı.",
+  "progressCardTaken": "{{name}}, {{fromName}} adlı oyuncudan bir gelişim kartı aldı.",
+  "merchantPlaced": "{{name}} tüccarı yerleştirdi.",
+  "cityWallBuilt": "{{name}} bir şehir suru inşa etti.",
+  "knightRemoved": "{{name}} adlı oyuncunun şövalyesi kaldırıldı.",
+  "roadRemoved": "{{name}} adlı oyuncunun yolu kaldırıldı.",
+  "numberTokensSwapped": "İki sayı jetonu yer değiştirdi.",
+  "commodityMonopolyResolved": "{{name}} Lüks Eşya Tekeliyle lüks eşya topladı.",
+  "resource": {
+    "brick_one": "{{count}} tuğla",
+    "brick_other": "{{count}} tuğla",
+    "lumber_one": "{{count}} kereste",
+    "lumber_other": "{{count}} kereste",
+    "wool_one": "{{count}} koyun",
+    "wool_other": "{{count}} koyun",
+    "grain_one": "{{count}} buğday",
+    "grain_other": "{{count}} buğday",
+    "ore_one": "{{count}} maden",
+    "ore_other": "{{count}} maden"
+  },
+  "resourceName": {
+    "brick": "tuğla",
+    "lumber": "kereste",
+    "wool": "koyun",
+    "grain": "buğday",
+    "ore": "maden"
+  },
+  "devCard": {
+    "knight": "Şövalye",
+    "roadBuilding": "Yol Yapımı",
+    "yearOfPlenty": "Bolluk Yılı",
+    "monopoly": "Tekel",
+    "victoryPoint": "Zafer Puanı",
+    "bumperCrop": "Bereketli Hasat",
+    "merchantsBoon": "Tüccar Lütfu",
+    "roadToll": "Yol Vergisi",
+    "trailblazer": "Öncü",
+    "windfall": "Beklenmedik Kazanç",
+    "highwayman": "Eşkıya"
+  },
+  "helperDealt": "{{name}} yeni bir Yardımcı kart aldı.",
+  "helperUsed": "{{name}} bir Yardımcı kart kullandı.",
+  "helperSwapped": "{{name}} Yardımcı kartını değiştirdi.",
+  "eventCardDrawn": "{{name}} bir olay kartı çekti: {{total}}.",
+  "hexPieceMoved": {
+    "wizard": "{{name}} Büyücü'yü taşıdı.",
+    "trader": "{{name}} Tüccar'ı taşıdı.",
+    "robinHood": "{{name}} Robin Hood'u taşıdı.",
+    "banker": "{{name}} Bankacı'yı taşıdı.",
+    "poaching": "{{name}} Avlanma parçasını taşıdı."
+  },
+  "hexPieceProduction": {
+    "wizard": "Büyücü, {{name}} için {{resources}} verdi.",
+    "trader": "Tüccar, {{name}} için {{resources}} verdi.",
+    "banker": "Bankacı, {{name}} için {{resources}} verdi.",
+    "poaching": "Avlanma, {{name}} için {{resources}} verdi."
+  },
+  "fishProduced": "{{name}} {{count}} balık tuttu.",
+  "oldBootAwarded": "{{name}} Eski Çizme'yi aldı.",
+  "oldBootPassed": "{{name}}, Eski Çizme'yi {{target}}'a verdi.",
+  "fishExchanged": {
+    "removeRobber": "{{name}} haydutu kaldırmak için balık harcadı.",
+    "steal": "{{name}} bir kaynak çalmak için balık harcadı.",
+    "bankResource": "{{name}} bankadan bir kaynak almak için balık harcadı.",
+    "freeRoad": "{{name}} bedava bir yol için balık harcadı.",
+    "devCard": "{{name}} bir gelişim kartı için balık harcadı."
+  },
+  "bridgeBuilt": "{{name}} bir köprü inşa etti.",
+  "coinsAwarded": {
+    "shore": "{{name}} nehir kenarında {{count}} altın kazandı.",
+    "bridge": "{{name}} köprü için {{count}} altın kazandı."
+  },
+  "coinsTraded": "{{name}} {{gave}} altını {{resources}} ile takas etti.",
+  "caravanVoteOpened": "{{name}}'in inşası bir kervan oylaması başlattı.",
+  "caravanVoteCast": "{{name}} kervan oylamasında {{count}} kart teklif etti.",
+  "caravanVoteResolved": {
+    "winner": "{{name}} kervan oylamasını kazandı.",
+    "none": "Kervan oylaması teklifsiz bitti — deve yerleştirilmedi."
+  },
+  "camelPlaced": "{{name}} bir deve yerleştirdi.",
+  "tbKnightRecruited": "{{name}} bir şövalye topladı.",
+  "tbKnightMoved": "{{name}} bir şövalyeyi hareket ettirdi.",
+  "tbBarbariansAdvanced": "Barbarlar ilerledi ({{count}} tanesi hareket etti).",
+  "tbBarbarianCombatResolved": "Şövalyeler {{count}} barbarı püskürttü.",
+  "tbBarbarianPillaged": {
+    "city": "Barbarlar {{name}}'in şehrini yağmalayıp kasabaya düşürdü.",
+    "settlement": "Barbarlar {{name}}'in kasabasını yağmalayıp yok etti."
+  },
+  "tbBarbarianDispersed": "Bir barbar merkeze ulaşıp dağıldı.",
+  "tbWagonPlaced": "{{name}} bir kervan arabası yerleştirdi.",
+  "tbWagonMoved": "{{name}} bir kervan arabasını hareket ettirdi.",
+  "tbCommodityProduced": "{{name}} emtia üretti.",
+  "tbDeliveryCompleted": {
+    "quarry": "{{name}} Taş Ocağı'na teslimat yaptı.",
+    "glassworks": "{{name}} Cam Atölyesi'ne teslimat yaptı.",
+    "castle": "{{name}} Kale'ye teslimat yaptı."
+  },
+  "epShipBuilt": "{{name}} bir gemi inşa etti.",
+  "epShipMoved": "{{name}} bir gemiyi hareket ettirdi.",
+  "epCargoLoaded": "{{name}} bir gemiye kargo yükledi.",
+  "epCargoUnloaded": "{{name}} bir gemiden kargo indirdi.",
+  "epTileRevealed": "{{name}}'in gemisi yeni bir altıgen keşfetti.",
+  "epSettlerBuilt": "{{name}} bir yerleşimci inşa etti.",
+  "epSettlementFounded": "{{name}} yeni bir köy kurdu.",
+  "epHarborSettlementBuilt": "{{name}} bir liman köyü inşa etti.",
+  "epCrewBuilt": "{{name}} bir mürettebat inşa etti.",
+  "epCrewPlacedOnLair": "{{name}} bir korsan inine mürettebat indirdi.",
+  "epLairCaptured": "Bir korsan ini ele geçirildi!",
+  "epGoldCompensated": "Hiçbir şey üretmeyen oyuncular altın aldı.",
+  "epGoldShipped": "{{name}} bir zafer puanı için altın gönderdi.",
+  "epFishHauled": "{{name}}'in gemisi balık topladı.",
+  "epFishDelivered": "{{name}} konseye balık teslim etti.",
+  "epSpiceTraded": "{{name}} bir köyde baharat için takas yaptı.",
+  "epSpiceDelivered": "{{name}} konseye baharat teslim etti.",
+  "turnSeparator": "— Tur {{turnNumber}}, {{name}} —",
+  "seatFallback": "Koltuk {{n}}",
+  "empty": "Henüz olay yok.",
+  "jumpToLatest": "En yeniye git",
+  "tabs": {
+    "groupLabel": "Günlük ve sohbet sekmeleri",
+    "log": "Günlük",
+    "chat": "Sohbet",
+    "unread": "Okunmamış sohbet mesajları"
+  },
+  "chat": {
+    "empty": "Henüz mesaj yok.",
+    "placeholder": "Mesaj…",
+    "inputLabel": "Sohbet mesajı",
+    "send": "Gönder"
+  }
+}

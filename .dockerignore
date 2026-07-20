@@ -1,0 +1,40 @@
+# Build context excludes for the Docker build (T-503, docs/09-runbook.md).
+# Everything here is rebuilt fresh inside the image (fresh `pnpm install` + `pnpm -w build`),
+# so host-side node_modules/dist/tsbuildinfo must never leak into the context.
+
+**/node_modules
+**/dist
+**/*.tsbuildinfo
+.git
+.gitignore
+.gitattributes
+.editorconfig
+
+# Docs, tasks, planning corpus — PM-owned, no runtime value in the image.
+docs
+README.md
+CLAUDE.md
+AGENTS.md
+*.md
+
+# Tests / e2e — not needed to run the built server.
+e2e
+coverage
+.playwright
+playwright-report
+
+# Editor / CI / local tooling noise.
+.vscode
+.idea
+.claude
+.env
+.env.*
+npm-debug.log*
+
+# Deployment files themselves don't need to be in the build context they produce.
+Dockerfile
+.dockerignore
+compose.yaml
+docker-compose.yaml
+fly.toml
+Caddyfile

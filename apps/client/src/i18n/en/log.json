@@ -1,0 +1,237 @@
+{
+  "gameStarted": "The game has started!",
+  "setupPlaced": {
+    "settlement": "{{name}} placed a settlement.",
+    "road": "{{name}} placed a road."
+  },
+  "startingResources": "{{name}} received {{resources}}.",
+  "diceRolled": "{{name}} rolled {{d1}} + {{d2}} = {{total}}.",
+  "production": {
+    "gain": "{{name}} collected {{resources}}.",
+    "shortage": "Bank shortage: no {{resources}} produced."
+  },
+  "discardRequired": "{{name}} must discard {{amount}} cards.",
+  "discarded": {
+    "self": "You discarded {{resources}}.",
+    "other": "{{name}} discarded {{count}} cards."
+  },
+  "robberMoved": "{{name}} moved the robber.",
+  "stolen": {
+    "actor": "You stole {{resource}} from {{from}}.",
+    "viewer": "{{name}} stole {{resource}} from you.",
+    "other": "{{name}} stole a card from {{from}}."
+  },
+  "built": {
+    "road": "{{name}} built a road.",
+    "settlement": "{{name}} built a settlement.",
+    "city": "{{name}} built a city."
+  },
+  "shipBuilt": "{{name}} built a ship.",
+  "shipMoved": "{{name}} moved a ship.",
+  "pirateMoved": "{{name}} moved the pirate.",
+  "goldChosen": "{{name}} took {{resources}} from a gold field.",
+  "islandSettled": "{{name}} settled a new island (+{{vp}} VP).",
+  "devBought": {
+    "self": "You bought {{card}}.",
+    "other": "{{name}} bought a development card."
+  },
+  "devPlayed": {
+    "knight": "{{name}} played a Knight.",
+    "roadBuilding": "{{name}} played Road Building.",
+    "yearOfPlenty": "{{name}} played Year of Plenty.",
+    "monopoly": "{{name}} played Monopoly.",
+    "victoryPoint": "{{name}} revealed a Victory Point card.",
+    "bumperCrop": "{{name}} played Bumper Crop.",
+    "merchantsBoon": "{{name}} played Merchant's Boon.",
+    "roadToll": "{{name}} played Road Toll.",
+    "trailblazer": "{{name}} played Trailblazer.",
+    "windfall": "{{name}} played Windfall.",
+    "highwayman": "{{name}} played Highwayman.",
+    "rideByNight": "{{name}} played Ride by Night.",
+    "nightOfPlenty": "{{name}} played Night of Plenty.",
+    "monorail": "{{name}} played Monorail.",
+    "megaKnight": "{{name}} played Mega Knight.",
+    "superSettle": "{{name}} played Super-Settle."
+  },
+  "monopolyResolved": "{{name}}'s Monopoly collected {{resources}}.",
+  "bankTraded": "{{name}} traded {{gave}} for {{got}} with the bank.",
+  "tradeOffered": "{{name}} offered {{give}} for {{receive}}.",
+  "tradeResponded": {
+    "accepted": "{{name}} accepted the trade.",
+    "declined": "{{name}} declined the trade."
+  },
+  "tradeCompleted": "{{name}} traded {{give}} to {{withName}} for {{receive}}.",
+  "tradeCancelled": "The trade offer was cancelled.",
+  "awardMoved": {
+    "longestRoad": "{{name}} took Longest Road ({{value}} roads).",
+    "longestRoadCleared": "Longest Road is no longer held.",
+    "largestArmy": "{{name}} took Largest Army ({{value}} knights).",
+    "largestArmyCleared": "Largest Army is no longer held.",
+    "harbormaster": "{{name}} took Harbormaster ({{value}} harbor points).",
+    "harbormasterCleared": "Harbormaster is no longer held."
+  },
+  "turnEnded": "{{name}} ended their turn — {{nextName}} is up.",
+  "specialBuildStarted": "Special building — {{name}} may build.",
+  "specialBuildPassed": "{{name}} passed on special building.",
+  "pairedBuildStarted": "Paired turn — {{name}} takes a partial turn.",
+  "pairedBuildEnded": "{{name}} ended their paired turn.",
+  "gameWon": "{{name}} wins with {{vp}} VP!",
+  "commodityProduction": {
+    "gain": "{{name}} produced commodities.",
+    "shortage": "Commodity shortage: none produced."
+  },
+  "aqueductGranted": "{{name}} used the Aqueduct to take {{resource}}.",
+  "improvementBuilt": "{{name}} advanced a city improvement.",
+  "metropolisPlaced": "{{name}} built a Metropolis.",
+  "metropolisCaptured": "{{name}} captured a Metropolis from {{fromName}}.",
+  "commodityTraded": "{{name}} traded commodities with the bank.",
+  "eventDieRolled": "{{name}} rolled the event die.",
+  "barbarianAdvanced": "The barbarian ship advanced ({{position}}).",
+  "progressGateOpened": "A progress-card gate opened.",
+  "barbarianAttackResolved": {
+    "defended": "Hexhaven was defended from the barbarians.",
+    "defeated": "The barbarians pillaged Hexhaven!"
+  },
+  "knightBuilt": "{{name}} built a knight.",
+  "knightActivated": "{{name}} activated a knight.",
+  "knightPromoted": "{{name}} promoted a knight.",
+  "knightMoved": "{{name}} moved a knight.",
+  "knightDisplaced": "{{name}} displaced a knight.",
+  "progressCardDrawn": {
+    "self": "You drew a progress card.",
+    "other": "{{name}} drew a progress card."
+  },
+  "progressCardRevealed": "{{name}} revealed a +1 VP progress card.",
+  "progressCardDiscarded": "{{name}} discarded a progress card.",
+  "progressCardPlayed": "{{name}} played a progress card.",
+  "progressCardsTransferred": "{{name}} received cards from {{fromName}}.",
+  "progressCardTaken": "{{name}} took a progress card from {{fromName}}.",
+  "merchantPlaced": "{{name}} placed the merchant.",
+  "cityWallBuilt": "{{name}} built a city wall.",
+  "knightRemoved": "{{name}}'s knight was removed.",
+  "roadRemoved": "{{name}}'s road was removed.",
+  "numberTokensSwapped": "Two number tokens were swapped.",
+  "commodityMonopolyResolved": "{{name}}'s Commodity Monopoly collected commodities.",
+  "resource": {
+    "brick_one": "{{count}} brick",
+    "brick_other": "{{count}} bricks",
+    "lumber_one": "{{count}} lumber",
+    "lumber_other": "{{count}} lumber",
+    "wool_one": "{{count}} wool",
+    "wool_other": "{{count}} wool",
+    "grain_one": "{{count}} grain",
+    "grain_other": "{{count}} grain",
+    "ore_one": "{{count}} ore",
+    "ore_other": "{{count}} ore"
+  },
+  "resourceName": {
+    "brick": "brick",
+    "lumber": "lumber",
+    "wool": "wool",
+    "grain": "grain",
+    "ore": "ore"
+  },
+  "devCard": {
+    "knight": "Knight",
+    "roadBuilding": "Road Building",
+    "yearOfPlenty": "Year of Plenty",
+    "monopoly": "Monopoly",
+    "victoryPoint": "Victory Point",
+    "bumperCrop": "Bumper Crop",
+    "merchantsBoon": "Merchant's Boon",
+    "roadToll": "Road Toll",
+    "trailblazer": "Trailblazer",
+    "windfall": "Windfall",
+    "highwayman": "Highwayman"
+  },
+  "helperDealt": "{{name}} was dealt a new Helper.",
+  "helperUsed": "{{name}} used a Helper.",
+  "helperSwapped": "{{name}} swapped their Helper.",
+  "eventCardDrawn": "{{name}} drew an event card: {{total}}.",
+  "hexPieceMoved": {
+    "wizard": "{{name}} moved the Wizard.",
+    "trader": "{{name}} moved the Trader.",
+    "robinHood": "{{name}} moved Robin Hood.",
+    "banker": "{{name}} moved the Banker.",
+    "poaching": "{{name}} moved the Poaching piece."
+  },
+  "hexPieceProduction": {
+    "wizard": "The Wizard granted {{name}} {{resources}}.",
+    "trader": "The Trader granted {{name}} {{resources}}.",
+    "banker": "The Banker granted {{name}} {{resources}}.",
+    "poaching": "Poaching granted {{name}} {{resources}}."
+  },
+  "fishProduced": "{{name}} caught {{count}} fish.",
+  "oldBootAwarded": "{{name}} received the Old Boot.",
+  "oldBootPassed": "{{name}} passed the Old Boot to {{target}}.",
+  "fishExchanged": {
+    "removeRobber": "{{name}} exchanged fish to remove the robber.",
+    "steal": "{{name}} exchanged fish to steal a resource.",
+    "bankResource": "{{name}} exchanged fish for a resource from the bank.",
+    "freeRoad": "{{name}} exchanged fish for a free road.",
+    "devCard": "{{name}} exchanged fish for a development card."
+  },
+  "bridgeBuilt": "{{name}} built a bridge.",
+  "coinsAwarded": {
+    "shore": "{{name}} earned {{count}} coin(s) along the river.",
+    "bridge": "{{name}} earned {{count}} coin(s) for the bridge."
+  },
+  "coinsTraded": "{{name}} traded {{gave}} coins for {{resources}}.",
+  "caravanVoteOpened": "{{name}}'s build opened a caravan vote.",
+  "caravanVoteCast": "{{name}} bid {{count}} card(s) in the caravan vote.",
+  "caravanVoteResolved": {
+    "winner": "{{name}} won the caravan vote.",
+    "none": "The caravan vote ended with no bids — no camel placed."
+  },
+  "camelPlaced": "{{name}} placed a camel.",
+  "tbKnightRecruited": "{{name}} recruited a knight.",
+  "tbKnightMoved": "{{name}} moved a knight.",
+  "tbBarbariansAdvanced": "The barbarians advanced ({{count}} on the move).",
+  "tbBarbarianCombatResolved": "Knights drove off {{count}} barbarian(s).",
+  "tbBarbarianPillaged": {
+    "city": "Barbarians pillaged {{name}}'s city down to a settlement.",
+    "settlement": "Barbarians pillaged and removed {{name}}'s settlement."
+  },
+  "tbBarbarianDispersed": "A barbarian reached the center and dispersed.",
+  "tbWagonPlaced": "{{name}} placed a wagon.",
+  "tbWagonMoved": "{{name}} moved a wagon.",
+  "tbCommodityProduced": "{{name}} produced commodities.",
+  "tbDeliveryCompleted": {
+    "quarry": "{{name}} delivered to the Quarry.",
+    "glassworks": "{{name}} delivered to the Glassworks.",
+    "castle": "{{name}} delivered to the Castle."
+  },
+  "epShipBuilt": "{{name}} built a ship.",
+  "epShipMoved": "{{name}} moved a ship.",
+  "epCargoLoaded": "{{name}} loaded cargo onto a ship.",
+  "epCargoUnloaded": "{{name}} unloaded cargo from a ship.",
+  "epTileRevealed": "{{name}}'s ship revealed a new hex.",
+  "epSettlerBuilt": "{{name}} built a settler.",
+  "epSettlementFounded": "{{name}} founded a new settlement.",
+  "epHarborSettlementBuilt": "{{name}} built a harbor settlement.",
+  "epCrewBuilt": "{{name}} built a crew.",
+  "epCrewPlacedOnLair": "{{name}} landed a crew on a pirate lair.",
+  "epLairCaptured": "A pirate lair was captured!",
+  "epGoldCompensated": "Players who produced nothing received gold.",
+  "epGoldShipped": "{{name}} shipped gold for a victory point.",
+  "epFishHauled": "{{name}}'s ship hauled in fish.",
+  "epFishDelivered": "{{name}} delivered fish to the council.",
+  "epSpiceTraded": "{{name}} traded for spice at a village.",
+  "epSpiceDelivered": "{{name}} delivered spice to the council.",
+  "turnSeparator": "— Turn {{turnNumber}}, {{name}} —",
+  "seatFallback": "Seat {{n}}",
+  "empty": "No events yet.",
+  "jumpToLatest": "Jump to latest",
+  "tabs": {
+    "groupLabel": "Log and chat tabs",
+    "log": "Log",
+    "chat": "Chat",
+    "unread": "Unread chat messages"
+  },
+  "chat": {
+    "empty": "No messages yet.",
+    "placeholder": "Message…",
+    "inputLabel": "Chat message",
+    "send": "Send"
+  }
+}

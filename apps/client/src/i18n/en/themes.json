@@ -1,0 +1,37 @@
+{
+  "switcherLabel": "Board theme",
+  "theme": {
+    "classic": {
+      "name": "Classic",
+      "description": "The traditional Hexhaven look — no reskin, same names and art."
+    },
+    "pirates": {
+      "name": "Pirate's Cove",
+      "description": "A swashbuckling reskin: the robber becomes a buccaneer, settlements become outposts."
+    },
+    "harvest": {
+      "name": "Harvest Festival",
+      "description": "A warm harvest reskin: the robber becomes a wandering scarecrow."
+    }
+  },
+  "piece": {
+    "classic": {
+      "robber": "Robber",
+      "settlement": "Settlement",
+      "city": "City",
+      "road": "Road"
+    },
+    "pirates": {
+      "robber": "Buccaneer",
+      "settlement": "Outpost",
+      "city": "Stronghold",
+      "road": "Trail"
+    },
+    "harvest": {
+      "robber": "Scarecrow",
+      "settlement": "Homestead",
+      "city": "Manor",
+      "road": "Lane"
+    }
+  }
+}

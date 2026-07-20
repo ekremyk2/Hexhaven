@@ -1,0 +1,22 @@
+{
+  "name": "@hexhaven/server",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@hexhaven/shared": "workspace:*",
+    "@hexhaven/engine": "workspace:*",
+    "@fastify/static": "9.3.0",
+    "fastify": "5.10.0",
+    "nanoid": "5.1.16",
+    "pino": "10.3.1",
+    "ws": "8.21.0"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.1",
+    "tsx": "4.17.0"
+  }
+}

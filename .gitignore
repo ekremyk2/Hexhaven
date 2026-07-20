@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+**/node_modules
+
+# Build output
+dist/
+**/dist
+*.tsbuildinfo
+
+# Test / coverage / e2e
+coverage/
+playwright/
+.playwright/
+playwright-report/
+test-results/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor / OS cruft
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Local Claude Code config & transient agent worktrees (not for the shared repo)
+.claude/
+
+# Internal planning & AI-session instructions — kept local, not published
+docs/
+CLAUDE.md
+AGENTS.md

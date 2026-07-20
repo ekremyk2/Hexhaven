@@ -1,0 +1,45 @@
+{
+  "trigger": "Trade",
+  "title": "Trade",
+  "tabs": {
+    "ariaLabel": "Trade type",
+    "bank": "Bank",
+    "domestic": "Players"
+  },
+  "bank": {
+    "giveLabel": "Give",
+    "receiveLabel": "Receive",
+    "rate": "{{rate}}:1",
+    "empty": "Bank empty",
+    "preview": "Give {{give}} → get {{receive}}",
+    "confirm": "Trade with the bank"
+  },
+  "form": {
+    "giveLabel": "You give",
+    "receiveLabel": "You want",
+    "blocked": {
+      "emptyGive": "Pick at least one card to give.",
+      "emptyReceive": "Pick at least one card to ask for.",
+      "overlap": "Give and receive can't share a resource type.",
+      "cantAfford": "You don't hold the cards you're offering."
+    },
+    "send": "Send offer"
+  },
+  "tracker": {
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "completeWith": "Complete with {{name}}",
+    "cancel": "Cancel offer"
+  },
+  "incoming": {
+    "headline": "{{name}} offers a trade",
+    "accept": "Accept",
+    "decline": "Decline",
+    "youAccepted": "You accepted",
+    "youDeclined": "You declined",
+    "youGive": "You give",
+    "youGet": "You get",
+    "cantAccept": "You don't have what they asked for — you can only decline."
+  }
+}

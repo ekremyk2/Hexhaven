@@ -1,0 +1,61 @@
+{
+  "hud": {
+    "title": "Sails & Scoundrels",
+    "goldLine": "Altın: {{count}}",
+    "harborSettlementsLine": "Liman yerleşimleri: {{count}}",
+    "settlerReserveLine": "Stokta yerleşimci: {{count}}"
+  },
+  "reason": {
+    "notYourTurn": "Sıra sende değil",
+    "notMainPhase": "Sadece zar attıktan sonra",
+    "cantAfford": "{{need}} {{unit}} gerekiyor (elinde {{have}} var)",
+    "noLegalTargets": "Şu an geçerli hedef yok",
+    "maxShips": "Zaten gemi limitindesin",
+    "noOwnSettlements": "Yükseltilecek bir yerleşimin yok",
+    "noReserve": "Stokta yok — önce bir tane inşa et",
+    "noShipHere": "Kendi kıyı yapılarından birinde uygun gemi yok",
+    "noHarborSettlement": "Mürettebat inşa etmek için bir liman yerleşimine ihtiyacın var"
+  },
+  "landHo": {
+    "title": "Karaya Çıkış",
+    "buildShip": "Gemi inşa et",
+    "moveShip": "Gemiyi hareket ettir",
+    "moveShipHint": "Bir gemine, ardından varış noktasına tıkla",
+    "buildSettler": "Yerleşimci inşa et",
+    "foundSettlement": "Yerleşim kur",
+    "foundSettlementHint": "Keşfedilmiş karada bir kıyı noktasına tıkla",
+    "upgradeToHarbor": "Liman yerleşimine yükselt",
+    "upgradeToHarborHint": "Yerleşimlerinden birine tıkla",
+    "shipsTitle": "Gemiler",
+    "shipAt": "{{edge}} numaralı kenarda gemi — {{cargo}}",
+    "cargoEmpty": "boş",
+    "cargoSettler": "yerleşimci",
+    "cargoCrew": "mürettebat",
+    "cargoFish": "balık",
+    "cargoSpice": "baharat",
+    "loadSettler": "Yerleşimciyi yükle",
+    "unloadSettler": "Yerleşimciyi indir",
+    "noShips": "Henüz gemi yok — keşfe çıkmak için bir tane inşa et.",
+    "noSettlerReserve": "Stokta yerleşimci yok — önce bir tane inşa et."
+  },
+  "fish": {
+    "title": "Hexhaven İçin Balık",
+    "deliverFish": "Balığı meclise teslim et"
+  },
+  "spice": {
+    "title": "Hexhaven İçin Baharat",
+    "tradeSpice": "Bir köyde baharat için takas yap",
+    "villageAt": "{{hex}} numaralı altıgende köy",
+    "deliverSpice": "Baharatı meclise teslim et"
+  },
+  "pirateLairs": {
+    "title": "Korsan İnleri",
+    "buildCrew": "Mürettebat inşa et",
+    "loadCrew": "Mürettebatı bir gemiye yükle",
+    "placeCrewOnLair": "Mürettebatı bir korsan inine indir",
+    "lairAt": "{{hex}} numaralı altıgende in — {{crews}} mürettebat indirildi"
+  },
+  "gold": {
+    "shipGold": "1 zafer puanı için meclise altın gönder"
+  }
+}

@@ -13,6 +13,9 @@ describe('detectMobileBudget', () => {
     const budget = detectMobileBudget();
     expect(budget.dpr).toEqual([1, 1]);
     expect(budget.shadowMapSize).toBe(512);
+    expect(budget.envResolution).toBe(64);
+    expect(budget.contactShadowResolution).toBe(384);
+    expect(budget.contactShadowSmooth).toBe(false);
   });
 
   it('picks the desktop budget when neither coarse-pointer nor narrow-viewport matches', () => {
@@ -22,6 +25,9 @@ describe('detectMobileBudget', () => {
     const budget = detectMobileBudget();
     expect(budget.dpr).toEqual([1, 2]);
     expect(budget.shadowMapSize).toBe(1536);
+    expect(budget.envResolution).toBe(256);
+    expect(budget.contactShadowResolution).toBe(1024);
+    expect(budget.contactShadowSmooth).toBe(true);
   });
 
   it('picks the mobile budget on a coarse pointer even at desktop width', () => {

@@ -13,10 +13,33 @@ export interface Board3DBudget {
   /** Shadow-map resolution for the one shadow-casting key light. Mobile GPUs pay quadratically for
    *  this — 512 is a third of the desktop 1536 default's fill cost. */
   shadowMapSize: number;
+  /** T-1500: cubemap bake resolution for `<SceneEnvironment>`'s procedural IBL (`Environment`'s
+   *  `resolution` prop) — a one-time bake (`frames={1}`), but still 6 cubemap faces at this size. */
+  envResolution: number;
+  /** T-1500: render-target resolution for `<ContactShadows>`'s soft ground-contact shadow catcher —
+   *  re-rendered every frame (pieces move through the game), so this is the recurring per-frame cost
+   *  the mobile path most needs to shrink, alongside `contactShadowSmooth` below. */
+  contactShadowResolution: number;
+  /** T-1500: `<ContactShadows smooth>` — the extra low-pass blur pass that softens the shadow further
+   *  (`ContactShadows.js` runs it as a SECOND blur pass at 0.4x the main `blur` radius). Cheap on
+   *  desktop; skipped on mobile to cut roughly a third of the shadow catcher's per-frame draw calls. */
+  contactShadowSmooth: boolean;
 }
 
-const DESKTOP_BUDGET: Board3DBudget = { dpr: [1, 2], shadowMapSize: 1536 };
-const MOBILE_BUDGET: Board3DBudget = { dpr: [1, 1], shadowMapSize: 512 };
+const DESKTOP_BUDGET: Board3DBudget = {
+  dpr: [1, 2],
+  shadowMapSize: 1536,
+  envResolution: 256,
+  contactShadowResolution: 1024,
+  contactShadowSmooth: true,
+};
+const MOBILE_BUDGET: Board3DBudget = {
+  dpr: [1, 1],
+  shadowMapSize: 512,
+  envResolution: 64,
+  contactShadowResolution: 384,
+  contactShadowSmooth: false,
+};
 
 /** SSR/test-safe: no `window`/`matchMedia` → the (cheaper-is-safer) mobile budget, never throws. */
 export function detectMobileBudget(): Board3DBudget {

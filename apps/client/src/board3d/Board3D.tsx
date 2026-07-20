@@ -1,12 +1,17 @@
 // <Board3D> — the WebGL 3D board (T-1400+), replacing the flat SVG `<BoardView>` stack when WebGL
 // is available (`Game.tsx` decides which to mount). Stands up the `<Canvas>`, camera +
-// `OrbitControls`, lighting/shadows, the sea, and the island's hex tiles + number tokens; pieces
-// (`<Pieces3D>`), click interaction (`<Interaction3D>`), and expansion overlays mount as `children`.
+// `OrbitControls`, lighting/shadows/environment, the table + sea, and the island's hex tiles +
+// number tokens; pieces (`<Pieces3D>`), click interaction (`<Interaction3D>`), and expansion
+// overlays mount as `children`.
 //
-// Lighting note: no drei `<Environment>` preset — those fetch an HDRI over HTTP at runtime by
-// default, which the task's offline/self-contained constraint rules out. A hemisphere light gives
-// the same "soft sky + ground bounce" read without any network dependency (same reasoning
-// `numberTexture.ts` gives for skipping drei's `<Text>`).
+// Lighting note (T-1500): the scene's image-based lighting comes from `<SceneEnvironment>`, a
+// PROCEDURAL drei `<Environment>` (children-based `Lightformer`s baked into a cubemap locally, no
+// HDRI file, no HTTP fetch — see that file's header for the exact reasoning); the direct
+// ambient/hemisphere/key/fill lights below are tuned DOWN from their T-1404 values to avoid
+// double-brightening now that the environment map itself contributes ambient + specular. Table +
+// sea now sit under a soft `<ContactShadows>` catcher (T-1500 requirement 3) so both "pieces
+// grounded on the board" and "board grounded on the table" read correctly, on top of the existing
+// directional key light's own (harder-edged, larger-scale) shadow map.
 //
 // Defensive rendering note: this task cannot be visually verified in this sandbox (see the task
 // file's "Verification note for the implementer") — every mesh in board3d/** renders `side:
@@ -17,24 +22,27 @@
 // T-1404 perf/polish note: `dpr` is clamped (never renders at more than 2x device pixels — the
 // single biggest fill-rate lever on a retina/4K display) and touch/small-viewport devices get a
 // smaller shadow-map budget (mirrors the flat board's own `InteractionLayer.tsx` "coarse pointer /
-// narrow viewport" mobile-budget convention, `PULSE_CSS`'s comment there). `OrbitControls`'
-// `.reset()` backs a small on-canvas recenter button — cheap (three.js already tracks the controls'
-// original camera position/target for this) and the one camera affordance the task calls out as
-// "if easy".
+// narrow viewport" mobile-budget convention, `PULSE_CSS`'s comment there). T-1500 extends the same
+// `mobileBudget.ts` budget to the new environment bake resolution + contact-shadow catcher.
+// `OrbitControls`' `.reset()` backs a small on-canvas recenter button — cheap (three.js already
+// tracks the controls' original camera position/target for this) and the one camera affordance the
+// task calls out as "if easy".
 import { useEffect, useMemo, useRef, type ElementRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { InstancedMesh } from 'three';
+import { ContactShadows, OrbitControls } from '@react-three/drei';
+import { ACESFilmicToneMapping, InstancedMesh, SRGBColorSpace } from 'three';
 import type { BoardGeometry, GameState, HexId, ScenarioTerrain } from '@hexhaven/shared';
 import { SEA_DEEP } from '../board/palette';
 import { boardWorldExtents, hexWorldCenter } from './coords';
-import { TILE_HEIGHT, TOKEN_HOVER } from './constants';
+import { CONTACT_SHADOW_DEPTH, CONTACT_SHADOW_LIFT, SEA_DEPTH, SEA_MARGIN_FACTOR, TABLE_RIM_GAP, TILE_HEIGHT, TOKEN_HOVER } from './constants';
 import { FogCover } from './FogCover';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
 import { HexTiles } from './HexTiles';
 import { NumberToken3D } from './NumberToken3D';
+import { SceneEnvironment } from './SceneEnvironment';
 import { Sea } from './Sea';
+import { Table } from './Table';
 import { useMobileBudget } from './mobileBudget';
 
 export interface Board3DProps {
@@ -112,25 +120,50 @@ export function Board3D({
         shadows
         dpr={budget.dpr as [number, number]}
         camera={{ position: cameraPosition, fov: fovDeg, near: 1, far: fitDistance * 8 }}
+        gl={{
+          // T-1500 requirement 4: an explicit, graded filmic tone map + correct output colour
+          // space via the renderer's own built-in pipeline (no `@react-three/postprocessing` dep —
+          // that's T-1501). R3F v8 already DEFAULTS to `ACESFilmicToneMapping` + sRGB output once
+          // configured (verified by reading its `Canvas.configure()`: it unconditionally applies
+          // `ACESFilmicToneMapping` unless the `flat` prop is set) — this makes that choice
+          // EXPLICIT rather than relying on an unstated default a future r3f/three upgrade could
+          // silently change, and tunes `toneMappingExposure` up slightly for the "bright, graded,
+          // not flat" premium look the task asks for (ACES over AgX: AgX's stronger desaturation of
+          // bright colours fights a colourful board game's read; ACES's filmic highlight rolloff
+          // still keeps the pieces' saturated colours legible).
+          toneMapping: ACESFilmicToneMapping,
+          toneMappingExposure: 1.15,
+          outputColorSpace: SRGBColorSpace,
+        }}
         className="h-full w-full"
         aria-label="HEXHAVEN 3D board"
       >
         <color attach="background" args={[SEA_DEEP]} />
-        {/* Ambient + hemisphere: soft fill so nothing in shadow reads as pure black; key + fill
-            directional lights below carry the actual modeled sun/sky direction and the shadows. */}
-        <ambientLight intensity={0.45} />
-        <hemisphereLight color={0xbfe0ff} groundColor={0x2f3a42} intensity={0.55} />
-        {/* Key light: casts the board's soft shadows. `shadow-radius` softens the shadow-map edge
-            (PCF blur) so shadows read as soft daylight rather than a hard-edged spotlight cutout;
-            a tight `shadow-camera-*` frustum (sized off the board's own radius, not a guess) keeps
-            the shadow map's limited resolution budget spent on the board, not empty margin. */}
+        {/* Offline image-based lighting (T-1500 requirement 2) — see SceneEnvironment.tsx for why
+            this is the offline-safe branch of drei's <Environment>. Contributes ambient fill +
+            soft specular reflections on every PBR material in the scene, on top of the direct
+            lights below. */}
+        <SceneEnvironment resolution={budget.envResolution} />
+        {/* Ambient + hemisphere: tuned DOWN from T-1404 (0.45/0.55 -> 0.2/0.3) now that
+            `<SceneEnvironment>`'s IBL supplies its own ambient contribution — these stay as a small
+            safety-net fill so nothing in shadow reads as pure black even where the environment
+            bake's contribution is weak. Key + fill directional lights below still carry the actual
+            modeled sun/sky direction and cast the shadows. */}
+        <ambientLight intensity={0.2} />
+        <hemisphereLight color={0xbfe0ff} groundColor={0x2f3a42} intensity={0.3} />
+        {/* Key light: bumped up from T-1404's 1.2 -> 1.4 for the requirement-3 "bright, even key ...
+            not moody" read. Still casts the board's soft shadows: `shadow-radius` softens the
+            shadow-map edge (PCF blur) so shadows read as soft daylight rather than a hard-edged
+            spotlight cutout; a tight `shadow-camera-*` frustum (sized off the board's own radius,
+            not a guess) keeps the shadow map's limited resolution budget spent on the board, not
+            empty margin. */}
         <directionalLight
           position={[
             extents.center.x + fitDistance * 0.35,
             fitDistance * 0.95,
             extents.center.z + fitDistance * 0.25,
           ]}
-          intensity={1.2}
+          intensity={1.4}
           castShadow
           shadow-mapSize-width={budget.shadowMapSize}
           shadow-mapSize-height={budget.shadowMapSize}
@@ -143,16 +176,39 @@ export function Board3D({
           shadow-camera-top={extents.radius * 1.6}
           shadow-camera-bottom={-extents.radius * 1.6}
         />
-        {/* Fill light: a cool, dim opposite-side light so the shadow side of every piece/tile still
-            reads a little colour instead of going flat black — the "bounce light" a real tabletop
-            would get from the room around it. */}
+        {/* Fill light: bumped up from T-1404's 0.25 -> 0.32 for the same "even, bright" re-tune —
+            still a cool, dim opposite-side light so the shadow side of every piece/tile reads a
+            little colour instead of going flat black, the "bounce light" a real tabletop would get
+            from the room around it. */}
         <directionalLight
           position={[-fitDistance * 0.3, fitDistance * 0.35, -fitDistance * 0.2]}
-          intensity={0.25}
+          intensity={0.32}
           color={0xdce8ff}
         />
 
+        <Table geometry={geometry} />
         <Sea geometry={geometry} />
+        {/* Soft ground-contact shadow catcher (T-1500 requirement 3) — sits a hairline above the
+            tabletop's own top surface (`CONTACT_SHADOW_LIFT`, same z-fighting-guard convention as
+            `Table.tsx`'s own offset from the sea) and samples `CONTACT_SHADOW_DEPTH` upward, which
+            comfortably covers the tile prisms + any standing piece well above `TILE_HEIGHT` without
+            needing their exact height. This is what grounds the island block visually onto the
+            table, and softens the piece-onto-tile contact the directional key light's harder-edged
+            shadow map (above) doesn't do on its own. `frames={Infinity}` keeps it live as pieces
+            are placed/moved through the game; the mobile budget shrinks its resolution and skips the
+            second smoothing blur pass (`mobileBudget.ts`) since this is a PER-FRAME re-render, unlike
+            the environment bake's one-time cost. */}
+        <ContactShadows
+          position={[extents.center.x, -(SEA_DEPTH + TABLE_RIM_GAP) + CONTACT_SHADOW_LIFT, extents.center.z]}
+          scale={extents.radius * SEA_MARGIN_FACTOR * 1.05}
+          far={CONTACT_SHADOW_DEPTH}
+          resolution={budget.contactShadowResolution}
+          smooth={budget.contactShadowSmooth}
+          blur={2.6}
+          opacity={0.6}
+          color="#2b1a10"
+          frames={Infinity}
+        />
         <HexTiles board={board} geometry={geometry} hexTerrain={hexTerrain} />
 
         {geometry.hexes.map((hex) => {

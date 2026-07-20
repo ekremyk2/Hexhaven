@@ -10,6 +10,9 @@ import {
 } from '@hexhaven/shared';
 import {
   HEX_SIZE,
+  HEX_INSET,
+  TILE_THICKNESS,
+  SKIRT_DARKEN_AMOUNT,
   SEA,
   SEA_DEEP,
   GOLD,
@@ -24,7 +27,9 @@ import {
   pipCount,
   isRedNumber,
   scenarioTerrainFill,
+  darken,
 } from './palette';
+import { boardProjection, type BoardProjection } from './projection';
 import { RESOURCE_GLYPH } from '../hud/constants';
 
 type BoardState = GameState['board'];
@@ -34,6 +39,18 @@ const MARGIN = 46;
 
 function px(n: number): number {
   return n * S;
+}
+
+type Point = { x: number; y: number };
+
+/** Moves `p` toward `c` by an absolute `dist` px along the segment between them — how each non-sea
+ * hex's top face is pulled in from its true (shared-with-neighbours) vertices (T-1210's per-hex
+ * inset, `HEX_INSET`) so adjacent 3D tiles read as separate raised slabs with a visible seam. */
+function insetToward(p: Point, c: Point, dist: number): Point {
+  const dx = p.x - c.x;
+  const dy = p.y - c.y;
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: p.x - (dx / len) * dist, y: p.y - (dy / len) * dist };
 }
 
 export interface BoardViewProps {
@@ -59,6 +76,11 @@ export interface BoardViewProps {
    *  owns it). Minimal v1 rendering (task T-756); a follow-up may give it its own visual. Empty
    *  outside a live Fog Islands game. */
   seafarersFogHidden?: readonly HexId[];
+  /** T-1210 "3D board": the shared affine tilt (`board/projection.ts`), also threaded through
+   *  `InteractionLayer` so clicks stay pixel-exact on a tilted board. Defaults to the tilted
+   *  projection (the shipped default look — `useBoard3d()` defaults ON too); pass
+   *  `boardProjection(false)` for the flat board, which renders byte-identical to pre-T-1210. */
+  projection?: BoardProjection;
   children?: React.ReactNode;
 }
 
@@ -69,6 +91,7 @@ export function BoardView({
   hiddenNumbers = false,
   epUnexplored = [],
   seafarersFogHidden = [],
+  projection = boardProjection(true),
   children,
 }: BoardViewProps) {
   const vx = (id: number) => {
@@ -76,27 +99,40 @@ export function BoardView({
     if (!v) throw new Error(`BUG: vertex ${id}`);
     return v;
   };
-  const hexCenter = (id: HexId) => {
+  // Raw (pre-tilt) hex centre — every JSX consumer below runs it through `proj`/`project` before
+  // emitting a coordinate; the raw value is what direction/inset math (harbors, skirts) is done in.
+  const hexCenter = (id: HexId): Point => {
     const h = geometry.hexes[id];
     if (!h) throw new Error(`BUG: hex ${id}`);
     return { x: px(h.x), y: px(h.y) };
   };
+  /** Projects a raw px-space point through the board's shared tilt (T-1210). `height` only ever
+   *  matters when `projection.enabled` — the identity projection ignores it, per `projection.ts`. */
+  const project = (p: Point, height?: number) => projection.project(p.x, p.y, height);
   // T-756: the Fog Islands' still-hidden hexes render with the SAME cover as E&P's `unexplored` —
   // union the two sets so one rendering block below covers both (only one is ever non-empty for a
   // given game, since the two expansions never combine, docs/10 §3).
   const epFogHexes = new Set([...epUnexplored, ...seafarersFogHidden]);
 
-  // viewBox from scaled vertex extents.
+  // viewBox from PROJECTED vertex extents (requirement 3) — a tilted board's silhouette isn't the
+  // same rectangle as the flat one, so the box must be recomputed post-projection or the tilted
+  // island would run off the edge / leave lopsided empty margin. `projection.enabled === false` is
+  // the identity map, so this is numerically identical to the pre-T-1210 "scaled vertex extents"
+  // computation in that case (RK-13-style byte-identical guarantee for the flat board).
   let minX = Infinity,
     minY = Infinity,
     maxX = -Infinity,
     maxY = -Infinity;
   for (const v of geometry.vertices) {
-    minX = Math.min(minX, px(v.x));
-    minY = Math.min(minY, px(v.y));
-    maxX = Math.max(maxX, px(v.x));
-    maxY = Math.max(maxY, px(v.y));
+    const p = project({ x: px(v.x), y: px(v.y) });
+    minX = Math.min(minX, p.sx);
+    minY = Math.min(minY, p.sy);
+    maxX = Math.max(maxX, p.sx);
+    maxY = Math.max(maxY, p.sy);
   }
+  // Room for hex skirts hanging TILE_THICKNESS below the frontmost (largest-y) tiles' top faces —
+  // otherwise the nearest row's side walls would be clipped by the viewBox.
+  if (projection.enabled) maxY += TILE_THICKNESS;
   const vbX = minX - MARGIN;
   const vbY = minY - MARGIN;
   const vbW = maxX - minX + MARGIN * 2;
@@ -133,25 +169,37 @@ export function BoardView({
         {geometry.coastEdges.map((eid) => {
           const e = geometry.edges[eid];
           if (!e) return null;
-          const a = vx(e.a),
-            b = vx(e.b);
-          return <line key={`c${eid}`} x1={px(a.x)} y1={px(a.y)} x2={px(b.x)} y2={px(b.y)} />;
+          const a = project({ x: px(vx(e.a).x), y: px(vx(e.a).y) });
+          const b = project({ x: px(vx(e.b).x), y: px(vx(e.b).y) });
+          return <line key={`c${eid}`} x1={a.sx} y1={a.sy} x2={b.sx} y2={b.sy} />;
         })}
       </g>
 
-      {/* Hexes */}
-      {geometry.hexes.map((h) => {
+      {/* Hexes (+ T-1210 skirts). With 3D on, draw back-to-front (ascending raw board-space y) so a
+          nearer tile/skirt paints over the one behind it — requirement 3's depth-order rule. With 3D
+          off this is a no-op re-sort by the identical key React already used (id order == geometry
+          order), so the flat board's DOM stays byte-identical to pre-T-1210. */}
+      {(projection.enabled ? [...geometry.hexes].sort((a, b) => a.y - b.y) : geometry.hexes).map((h) => {
         const tile = board.hexes[h.id];
         if (!tile) return null;
         // Authoritative terrain: the Seafarers scenario map when present (sea/gold live only here,
         // proxied to `desert` in `board.hexes`), else the base tile terrain (base/EXT56 unchanged).
         const terrain: ScenarioTerrain = hexTerrain?.[h.id] ?? tile.terrain;
         const isSea = terrain === 'sea';
-        const pts = h.vertices.map((vid) => {
+        const rawC = hexCenter(h.id);
+        const rawVerts = h.vertices.map((vid) => {
           const v = vx(vid);
-          return `${px(v.x)},${px(v.y)}`;
+          return { x: px(v.x), y: px(v.y) };
         });
-        const c = hexCenter(h.id);
+        // T-1210: every non-sea hex reads as its OWN raised tile — pulled in slightly from its true
+        // (shared-with-neighbours) vertices so adjacent tiles show a seam. Sea stays un-inset (flat,
+        // melts into the backdrop) and this only ever runs with 3D on (flat board ⇒ `rawVerts`
+        // unchanged ⇒ identical polygon to pre-T-1210).
+        const topRawVerts = projection.enabled && !isSea ? rawVerts.map((p) => insetToward(p, rawC, HEX_INSET)) : rawVerts;
+        const topPts = topRawVerts.map((p) => project(p));
+        const pts = topPts.map((p) => `${p.sx},${p.sy}`);
+        const c = project(rawC);
+        const fill = scenarioTerrainFill(terrain);
         return (
           <g
             key={`h${h.id}`}
@@ -164,14 +212,41 @@ export function BoardView({
             data-terrain={terrain}
             data-token={tile.token ?? ''}
           >
+            {/* T-1210 skirts: side walls on this hex's OWN viewer-facing edges (top faces stay
+                coplanar at height 0 — no per-terrain elevation, so T-1211's vertex piece placement
+                doesn't have to account for it). Drawn BEFORE the top face so the top face's fill
+                always paints over its own skirts' top seam. */}
+            {projection.enabled &&
+              !isSea &&
+              topRawVerts.map((aRaw, i) => {
+                const bRaw = topRawVerts[(i + 1) % topRawVerts.length]!;
+                const aTop = topPts[i]!;
+                const bTop = topPts[(i + 1) % topPts.length]!;
+                // Viewer-facing = this edge's midpoint projects nearer the viewer (larger sy) than
+                // the hex's own centre — the "lower half" of the tile in screen space.
+                const isFront = (aTop.sy + bTop.sy) / 2 > c.sy;
+                if (!isFront) return null;
+                const aBot = project(aRaw, -TILE_THICKNESS);
+                const bBot = project(bRaw, -TILE_THICKNESS);
+                return (
+                  <polygon
+                    key={`sk${h.id}-${i}`}
+                    data-testid={`hex-skirt-${h.id}`}
+                    points={`${aTop.sx},${aTop.sy} ${bTop.sx},${bTop.sy} ${bBot.sx},${bBot.sy} ${aBot.sx},${aBot.sy}`}
+                    fill={darken(fill, SKIRT_DARKEN_AMOUNT)}
+                    stroke="#00000030"
+                    strokeWidth={1}
+                  />
+                );
+              })}
             <polygon
               points={pts.join(' ')}
-              fill={scenarioTerrainFill(terrain)}
+              fill={fill}
               // Sea hexes carry no outline so they melt into the ocean backdrop (docs/11 §4).
               stroke={isSea ? 'none' : '#00000022'}
               strokeWidth={2}
             />
-            <TerrainMotif terrain={terrain} cx={c.x} cy={c.y} />
+            <TerrainMotif terrain={terrain} cx={c.sx} cy={c.sy} />
             {/* inner bevel highlight (skipped on sea so the tile edge stays invisible) */}
             {!isSea && (
               <polygon
@@ -179,7 +254,7 @@ export function BoardView({
                 fill="none"
                 stroke="#ffffff30"
                 strokeWidth={1.5}
-                transform={`translate(${c.x} ${c.y}) scale(0.9) translate(${-c.x} ${-c.y})`}
+                transform={`translate(${c.sx} ${c.sy}) scale(0.9) translate(${-c.sx} ${-c.sy})`}
               />
             )}
           </g>
@@ -190,18 +265,18 @@ export function BoardView({
       {geometry.hexes.map((h) => {
         const tile = board.hexes[h.id];
         if (!tile) return null;
-        const c = hexCenter(h.id);
+        const c = project(hexCenter(h.id));
         const robbed = board.robber === h.id;
         if (hiddenNumbers) {
           // Blind placement (hiddenSetupNumbers): tokens were stripped in redaction, so decide from
           // terrain which hexes WILL carry a number (everything that isn't desert/sea) and show a "?".
           const terrain = hexTerrain?.[h.id] ?? tile.terrain;
           if (terrain === 'desert' || terrain === 'sea') return null;
-          return <NumberToken key={`t${h.id}`} cx={c.x} cy={c.y} hidden dimmed={robbed} />;
+          return <NumberToken key={`t${h.id}`} cx={c.sx} cy={c.sy} hidden dimmed={robbed} />;
         }
         if (tile.token == null) return null;
         return (
-          <NumberToken key={`t${h.id}`} cx={c.x} cy={c.y} value={tile.token} dimmed={robbed} />
+          <NumberToken key={`t${h.id}`} cx={c.sx} cy={c.sy} value={tile.token} dimmed={robbed} />
         );
       })}
 
@@ -216,24 +291,28 @@ export function BoardView({
         // sea hexes are only identifiable via `hexTerrain` (board.hexes proxies sea → 'desert').
         const hid = e.hexes.find((h) => h != null && hexTerrain?.[h] !== 'sea') ?? e.hexes[0];
         if (hid == null) return null;
+        // Direction math stays in raw (pre-tilt) space — the affine tilt scales y uniformly, so an
+        // "outward" unit vector computed here still points away from the hex once BOTH endpoints are
+        // projected; only the final `mid`/`(bx,by)` points are projected, right before rendering.
         const hc = hexCenter(hid);
-        const mid = { x: px(e.x), y: px(e.y) };
+        const rawMid = { x: px(e.x), y: px(e.y) };
         // outward = from the land hex centre through the edge midpoint (toward the sea)
-        let dx = mid.x - hc.x,
-          dy = mid.y - hc.y;
+        let dx = rawMid.x - hc.x,
+          dy = rawMid.y - hc.y;
         const len = Math.hypot(dx, dy) || 1;
         dx /= len;
         dy /= len;
-        const bx = mid.x + dx * S * 0.5;
-        const by = mid.y + dy * S * 0.5;
+        const rawB = { x: rawMid.x + dx * S * 0.5, y: rawMid.y + dy * S * 0.5 };
+        const mid = project(rawMid);
+        const b = project(rawB);
         const label = type === 'generic' ? '3:1' : '2:1';
         return (
           <g key={`hb${eid}`}>
             <line
-              x1={mid.x}
-              y1={mid.y}
-              x2={bx}
-              y2={by}
+              x1={mid.sx}
+              y1={mid.sy}
+              x2={b.sx}
+              y2={b.sy}
               stroke="#8a6a42"
               strokeWidth={S * 0.12}
               strokeLinecap="round"
@@ -241,11 +320,11 @@ export function BoardView({
             {/* A slightly larger token; a resource (2:1) harbor shows the RESOURCE ICON above the
                 ratio instead of a cryptic, overflowing 3-letter abbreviation ("bri") — the icon says
                 which resource at a glance and needs no translation (playtest: "can't read the bonus"). */}
-            <circle cx={bx} cy={by} r={S * 0.32} fill="#efe4c6" stroke="#8a6a42" strokeWidth={2} />
+            <circle cx={b.sx} cy={b.sy} r={S * 0.32} fill="#efe4c6" stroke="#8a6a42" strokeWidth={2} />
             {type === 'generic' ? (
               <text
-                x={bx}
-                y={by}
+                x={b.sx}
+                y={b.sy}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize={S * 0.26}
@@ -256,12 +335,12 @@ export function BoardView({
               </text>
             ) : (
               <>
-                <text x={bx} y={by - S * 0.09} textAnchor="middle" dominantBaseline="central" fontSize={S * 0.24}>
+                <text x={b.sx} y={b.sy - S * 0.09} textAnchor="middle" dominantBaseline="central" fontSize={S * 0.24}>
                   {RESOURCE_GLYPH[type]}
                 </text>
                 <text
-                  x={bx}
-                  y={by + S * 0.13}
+                  x={b.sx}
+                  y={b.sy + S * 0.13}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontSize={S * 0.19}
@@ -281,18 +360,19 @@ export function BoardView({
       {epFogHexes.size > 0 &&
         geometry.hexes.map((h) => {
           if (!epFogHexes.has(h.id)) return null;
-          const c = hexCenter(h.id);
+          const c = project(hexCenter(h.id));
           const pts = h.vertices.map((vid) => {
             const v = vx(vid);
-            return `${px(v.x)},${px(v.y)}`;
+            return project({ x: px(v.x), y: px(v.y) });
           });
+          const ptsStr = pts.map((p) => `${p.sx},${p.sy}`).join(' ');
           return (
             <g key={`fog${h.id}`} data-testid={`ep-fog-${h.id}`} data-hex-id={h.id}>
-              <polygon points={pts.join(' ')} fill={FOG_MIST} opacity={0.82} />
-              <polygon points={pts.join(' ')} fill="none" stroke={FOG_MIST_DEEP} strokeWidth={1.5} opacity={0.6} />
+              <polygon points={ptsStr} fill={FOG_MIST} opacity={0.82} />
+              <polygon points={ptsStr} fill="none" stroke={FOG_MIST_DEEP} strokeWidth={1.5} opacity={0.6} />
               <text
-                x={c.x}
-                y={c.y}
+                x={c.sx}
+                y={c.sy}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontFamily="var(--font-display)"

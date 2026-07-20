@@ -40,6 +40,9 @@
     "dark": "Koyu tema",
     "system": "Sistem teması"
   },
+  "board3d": {
+    "switcherLabel": "3B tahta"
+  },
   "ui": {
     "modal": {
       "close": "Kapat"

@@ -12,7 +12,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { GEOMETRY } from '@hexhaven/shared';
 import { InteractionLayer } from './InteractionLayer';
-import { PLAYER_COLORS } from './palette';
+import { PLAYER_COLORS, HEX_SIZE } from './palette';
+import { boardProjection } from './projection';
 
 const GHOST_COLOR = PLAYER_COLORS[0];
 
@@ -98,5 +99,37 @@ describe('InteractionLayer: renders every id (budget, docs/11 §6)', () => {
     expect(count(html, '<circle')).toBe(GEOMETRY.vertices.length);
     expect(count(html, '<line')).toBe(GEOMETRY.edges.length);
     expect(count(html, '<polygon')).toBe(GEOMETRY.hexes.length);
+  });
+});
+
+describe('InteractionLayer: shared projection (T-1210 "3D board")', () => {
+  const px = (n: number) => n * HEX_SIZE;
+
+  it('projection={boardProjection(false)} (identity) places every vertex hit-area at the raw, un-tilted geometry position', () => {
+    const html = render({
+      mode: 'vertex',
+      targets: new Set([GEOMETRY.vertices[0]!.id]),
+      projection: boardProjection(false),
+    });
+    const v = GEOMETRY.vertices[0]!;
+    expect(html).toContain(`cx="${px(v.x)}"`);
+    expect(html).toContain(`cy="${px(v.y)}"`);
+  });
+
+  it('the default projection (3D on) tilts vertex hit-areas away from the raw geometry position', () => {
+    const html = render({ mode: 'vertex', targets: new Set([GEOMETRY.vertices[0]!.id]) });
+    const v = GEOMETRY.vertices[0]!;
+    // x is untouched by the affine tilt (no horizontal foreshortening) — only y moves.
+    expect(html).toContain(`cx="${px(v.x)}"`);
+    expect(html).not.toContain(`cy="${px(v.y)}"`);
+  });
+
+  it('a caller-supplied projection reprojects hit areas EXACTLY as BoardView would (shared math, requirement 4)', () => {
+    const projection = boardProjection(true);
+    const html = render({ mode: 'vertex', targets: new Set([GEOMETRY.vertices[5]!.id]), projection });
+    const v = GEOMETRY.vertices[5]!;
+    const expected = projection.project(px(v.x), px(v.y));
+    expect(html).toContain(`cx="${expected.sx}"`);
+    expect(html).toContain(`cy="${expected.sy}"`);
   });
 });

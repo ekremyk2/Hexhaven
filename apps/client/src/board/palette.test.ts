@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { pipCount, isRedNumber, contrastInk, PLAYER_COLORS, PLAYER_BADGES, TERRAIN_FILL } from './palette';
+import {
+  pipCount,
+  isRedNumber,
+  contrastInk,
+  PLAYER_COLORS,
+  PLAYER_BADGES,
+  TERRAIN_FILL,
+  darken,
+  HEX_INSET,
+  TILE_THICKNESS,
+  SKIRT_DARKEN_AMOUNT,
+} from './palette';
 
 describe('board palette', () => {
   it('pip counts follow the dice probability (docs/01 R16)', () => {
@@ -30,5 +41,32 @@ describe('board palette', () => {
     for (const t of ['hills', 'forest', 'pasture', 'fields', 'mountains', 'desert'] as const) {
       expect(TERRAIN_FILL[t]).toMatch(/^#/);
     }
+  });
+
+  it('3D board skirt constants are positive (T-1210)', () => {
+    expect(HEX_INSET).toBeGreaterThan(0);
+    expect(TILE_THICKNESS).toBeGreaterThan(0);
+    expect(SKIRT_DARKEN_AMOUNT).toBeGreaterThan(0);
+    expect(SKIRT_DARKEN_AMOUNT).toBeLessThan(1);
+  });
+
+  describe('darken()', () => {
+    it('moves each channel toward black by `amount`', () => {
+      expect(darken('#ffffff', 0.5)).toBe('#808080');
+      expect(darken('#ffffff', 0)).toBe('#ffffff');
+      expect(darken('#ffffff', 1)).toBe('#000000');
+    });
+
+    it('darkens every real terrain fill without throwing/producing invalid output', () => {
+      for (const fill of Object.values(TERRAIN_FILL)) {
+        const out = darken(fill, SKIRT_DARKEN_AMOUNT);
+        expect(out).toMatch(/^#[0-9a-f]{6}$/);
+        expect(out).not.toBe(fill);
+      }
+    });
+
+    it('passes through non-hex-color input unchanged (e.g. a gradient url reference)', () => {
+      expect(darken('url(#gold-grad)', 0.4)).toBe('url(#gold-grad)');
+    });
   });
 });

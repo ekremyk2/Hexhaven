@@ -22,6 +22,7 @@ import type { Seat } from '@hexhaven/shared';
 import { BoardView } from '../board/BoardView';
 import { boardGeometryFor } from '../board/geometry';
 import { InteractionLayer } from '../board/InteractionLayer';
+import { boardProjection } from '../board/projection';
 import { Pieces } from '../board/Pieces';
 import { CitiesKnightsPieces } from '../board/CitiesKnightsPieces';
 import { PLAYER_COLORS } from '../board/palette';
@@ -38,6 +39,7 @@ import { EndScreen } from '../endscreen/EndScreen';
 import { GameLog } from '../log/LogPanel';
 import { RobberOverlay } from '../robber/RobberOverlay';
 import { useHexhavenTheme } from '../themes/themeState';
+import { useBoard3d } from '../theme/board3d';
 import { BarbarianAttackToasts } from '../citiesKnights/BarbarianAttackToasts';
 import { CitiesKnightsHud } from '../citiesKnights/CitiesKnightsHud';
 import { CkActionPanel } from '../citiesKnights/CkActionPanel';
@@ -89,6 +91,11 @@ export default function Game() {
   // T-907 PM wiring: the viewer's own cosmetic-theme choice (persisted client-side, never part of
   // RoomConfig/GameConfig — see themes.ts's header) reskins the board robber + a few HUD labels.
   const { themeId } = useHexhavenTheme();
+  // T-1210 "3D board": one shared `BoardProjection` instance per render, built off the viewer's
+  // persisted on/off choice, threaded through every board layer (BoardView/Pieces/InteractionLayer)
+  // so they all agree on the exact same tilt (or lack of one) for correct hit-testing.
+  const [board3d] = useBoard3d();
+  const projection = boardProjection(board3d);
 
   if (!view) {
     return (
@@ -179,6 +186,7 @@ export default function Game() {
           hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
           hiddenNumbers={view.hiddenNumbers}
           epUnexplored={epExt?.unexplored ?? []}
+          projection={projection}
         >
           <Pieces
             geometry={geometry}
@@ -190,6 +198,7 @@ export default function Game() {
             pirate={seafarers?.pirate ?? null}
             themeId={themeId}
             hexPieces={view.ext?.hexPieces?.pieces ?? []}
+            projection={projection}
           />
           {ep ? <ExplorersPiratesPieces geometry={geometry} harborSettlements={epHarborSettlements} /> : null}
           {ck ? (
@@ -217,7 +226,14 @@ export default function Game() {
               pathBarbarians={tbExt?.pathBarbarians ?? []}
             />
           ) : null}
-          <InteractionLayer geometry={geometry} mode={mode} targets={targets} onPick={onPick} ghostColor={PLAYER_COLORS[me]} />
+          <InteractionLayer
+            geometry={geometry}
+            mode={mode}
+            targets={targets}
+            onPick={onPick}
+            ghostColor={PLAYER_COLORS[me]}
+            projection={projection}
+          />
         </BoardView>
       </div>
 

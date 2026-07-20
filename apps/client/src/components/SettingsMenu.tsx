@@ -9,9 +9,14 @@ import { useTranslation } from 'react-i18next';
 import { Modal, SegmentedControl } from '../ui';
 import { FOCUS_RING_CLASS } from '../ui/constants';
 import { THEME_CHOICES, useTheme, type ThemeChoice } from '../theme/theme';
+import { useBoard3d } from '../theme/board3d';
 import { useHexhavenTheme } from '../themes/themeState';
 import { THEME_IDS, themeDefinition } from '../themes/themes';
 import { SUPPORTED_LANGUAGES } from '../i18n';
+
+/** `useBoard3d()`'s boolean <-> `SegmentedControl`'s string-value contract (T-1210). */
+const BOARD_3D_OPTIONS = ['on', 'off'] as const;
+type Board3dOption = (typeof BOARD_3D_OPTIONS)[number];
 
 /** Decorative gear glyph (referenced, not inlined, so the i18n raw-text guard treats it as an icon
  *  rather than translatable copy — same pattern as ThemeToggle's glyph map). */
@@ -22,6 +27,7 @@ export function SettingsMenu() {
   const [open, setOpen] = useState(false);
   const { choice, setChoice } = useTheme();
   const { themeId, setThemeId } = useHexhavenTheme();
+  const [board3d, setBoard3d] = useBoard3d();
   const currentLang = i18n.resolvedLanguage ?? i18n.language;
 
   return (
@@ -60,6 +66,16 @@ export function SettingsMenu() {
               value={themeId}
               onChange={(v) => setThemeId(v as (typeof THEME_IDS)[number])}
               options={THEME_IDS.map((id) => ({ value: id, label: t(themeDefinition(id).nameKey, { ns: 'themes' }) }))}
+            />
+          </div>
+
+          <div>
+            <p className="mb-1 font-ui text-14 font-medium text-ink">{t('common:board3d.switcherLabel')}</p>
+            <SegmentedControl
+              ariaLabel={t('common:board3d.switcherLabel')}
+              value={board3d ? 'on' : 'off'}
+              onChange={(v) => setBoard3d((v as Board3dOption) === 'on')}
+              options={BOARD_3D_OPTIONS.map((v) => ({ value: v, label: t(`common:ui.${v}`) }))}
             />
           </div>
 

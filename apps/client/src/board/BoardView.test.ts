@@ -10,6 +10,8 @@ import { BoardView } from './BoardView';
 import { Pieces } from './Pieces';
 import { ExplorersPiratesPieces } from './ExplorersPiratesPieces';
 import { boardGeometryFor } from './geometry';
+import { boardProjection } from './projection';
+import { HEX_SIZE } from './palette';
 
 function seafarersGame(playerCount: 3 | 4) {
   const config: GameConfig = {
@@ -251,5 +253,87 @@ describe('BoardView The Fog Islands (T-756, Seafarers 5-6 scenario)', () => {
       createElement(BoardView, { board: state.board, hexTerrain: state.ext!.seafarers!.hexTerrain }),
     );
     expect(html).not.toContain('data-testid="ep-fog-');
+  });
+});
+
+describe('BoardView 3D board (T-1210)', () => {
+  const px = (n: number) => n * HEX_SIZE;
+  const MARGIN = 46;
+
+  const config: GameConfig = {
+    playerCount: 4,
+    targetVp: 10,
+    seed: 't1210-1',
+    board: 'random',
+    tokenMethod: 'spiral',
+    expansions: { fiveSix: false, seafarers: false, citiesKnights: false },
+  };
+
+  /** The pre-T-1210 viewBox formula — raw (un-projected) vertex extents, no skirt margin. */
+  function flatViewBox(): string {
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (const v of GEOMETRY.vertices) {
+      minX = Math.min(minX, px(v.x));
+      minY = Math.min(minY, px(v.y));
+      maxX = Math.max(maxX, px(v.x));
+      maxY = Math.max(maxY, px(v.y));
+    }
+    return `${minX - MARGIN} ${minY - MARGIN} ${maxX - minX + MARGIN * 2} ${maxY - minY + MARGIN * 2}`;
+  }
+
+  /** The pre-T-1210 top-face polygon for a hex — its true, un-inset, un-tilted vertex positions. */
+  function flatHexPoints(hexId: number): string {
+    const h = GEOMETRY.hexes[hexId]!;
+    return h.vertices
+      .map((vid) => {
+        const v = GEOMETRY.vertices[vid]!;
+        return `${px(v.x)},${px(v.y)}`;
+      })
+      .join(' ');
+  }
+
+  it('3D off (identity projection) is byte-identical to the pre-T-1210 flat-board formula: viewBox + every hex polygon + no skirts', () => {
+    const state = createGame(config);
+    const html = renderToStaticMarkup(
+      createElement(BoardView, { board: state.board, projection: boardProjection(false) }),
+    );
+
+    expect(html).toContain(`viewBox="${flatViewBox()}"`);
+    for (const h of GEOMETRY.hexes) {
+      expect(html).toContain(`points="${flatHexPoints(h.id)}"`);
+    }
+    expect(html).not.toContain('hex-skirt-');
+  });
+
+  it('3D on (the default) draws a skirt for every hex (base game has no sea hexes to exclude)', () => {
+    const state = createGame(config);
+    const html = renderToStaticMarkup(createElement(BoardView, { board: state.board }));
+    for (const h of GEOMETRY.hexes) {
+      // Every hex has SOME viewer-facing edge under the tilt (a regular hexagon's centre can never
+      // sit exactly on the boundary between "front" and "back" halves), so every non-sea hex gets
+      // at least one skirt polygon.
+      expect(html).toContain(`data-testid="hex-skirt-${h.id}"`);
+    }
+  });
+
+  it('3D on renders each hex\'s top face inset from (not equal to) the flat/true vertex positions', () => {
+    const state = createGame(config);
+    const html = renderToStaticMarkup(createElement(BoardView, { board: state.board }));
+    for (const h of GEOMETRY.hexes) {
+      expect(html).not.toContain(`points="${flatHexPoints(h.id)}"`);
+    }
+  });
+
+  it('the viewBox grows to accommodate the skirt depth when 3D is on', () => {
+    const state = createGame(config);
+    const flatHtml = renderToStaticMarkup(
+      createElement(BoardView, { board: state.board, projection: boardProjection(false) }),
+    );
+    const tiltedHtml = renderToStaticMarkup(createElement(BoardView, { board: state.board }));
+    expect(tiltedHtml).not.toContain(`viewBox="${flatViewBox()}"`);
+    expect(flatHtml).toContain(`viewBox="${flatViewBox()}"`);
   });
 });

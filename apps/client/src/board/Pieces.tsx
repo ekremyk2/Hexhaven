@@ -13,6 +13,7 @@ import {
   type VertexId,
 } from '@hexhaven/shared';
 import { HEX_SIZE, PLAYER_COLORS, PLAYER_BADGES, contrastInk } from './palette';
+import type { BoardProjection } from './projection';
 import { usePrefersReducedMotion } from '../theme/motion';
 import { RobberArt } from '../themes/ThemedPieces';
 import { DEFAULT_THEME_ID, THEMES, type ThemeId } from '../themes/themes';
@@ -63,6 +64,11 @@ export interface PiecesProps {
    *  Trader/Robin Hood/Banker/Poaching), each drawn as a small distinct marker at its hex center —
    *  from `view.ext.hexPieces.pieces`. Empty/absent while the `hexPieces` modifier is off. */
   hexPieces?: { hex: HexId; kind: HexPieceKindId }[];
+  /** T-1210 "3D board": accepted so `routes/Game.tsx` can thread the shared `BoardProjection`
+   *  through EVERY board layer without a follow-up task needing to touch its wiring again — pieces
+   *  still render flat on the board plane here (out of scope per T-1210; T-1211 stands them up
+   *  using this same prop). Unused in this task. */
+  projection?: BoardProjection;
 }
 
 /** docs/11 §5 "Robber move: arc hop between hexes, 400ms" — pure geometry, unit-testable without
@@ -92,6 +98,10 @@ export function Pieces({
   islandChits = [],
   themeId = DEFAULT_THEME_ID,
   hexPieces = [],
+  // T-1210: `projection` is intentionally NOT destructured — it's part of `PiecesProps` (so
+  // `routes/Game.tsx` can pass it and T-1211 can start reading it without a signature change) but
+  // unused by this task; omitting it from the destructure avoids an unused-local-variable lint
+  // error while still accepting the prop.
 }: PiecesProps) {
   const reducedMotion = usePrefersReducedMotion();
   // Tracks the robber's PREVIOUS hex across renders so a move can hop from where it was (docs/11

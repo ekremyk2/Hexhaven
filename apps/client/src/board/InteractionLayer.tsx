@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react';
 import { GEOMETRY, type BoardGeometry } from '@hexhaven/shared';
 import { HEX_SIZE } from './palette';
+import { boardProjection, type BoardProjection } from './projection';
 import type { TargetMode } from '../store/uiMode';
 
 const S = HEX_SIZE;
@@ -27,6 +28,12 @@ export interface InteractionLayerProps {
   onPick: (id: number) => void;
   /** Ghost/hover highlight color — the acting seat's player color (palette.ts `PLAYER_COLORS`). */
   ghostColor: string;
+  /** T-1210 "3D board": the SAME `BoardProjection` instance `BoardView` renders with — every hit
+   *  area below is projected through it so a click on the tilted board lands on the exact
+   *  vertex/edge/hex the viewer sees (an affine map, not true perspective, so this stays exact
+   *  rather than needing an inverse-projection reconstruction). Defaults to the tilted projection,
+   *  matching `BoardView`'s own default. */
+  projection?: BoardProjection;
 }
 
 /** docs/11 §5 motion catalog: "Legal targets: soft pulsing ghost (opacity 35→60%), 1.2s loop",
@@ -59,16 +66,30 @@ const PULSE_CSS = `
   }
 `;
 
-function vertexPoint(geometry: BoardGeometry, id: number) {
+/** Raw (pre-tilt) vertex point — `BoardView` computes the identical raw value before running it
+ * through the shared `BoardProjection` (T-1210), so the two layers agree pixel-for-pixel on where
+ * a click landed. */
+function rawVertexPoint(geometry: BoardGeometry, id: number) {
   const v = geometry.vertices[id];
   if (!v) throw new Error(`BUG: vertex ${id}`);
   return { x: px(v.x), y: px(v.y) };
 }
 
-function hexPoints(geometry: BoardGeometry, hexId: number): string {
+function vertexPoint(geometry: BoardGeometry, id: number, projection: BoardProjection) {
+  const raw = rawVertexPoint(geometry, id);
+  const p = projection.project(raw.x, raw.y);
+  return { x: p.sx, y: p.sy };
+}
+
+function hexPoints(geometry: BoardGeometry, hexId: number, projection: BoardProjection): string {
   const h = geometry.hexes[hexId];
   if (!h) throw new Error(`BUG: hex ${hexId}`);
-  return h.vertices.map((vid) => { const p = vertexPoint(geometry, vid); return `${p.x},${p.y}`; }).join(' ');
+  return h.vertices
+    .map((vid) => {
+      const p = vertexPoint(geometry, vid, projection);
+      return `${p.x},${p.y}`;
+    })
+    .join(' ');
 }
 
 export function InteractionLayer({
@@ -77,6 +98,7 @@ export function InteractionLayer({
   targets,
   onPick,
   ghostColor,
+  projection = boardProjection(true),
 }: InteractionLayerProps) {
   const [hovered, setHovered] = useState<number | null>(null);
 
@@ -100,7 +122,7 @@ export function InteractionLayer({
             .map((h) => (
               <HexGhost
                 key={`gh${h.id}`}
-                points={hexPoints(geometry, h.id)}
+                points={hexPoints(geometry, h.id, projection)}
                 color={ghostColor}
                 solid={hovered === h.id}
               />
@@ -108,21 +130,32 @@ export function InteractionLayer({
         {mode === 'edge' &&
           geometry.edges
             .filter((e) => targets.has(e.id))
-            .map((e) => (
-              <EdgeGhost
-                key={`ge${e.id}`}
-                cx={px(e.x)}
-                cy={px(e.y)}
-                angleDeg={e.angleDeg}
-                color={ghostColor}
-                solid={hovered === e.id}
-              />
-            ))}
+            .map((e) => {
+              const a = vertexPoint(geometry, e.a, projection);
+              const b = vertexPoint(geometry, e.b, projection);
+              // The tilt is a NON-uniform scale (x untouched, y compressed) — a straight edge's
+              // on-screen angle after projecting differs from `e.angleDeg` (the flat-geometry
+              // angle) unless the edge happens to be purely horizontal/vertical, so the ghost's
+              // rotation is re-derived from the two PROJECTED endpoints rather than reused.
+              const cx = (a.x + b.x) / 2;
+              const cy = (a.y + b.y) / 2;
+              const angleDeg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+              return (
+                <EdgeGhost
+                  key={`ge${e.id}`}
+                  cx={cx}
+                  cy={cy}
+                  angleDeg={angleDeg}
+                  color={ghostColor}
+                  solid={hovered === e.id}
+                />
+              );
+            })}
         {mode === 'vertex' &&
           geometry.vertices
             .filter((v) => targets.has(v.id))
             .map((v) => {
-              const p = vertexPoint(geometry, v.id);
+              const p = vertexPoint(geometry, v.id, projection);
               return (
                 <VertexGhost key={`gv${v.id}`} x={p.x} y={p.y} color={ghostColor} solid={hovered === v.id} />
               );
@@ -145,7 +178,7 @@ export function InteractionLayer({
               // clickable" guarantee.
               data-testid={`hex-target-${h.id}`}
               data-active={active}
-              points={hexPoints(geometry, h.id)}
+              points={hexPoints(geometry, h.id, projection)}
               fill="transparent"
               style={{ pointerEvents: active ? 'fill' : 'none', cursor: active ? 'pointer' : 'default' }}
               onPointerEnter={() => active && setHovered(h.id)}
@@ -157,8 +190,8 @@ export function InteractionLayer({
         })}
         {geometry.edges.map((e) => {
           const active = mode === 'edge' && targets.has(e.id);
-          const a = vertexPoint(geometry, e.a);
-          const b = vertexPoint(geometry, e.b);
+          const a = vertexPoint(geometry, e.a, projection);
+          const b = vertexPoint(geometry, e.b, projection);
           return (
             <line
               key={`he${e.id}`}
@@ -182,7 +215,7 @@ export function InteractionLayer({
         })}
         {geometry.vertices.map((v) => {
           const active = mode === 'vertex' && targets.has(v.id);
-          const p = vertexPoint(geometry, v.id);
+          const p = vertexPoint(geometry, v.id, projection);
           return (
             <circle
               key={`hv${v.id}`}

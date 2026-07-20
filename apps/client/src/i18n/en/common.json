@@ -40,6 +40,9 @@
     "dark": "Dark theme",
     "system": "System theme"
   },
+  "board3d": {
+    "switcherLabel": "3D board"
+  },
   "ui": {
     "modal": {
       "close": "Close"

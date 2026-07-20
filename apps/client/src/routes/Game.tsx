@@ -28,6 +28,10 @@ import { Interaction3D } from '../board3d/Interaction3D';
 import { Pieces } from '../board/Pieces';
 import { Board3D } from '../board3d/Board3D';
 import { hasWebGL } from '../board3d/webgl';
+import { BoardMarkers3D } from '../board3d/overlays/BoardMarkers3D';
+import { CitiesKnightsOverlay3D } from '../board3d/overlays/CitiesKnightsOverlay3D';
+import { ExplorersPiratesOverlay3D } from '../board3d/overlays/ExplorersPiratesOverlay3D';
+import { TradersBarbariansOverlay3D } from '../board3d/overlays/TradersBarbariansOverlay3D';
 import { CitiesKnightsPieces } from '../board/CitiesKnightsPieces';
 import { PLAYER_COLORS } from '../board/palette';
 import { ActionBar } from '../controls/ActionBar';
@@ -192,9 +196,10 @@ export default function Game() {
         style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))' }}
       >
         {use3d ? (
-          // T-1400 scene + T-1401 pieces + T-1402 interaction, mounted as Canvas children. Expansion
-          // overlays (T-1403) and polish (T-1404) still to come; falls through to the flat SVG stack
-          // below whenever WebGL is unavailable OR the viewer opted out via the settings menu.
+          // T-1400 scene + T-1401 pieces + T-1402 interaction + T-1403 expansion overlays, mounted as
+          // Canvas children. Perf/mobile polish + faux-3D retirement (T-1404) still to come; falls
+          // through to the flat SVG stack below whenever WebGL is unavailable OR the viewer opted out
+          // via the settings menu.
           <Board3D
             board={view.board}
             geometry={geometry}
@@ -218,6 +223,32 @@ export default function Game() {
               onPick={onPick}
               ghostColor={PLAYER_COLORS[me]}
             />
+            {/* T-1403 expansion overlays — same props/gates as the SVG branch below, so every
+                shipped expansion (Cities & Knights / Traders & Barbarians / Explorers & Pirates) plus
+                T-903 hex pieces render identically on both boards. Island chits stay unwired on BOTH
+                renderers (see BoardMarkers3D's own prop doc) — not a 3D-only gap. */}
+            <BoardMarkers3D geometry={geometry} hexPieces={view.ext?.hexPieces?.pieces ?? []} />
+            {ep ? <ExplorersPiratesOverlay3D geometry={geometry} harborSettlements={epHarborSettlements} /> : null}
+            {ck ? (
+              <CitiesKnightsOverlay3D geometry={geometry} knights={ckKnights} walls={ckWalls} metropolises={ckMetropolises} />
+            ) : null}
+            {tb ? (
+              <TradersBarbariansOverlay3D
+                geometry={geometry}
+                lakeHex={tbExt?.lakeHex ?? null}
+                fishingGrounds={tbExt?.fishingGrounds ?? []}
+                riverEdges={tbExt?.riverEdges ?? []}
+                bridges={tbBridges}
+                oasisHex={tbExt?.oasisHex ?? null}
+                routeEdges={tbExt?.routeEdges ?? []}
+                camels={tbExt?.camels ?? []}
+                barbarianHexes={tbExt?.barbarians ?? []}
+                tbKnights={tbExt?.knights ?? []}
+                tradeHexes={tbExt?.tradeHexes ?? []}
+                wagons={tbWagons}
+                pathBarbarians={tbExt?.pathBarbarians ?? []}
+              />
+            ) : null}
           </Board3D>
         ) : (
           <BoardView

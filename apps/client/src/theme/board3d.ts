@@ -1,18 +1,26 @@
-// "3D board" setting (T-1210): a per-viewer, persisted on/off toggle for the tilted-tabletop board
-// (`board/projection.ts`). Mirrors `theme.ts`'s light/dark persistence pattern exactly — same
-// localStorage read/write shape, same "default resolved before first paint, re-affirmed by a hook"
-// contract — just a boolean instead of a three-way choice, and a DIFFERENT storage key so it never
-// collides with the UI theme or the cosmetic board-skin setting (`themes/themeState.ts`). Unlike
-// dark/light this has no "system" concept and no live OS subscription — it's a static tilt, not a
-// media-query-driven preference, so `usePrefersReducedMotion()` deliberately does NOT force it off
-// (T-1210 requirement 2): reduced motion means "no animation", not "no static tilt".
+// "3D board" setting — originally T-1210's tilted-tabletop SVG toggle; T-1400 repurposes it as the
+// RENDERER CHOICE between the real WebGL `<Board3D>` (`board3d/Board3D.tsx`) and the flat SVG
+// `<BoardView>` fallback, per the task's "replace the boolean toggle with a renderer choice ... at
+// minimum keep a way to force the 2D fallback" requirement — a boolean already satisfies that
+// minimum (true = prefer the WebGL board when available; false = force the flat fallback), so this
+// module keeps its existing storage key/shape rather than churn a second persisted setting. `Game.tsx`
+// ANDs this with `board3d/webgl.ts`'s `hasWebGL()` feature detection — a browser without WebGL always
+// falls back regardless of the stored choice. Mirrors `theme.ts`'s light/dark persistence pattern
+// exactly — same localStorage read/write shape, same "default resolved before first paint,
+// re-affirmed by a hook" contract — just a boolean instead of a three-way choice, and a DIFFERENT
+// storage key so it never collides with the UI theme or the cosmetic board-skin setting
+// (`themes/themeState.ts`). Unlike dark/light this has no "system" concept and no live OS
+// subscription — it's a static preference, not a media-query-driven one, so
+// `usePrefersReducedMotion()` deliberately does NOT force it off: reduced motion means "no
+// animation", not "no 3D board" (T-1210's original rationale, still true of the WebGL board's own
+// OrbitControls damping).
 import { useCallback, useState } from 'react';
 
-/** localStorage key the "3D board" choice persists under. */
+/** localStorage key the renderer choice persists under. */
 export const BOARD_3D_STORAGE_KEY = 'hexhaven.board3d';
 
-/** Default ON — the tilted tabletop is the shipped look; the toggle lets a viewer opt back out to
- * the flat board (low-power devices, personal preference). */
+/** Default ON — prefer the WebGL 3D board whenever it's available; the toggle lets a viewer force
+ * the flat 2D fallback (low-power devices, accessibility, personal preference). */
 export const BOARD_3D_DEFAULT = true;
 
 function parseStored(value: string | null): boolean | null {

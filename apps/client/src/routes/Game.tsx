@@ -14,7 +14,7 @@
 // `<aside>` itself never does. The persistent dice panel is gone entirely (center-screen
 // `DiceRollOverlay` is the only dice UI now); the one thing worth keeping from it — turn number +
 // whose turn — now rides `hud/Scoreboard.tsx`'s header line instead of a standalone box.
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import type { OtherPlayerView, OwnPlayerView, PlayerView } from '@hexhaven/engine';
@@ -24,6 +24,8 @@ import { boardGeometryFor } from '../board/geometry';
 import { InteractionLayer } from '../board/InteractionLayer';
 import { boardProjection } from '../board/projection';
 import { Pieces } from '../board/Pieces';
+import { Board3D } from '../board3d/Board3D';
+import { hasWebGL } from '../board3d/webgl';
 import { CitiesKnightsPieces } from '../board/CitiesKnightsPieces';
 import { PLAYER_COLORS } from '../board/palette';
 import { ActionBar } from '../controls/ActionBar';
@@ -91,11 +93,18 @@ export default function Game() {
   // T-907 PM wiring: the viewer's own cosmetic-theme choice (persisted client-side, never part of
   // RoomConfig/GameConfig — see themes.ts's header) reskins the board robber + a few HUD labels.
   const { themeId } = useHexhavenTheme();
-  // T-1210 "3D board": one shared `BoardProjection` instance per render, built off the viewer's
-  // persisted on/off choice, threaded through every board layer (BoardView/Pieces/InteractionLayer)
-  // so they all agree on the exact same tilt (or lack of one) for correct hit-testing.
-  const [board3d] = useBoard3d();
-  const projection = boardProjection(board3d);
+  // T-1400 "WebGL 3D board": `useBoard3d()` now drives the RENDERER CHOICE (real WebGL `<Board3D>`
+  // vs the flat SVG `<BoardView>` fallback), not the old faux-3D tilt (`board/projection.ts`, kept
+  // only for the fallback and retired in T-1404). `hasWebGL()` feature-detects once per mount — a
+  // browser/device without WebGL always falls back regardless of the viewer's preference.
+  const [prefer3d] = useBoard3d();
+  const webglAvailable = useMemo(() => hasWebGL(), []);
+  const use3d = prefer3d && webglAvailable;
+  // The 2D fallback always renders FLAT now (the WebGL board is the shipped "3D" look; the faux-3D
+  // tilt it supersedes is dead code walking until T-1404 deletes it) — every consumer below
+  // (BoardView/Pieces/InteractionLayer/overlay layers) shares this one identity projection so their
+  // hit-testing/tilt math stays consistent with each other.
+  const projection = boardProjection(false);
 
   if (!view) {
     return (
@@ -180,69 +189,83 @@ export default function Game() {
         className="min-h-0 min-w-0 shrink-0 basis-[46vh] lg:shrink lg:basis-auto lg:flex-1"
         style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))' }}
       >
-        <BoardView
-          board={view.board}
-          geometry={geometry}
-          hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
-          hiddenNumbers={view.hiddenNumbers}
-          epUnexplored={epExt?.unexplored ?? []}
-          projection={projection}
-        >
-          <Pieces
+        {use3d ? (
+          // T-1400: the real WebGL 3D board. Terrain-only for now — pieces (T-1401), click
+          // interaction (T-1402), and expansion overlays (T-1403) don't render in 3D mode yet; they
+          // land in those follow-up tasks. Falls through to the flat SVG stack below whenever WebGL
+          // is unavailable OR the viewer opted out via the settings menu.
+          <Board3D
+            board={view.board}
             geometry={geometry}
-            roads={roads}
-            settlements={settlements}
-            cities={cities}
-            robber={view.board.robber}
-            ships={[...ships, ...epShips]}
-            pirate={seafarers?.pirate ?? null}
-            themeId={themeId}
-            hexPieces={view.ext?.hexPieces?.pieces ?? []}
-            projection={projection}
+            hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
+            hiddenNumbers={view.hiddenNumbers}
+            epUnexplored={epExt?.unexplored ?? []}
           />
-          {ep ? (
-            <ExplorersPiratesPieces
-              geometry={geometry}
-              harborSettlements={epHarborSettlements}
-              projection={projection}
-            />
-          ) : null}
-          {ck ? (
-            <CitiesKnightsPieces
-              geometry={geometry}
-              knights={ckKnights}
-              walls={ckWalls}
-              metropolises={ckMetropolises}
-              projection={projection}
-            />
-          ) : null}
-          {tb ? (
-            <TradersBarbariansPieces
-              geometry={geometry}
-              lakeHex={tbExt?.lakeHex ?? null}
-              fishingGrounds={tbExt?.fishingGrounds ?? []}
-              riverEdges={tbExt?.riverEdges ?? []}
-              bridges={tbBridges}
-              oasisHex={tbExt?.oasisHex ?? null}
-              routeEdges={tbExt?.routeEdges ?? []}
-              camels={tbExt?.camels ?? []}
-              barbarianHexes={tbExt?.barbarians ?? []}
-              tbKnights={tbExt?.knights ?? []}
-              tradeHexes={tbExt?.tradeHexes ?? []}
-              wagons={tbWagons}
-              pathBarbarians={tbExt?.pathBarbarians ?? []}
-              projection={projection}
-            />
-          ) : null}
-          <InteractionLayer
+        ) : (
+          <BoardView
+            board={view.board}
             geometry={geometry}
-            mode={mode}
-            targets={targets}
-            onPick={onPick}
-            ghostColor={PLAYER_COLORS[me]}
+            hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
+            hiddenNumbers={view.hiddenNumbers}
+            epUnexplored={epExt?.unexplored ?? []}
             projection={projection}
-          />
-        </BoardView>
+          >
+            <Pieces
+              geometry={geometry}
+              roads={roads}
+              settlements={settlements}
+              cities={cities}
+              robber={view.board.robber}
+              ships={[...ships, ...epShips]}
+              pirate={seafarers?.pirate ?? null}
+              themeId={themeId}
+              hexPieces={view.ext?.hexPieces?.pieces ?? []}
+              projection={projection}
+            />
+            {ep ? (
+              <ExplorersPiratesPieces
+                geometry={geometry}
+                harborSettlements={epHarborSettlements}
+                projection={projection}
+              />
+            ) : null}
+            {ck ? (
+              <CitiesKnightsPieces
+                geometry={geometry}
+                knights={ckKnights}
+                walls={ckWalls}
+                metropolises={ckMetropolises}
+                projection={projection}
+              />
+            ) : null}
+            {tb ? (
+              <TradersBarbariansPieces
+                geometry={geometry}
+                lakeHex={tbExt?.lakeHex ?? null}
+                fishingGrounds={tbExt?.fishingGrounds ?? []}
+                riverEdges={tbExt?.riverEdges ?? []}
+                bridges={tbBridges}
+                oasisHex={tbExt?.oasisHex ?? null}
+                routeEdges={tbExt?.routeEdges ?? []}
+                camels={tbExt?.camels ?? []}
+                barbarianHexes={tbExt?.barbarians ?? []}
+                tbKnights={tbExt?.knights ?? []}
+                tradeHexes={tbExt?.tradeHexes ?? []}
+                wagons={tbWagons}
+                pathBarbarians={tbExt?.pathBarbarians ?? []}
+                projection={projection}
+              />
+            ) : null}
+            <InteractionLayer
+              geometry={geometry}
+              mode={mode}
+              targets={targets}
+              onPick={onPick}
+              ghostColor={PLAYER_COLORS[me]}
+              projection={projection}
+            />
+          </BoardView>
+        )}
       </div>
 
       {/* Right sidebar (`lg:w-[26rem]`): everything that used to be the bottom footer plus the old

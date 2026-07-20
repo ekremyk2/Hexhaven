@@ -4,12 +4,13 @@
 // SegmentedControls (panel-appropriate styling) driven by the SAME hooks the old inline switchers
 // used — useTheme (light/dark/system), useHexhavenTheme (cosmetic board theme), and i18next — so
 // behavior is identical; only the presentation moved.
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, SegmentedControl } from '../ui';
 import { FOCUS_RING_CLASS } from '../ui/constants';
 import { THEME_CHOICES, useTheme, type ThemeChoice } from '../theme/theme';
 import { useBoard3d } from '../theme/board3d';
+import { hasWebGL } from '../board3d/webgl';
 import { useHexhavenTheme } from '../themes/themeState';
 import { THEME_IDS, themeDefinition } from '../themes/themes';
 import { SUPPORTED_LANGUAGES } from '../i18n';
@@ -28,6 +29,10 @@ export function SettingsMenu() {
   const { choice, setChoice } = useTheme();
   const { themeId, setThemeId } = useHexhavenTheme();
   const [board3d, setBoard3d] = useBoard3d();
+  // T-1400: the toggle now picks the renderer (real WebGL board vs the flat 2D fallback) — a device
+  // without WebGL can't render the 3D choice at all, so disable it rather than let a viewer pick a
+  // setting that silently falls back anyway (`Game.tsx` ANDs this same `hasWebGL()` check).
+  const webglAvailable = useMemo(() => hasWebGL(), []);
   const currentLang = i18n.resolvedLanguage ?? i18n.language;
 
   return (
@@ -75,8 +80,15 @@ export function SettingsMenu() {
               ariaLabel={t('common:board3d.switcherLabel')}
               value={board3d ? 'on' : 'off'}
               onChange={(v) => setBoard3d((v as Board3dOption) === 'on')}
-              options={BOARD_3D_OPTIONS.map((v) => ({ value: v, label: t(`common:ui.${v}`) }))}
+              options={BOARD_3D_OPTIONS.map((v) => ({
+                value: v,
+                label: t(`common:ui.${v}`),
+                disabled: v === 'on' && !webglAvailable,
+              }))}
             />
+            {webglAvailable ? null : (
+              <p className="mt-1 font-ui text-12 italic text-ink-soft">{t('common:board3d.unavailable')}</p>
+            )}
           </div>
 
           <div>

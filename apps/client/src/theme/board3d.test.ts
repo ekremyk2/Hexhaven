@@ -1,5 +1,6 @@
-// Tests for the "3D board" setting persistence (T-1210). Like theme.test.ts, this workspace runs
-// vitest under `environment: "node"` (no jsdom), so `localStorage` is stubbed as a plain object.
+// Tests for the "3D board" renderer-choice setting persistence (T-1210, repurposed by T-1400 — see
+// board3d.ts's header comment). Like theme.test.ts, this workspace runs vitest under
+// `environment: "node"` (no jsdom), so `localStorage` is stubbed as a plain object.
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   BOARD_3D_DEFAULT,

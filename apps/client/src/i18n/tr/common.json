@@ -41,7 +41,8 @@
     "system": "Sistem teması"
   },
   "board3d": {
-    "switcherLabel": "3B tahta"
+    "switcherLabel": "3B tahta",
+    "unavailable": "Bu cihazda WebGL kullanılamıyor — düz tahta gösteriliyor."
   },
   "ui": {
     "modal": {

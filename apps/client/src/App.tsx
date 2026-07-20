@@ -68,8 +68,12 @@ function AppShell() {
 }
 
 function App() {
+  // Router basename = the Vite base path (import.meta.env.BASE_URL). "/" for the single-port server
+  // build (→ basename "/"); "/Hexhaven/" for the GitHub Pages build (→ "/Hexhaven") so client-side
+  // routes resolve under the project-pages sub-path. Trailing slash stripped (react-router wants none).
+  const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <AppShell />
     </BrowserRouter>
   );

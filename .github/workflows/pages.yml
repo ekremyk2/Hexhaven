@@ -1,0 +1,57 @@
+name: Deploy client to GitHub Pages
+
+# Builds the static client (apps/client) and publishes it to GitHub Pages at
+# https://ekremyk2.github.io/Hexhaven/. The server (online multiplayer) is hosted separately —
+# set the repo variable VITE_SERVER_URL (Settings → Secrets and variables → Actions → Variables)
+# to your backend's public URL (e.g. https://hexhaven-web.fly.dev) so the client connects there.
+# Without it, the client falls back to same-origin and only hot-seat (local) play works.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # reads packageManager (pnpm@11) from package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build (Pages base + backend URL)
+        env:
+          VITE_BASE: /Hexhaven/
+          VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
+        run: pnpm -w build
+      - name: SPA fallback + disable Jekyll
+        run: |
+          cp apps/client/dist/index.html apps/client/dist/404.html
+          touch apps/client/dist/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/client/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,23 @@
+# Render Blueprint — deploys the Hexhaven backend (Fastify + WebSocket game server) on the FREE plan.
+# The client is hosted on GitHub Pages; after this service is live, set the Pages repo variable
+# VITE_SERVER_URL to its URL (e.g. https://hexhaven-server.onrender.com) so the Pages client connects
+# here for online multiplayer.
+#
+# Free plan: no credit card; spins down after ~15 min idle and takes ~1 min to wake on the first
+# connection; in-memory games are dropped when it sleeps (D-014, single-instance by design).
+#
+# One-click deploy: render.com → sign in with GitHub → New → Blueprint → pick the Hexhaven repo.
+services:
+  - type: web
+    name: hexhaven-server
+    runtime: node
+    plan: free
+    region: oregon
+    # Render provides PORT; the server reads process.env.PORT and binds 0.0.0.0 already.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm -w build
+    startCommand: node apps/server/dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"

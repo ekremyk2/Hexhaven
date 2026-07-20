@@ -23,6 +23,8 @@ import { BoardView } from '../board/BoardView';
 import { boardGeometryFor } from '../board/geometry';
 import { InteractionLayer } from '../board/InteractionLayer';
 import { boardProjection } from '../board/projection';
+import { Pieces3D } from '../board3d/Pieces3D';
+import { Interaction3D } from '../board3d/Interaction3D';
 import { Pieces } from '../board/Pieces';
 import { Board3D } from '../board3d/Board3D';
 import { hasWebGL } from '../board3d/webgl';
@@ -190,17 +192,33 @@ export default function Game() {
         style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))' }}
       >
         {use3d ? (
-          // T-1400: the real WebGL 3D board. Terrain-only for now — pieces (T-1401), click
-          // interaction (T-1402), and expansion overlays (T-1403) don't render in 3D mode yet; they
-          // land in those follow-up tasks. Falls through to the flat SVG stack below whenever WebGL
-          // is unavailable OR the viewer opted out via the settings menu.
+          // T-1400 scene + T-1401 pieces + T-1402 interaction, mounted as Canvas children. Expansion
+          // overlays (T-1403) and polish (T-1404) still to come; falls through to the flat SVG stack
+          // below whenever WebGL is unavailable OR the viewer opted out via the settings menu.
           <Board3D
             board={view.board}
             geometry={geometry}
             hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
             hiddenNumbers={view.hiddenNumbers}
             epUnexplored={epExt?.unexplored ?? []}
-          />
+          >
+            <Pieces3D
+              geometry={geometry}
+              roads={roads}
+              settlements={settlements}
+              cities={cities}
+              robber={view.board.robber}
+              ships={[...ships, ...epShips]}
+              pirate={seafarers?.pirate ?? null}
+            />
+            <Interaction3D
+              geometry={geometry}
+              mode={mode}
+              targets={targets}
+              onPick={onPick}
+              ghostColor={PLAYER_COLORS[me]}
+            />
+          </Board3D>
         ) : (
           <BoardView
             board={view.board}

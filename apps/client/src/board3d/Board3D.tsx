@@ -14,7 +14,7 @@
 // DoubleSide` so a winding-direction mistake in `hexGeometryBuilders.ts` produces a possibly-odd
 // look rather than SILENTLY INVISIBLE geometry, which would be a much worse failure mode to ship
 // unverified.
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { InstancedMesh } from 'three';
@@ -39,6 +39,11 @@ export interface Board3DProps {
   epUnexplored?: readonly HexId[];
   /** The Fog Islands (Seafarers 5-6) still-hidden hexes — same cover treatment as `epUnexplored`. */
   seafarersFogHidden?: readonly HexId[];
+  /** In-scene r3f content mounted INSIDE the `<Canvas>` — the pieces (`<Pieces3D>`, T-1401), click
+   *  interaction (`<Interaction3D>`, T-1402), and expansion overlays (T-1403). These use r3f hooks
+   *  (useThree/useFrame) so they MUST render inside the Canvas, exactly as the SVG `<Pieces>`/
+   *  `<InteractionLayer>` rendered inside `<BoardView>`'s `<svg>`. Game.tsx supplies them. */
+  children?: ReactNode;
 }
 
 export function Board3D({
@@ -48,6 +53,7 @@ export function Board3D({
   hiddenNumbers = false,
   epUnexplored = [],
   seafarersFogHidden = [],
+  children,
 }: Board3DProps) {
   const extents = useMemo(() => boardWorldExtents(geometry), [geometry]);
   const capGeometry = useMemo(() => buildHexCapGeometry(geometry), [geometry]);
@@ -146,6 +152,10 @@ export function Board3D({
           />
         );
       })}
+
+      {/* Pieces (T-1401), interaction (T-1402), overlays (T-1403) — mounted inside the Canvas by
+          Game.tsx so their r3f hooks resolve, mirroring the SVG board's children. */}
+      {children}
 
       <OrbitControls
         target={target}

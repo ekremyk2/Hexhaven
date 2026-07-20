@@ -69,11 +69,13 @@ export default function Lobby() {
   }
 
   const code = lobby.code ?? gameId ?? '';
-  // Clean path-based invite link that respects the app's base path (import.meta.env.BASE_URL is
-  // "/Hexhaven/" on GitHub Pages, "/" for the single-port server build) — the old `origin + '/'`
-  // form dropped the base and broke the link on the Pages sub-path deploy.
+  // Invite link. Uses a HASH fragment (`<base>#/join/CODE`) on purpose: GitHub Pages is a static
+  // host with no SPA fallback for unknown paths (a clean `/join/CODE` URL 404s there), whereas the
+  // hash always loads the real, existing `<base>` page (200) and the app reads the fragment on load.
+  // `import.meta.env.BASE_URL` = "/Hexhaven/" on Pages, "/" for the single-port server build — the
+  // earlier bug used `origin + '/'`, dropping the base so the link pointed at the empty repo root.
   const inviteUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}${import.meta.env.BASE_URL}join/${code}` : '';
+    typeof window !== 'undefined' ? `${window.location.origin}${import.meta.env.BASE_URL}#/join/${code}` : '';
 
   const modeSummary = knownConfig ? gameModeSummary(knownConfig) : null;
 

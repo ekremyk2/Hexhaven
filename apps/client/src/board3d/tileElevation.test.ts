@@ -1,8 +1,7 @@
 // Tests for T-1505's per-hex/vertex/edge tile-top elevation lookups — pure, no react/three/DOM.
 import { describe, expect, it } from 'vitest';
 import type { EdgeId, HexId, HexTile, ScenarioTerrain, VertexId } from '@hexhaven/shared';
-import { TILE_HEIGHT } from './constants';
-import { hexModelHeight } from './terrainStlModels';
+import { TILE_HEIGHT, TILE_SURFACE_HEIGHT } from './constants';
 import { edgeTopY, hexTopY, resolvedHexTerrain, vertexTopY } from './tileElevation';
 
 const hid = (n: number) => n as HexId;
@@ -34,9 +33,11 @@ describe('resolvedHexTerrain', () => {
 });
 
 describe('hexTopY', () => {
-  it('returns the STL model height for a terrain with coverage', () => {
+  it('returns the flat tile-rim height (TILE_SURFACE_HEIGHT) for a terrain with STL coverage', () => {
+    // Items rest on the tile's playable rim, NOT the sculpted model peak (trees/mountains) — resting
+    // on the peak left tokens/pieces hovering high above the board (user).
     const board = { hexes: [hex('forest')] };
-    expect(hexTopY(board, undefined, hid(0))).toBeCloseTo(hexModelHeight('forest', 0), 10);
+    expect(hexTopY(board, undefined, hid(0))).toBe(TILE_SURFACE_HEIGHT);
   });
 
   it('falls back to TILE_HEIGHT for gold (no supplied model)', () => {
@@ -49,9 +50,9 @@ describe('hexTopY', () => {
     expect(hexTopY(board, undefined, hid(0))).toBe(TILE_HEIGHT);
   });
 
-  it('sea (proxied through desert) gets the water model\'s height, not TILE_HEIGHT', () => {
+  it('sea (proxied through desert) also rests on the STL tile rim, not the flat prism TILE_HEIGHT', () => {
     const board = { hexes: [hex('desert')] };
-    expect(hexTopY(board, ['sea'], hid(0))).toBeCloseTo(hexModelHeight('sea', 0), 10);
+    expect(hexTopY(board, ['sea'], hid(0))).toBe(TILE_SURFACE_HEIGHT);
     expect(hexTopY(board, ['sea'], hid(0))).not.toBe(TILE_HEIGHT);
   });
 });

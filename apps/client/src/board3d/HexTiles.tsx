@@ -296,10 +296,10 @@ function TerrainStlTile({
 // ring; it must fall back to the ordinary plain-water tile instead, same discipline as every other
 // STL tile in this file.
 
-/** A flat tint for every harbor model (user: single colour, no multicolour — same convention every
- *  STL tile in this file follows) — a warm wood/hull tone distinct from the water tint so a harbor
- *  tile still reads as a distinct piece against its plain-water neighbours. */
-const HARBOR_TILE_COLOR = '#8a6a42';
+/** A flat tint for every harbor model — the SAME sea colour as the plain-water tiles (user: "make
+ *  harbors sea color too") so a harbor tile blends into the surrounding sea ring; the ship/lighthouse
+ *  silhouette + the ratio label are what mark it as a port, not a contrasting tile colour. */
+const HARBOR_TILE_COLOR = SEA;
 
 const HARBOR_LABEL_FILL = '#efe4c6';
 const HARBOR_LABEL_TEXT = '#2b2416'; // matches board/palette.ts's INK

@@ -18,6 +18,12 @@ export const TILE_BEVEL_THICKNESS = HEX_SIZE * 0.04;
 export const TOKEN_RADIUS = HEX_SIZE * 0.34;
 export const TOKEN_HOVER = HEX_SIZE * 0.06;
 
+/** The Y at which things resting ON a sculpted STL terrain tile (number tokens, fog covers, pieces at
+ *  a vertex/edge) sit — the tile's flat playable RIM, NOT the model's full sculpted height (trees/
+ *  mountain peaks), which left everything hovering high above the board (user). This is a single
+ *  USER-CALIBRATED knob: raise it if items sink into a tile, lower it if they still float. */
+export const TILE_SURFACE_HEIGHT = HEX_SIZE * 0.14;
+
 /** Sea plane: how far past the island's bounding radius it extends, and how far below the tile
  *  baseline (world Y=0) it sits so the tiles visibly rise above the water. */
 export const SEA_MARGIN_FACTOR = 4;

@@ -8,8 +8,8 @@
 // coverage, a different deterministically-picked variant height) — a piece standing there rests on
 // the TALLEST of them, so it never clips into a taller neighbouring sculpted tile.
 import type { BoardGeometry, EdgeId, GameState, HexId, ScenarioTerrain, VertexId } from '@hexhaven/shared';
-import { TILE_HEIGHT } from './constants';
-import { hasStlCoverage, hexModelHeight } from './terrainStlModels';
+import { TILE_HEIGHT, TILE_SURFACE_HEIGHT } from './constants';
+import { hasStlCoverage } from './terrainStlModels';
 
 type BoardState = GameState['board'];
 
@@ -36,7 +36,9 @@ export function hexTopY(
   hexId: HexId,
 ): number {
   const terrain = resolvedHexTerrain(board, hexTerrain, hexId);
-  if (terrain && hasStlCoverage(terrain)) return hexModelHeight(terrain, hexId);
+  // STL terrain: rest on the tile's flat playable rim (`TILE_SURFACE_HEIGHT`), NOT the model's full
+  // sculpted height (trees/peaks) — resting on the peak left everything floating above the board.
+  if (terrain && hasStlCoverage(terrain)) return TILE_SURFACE_HEIGHT;
   return TILE_HEIGHT;
 }
 

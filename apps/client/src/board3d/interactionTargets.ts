@@ -38,7 +38,7 @@ export const EDGE_HIT_RADIUS = HEX_SIZE * 0.16;
  *  terrain tiles — `Interaction3D.tsx` now adds this LIFT on top of the per-vertex/edge sculpted top
  *  Y instead (`tileElevation.ts`'s `vertexTopY`/`edgeTopY`, the same helpers pieces already rest on),
  *  so a settlement/city/road ghost sits exactly where the real piece will land. */
-export const VERTEX_EDGE_MARKER_LIFT = VERTEX_GHOST_RADIUS;
+export const VERTEX_EDGE_MARKER_LIFT = VERTEX_GHOST_RADIUS * 0.5;
 
 /** Same lift, above a hex's own sculpted top Y (`tileElevation.ts`'s `hexTopY`) — clears the
  *  number-token layer (`NumberToken3D`'s own `hexTopY + TOKEN_HOVER`) so a robber/pirate/hex-piece

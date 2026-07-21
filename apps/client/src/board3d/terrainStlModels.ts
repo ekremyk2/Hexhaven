@@ -156,19 +156,54 @@ export function hexModelHeight(terrain: ScenarioTerrain, seed: number): number {
 
 // --- Harbors (requirement 5): ship (3 variants) or lighthouse, picked per harbor edge --------------
 
-const HARBOR_SHIP_VARIANTS: TerrainModelVariant[] = [
-  { url: harborShip1Url, heightRatio: 0.1303 },
-  { url: harborShip2Url, heightRatio: 0.1303 },
-  { url: harborShip3Url, heightRatio: 0.1971 },
+/** Stable per-harbor-model identifier — PART A (per-ship-variant yaw): each harbor model was authored
+ *  with its own "front"/dock facing, so a single global yaw offset can't aim all of them at once (the
+ *  ORIGINAL single-ship-offset bug this replaces). Every `HarborModelVariant` below carries one of
+ *  these so `harborPlacement.ts` can look up ITS OWN calibration offset instead of a shared constant. */
+export type HarborVariantId = 'ship1' | 'ship2' | 'ship3' | 'lighthouse';
+
+export interface HarborModelVariant extends TerrainModelVariant {
+  id: HarborVariantId;
+}
+
+const HARBOR_SHIP_VARIANTS: HarborModelVariant[] = [
+  { id: 'ship1', url: harborShip1Url, heightRatio: 0.1303 },
+  { id: 'ship2', url: harborShip2Url, heightRatio: 0.1303 },
+  { id: 'ship3', url: harborShip3Url, heightRatio: 0.1971 },
 ];
-const HARBOR_LIGHTHOUSE_VARIANT: TerrainModelVariant = { url: harborLighthouseUrl, heightRatio: 0.2909 };
+const HARBOR_LIGHTHOUSE_VARIANT: HarborModelVariant = { id: 'lighthouse', url: harborLighthouseUrl, heightRatio: 0.2909 };
+
+/** PART A — per-variant yaw calibration (radians), keyed by `HarborVariantId`, applied on top of each
+ *  harbor tile's computed inward-facing, hex-flush-snapped yaw (`harborPlacement.ts`). Replaces the
+ *  old single ship/lighthouse pair of constants: the user reported one SHIP variant (of the 3) was
+ *  mis-rotated relative to the other two, which a single shared ship offset could never fix.
+ *  STARTING VALUES (user will calibrate each independently on :8080):
+ *   - `ship1`/`ship2`: +120° (carried over from the old shared `HARBOR_SHIP_YAW_OFFSET` — these two
+ *     were reported correct).
+ *   - `ship3`: -120° (best guess — this is the "other" harbor the user said needs -120, since it's
+ *     the one ship variant NOT sharing ship1/ship2's authored orientation).
+ *   - `lighthouse`: -120° (carried over from the old `HARBOR_LIGHTHOUSE_YAW_OFFSET`, unchanged — no
+ *     lighthouse harbor in the user's actual game, but the offset stays defined for completeness). */
+export const HARBOR_VARIANT_YAW_OFFSET: Record<HarborVariantId, number> = {
+  ship1: 0, // 0° (user-calibrated)
+  ship2: 0, // 0° (user-calibrated)
+  ship3: (2 * Math.PI) / 3, // +120° (user-calibrated — the one mis-authored ship model)
+  lighthouse: 0, // 0° (user-calibrated)
+};
 
 /** Deterministically picks a harbor's model (mostly ships, an occasional lighthouse for variety) from
  *  its `EdgeId` — stable across renders, same discipline as `pickTerrainVariant`. */
-export function pickHarborVariant(edgeId: EdgeId): TerrainModelVariant {
+export function pickHarborVariant(edgeId: EdgeId): HarborModelVariant {
   const useLighthouse = mixHash(edgeId, 3) % 4 === 0; // 1-in-4 — ships are the common case
   if (useLighthouse) return HARBOR_LIGHTHOUSE_VARIANT;
   return HARBOR_SHIP_VARIANTS[mixHash(edgeId, 4) % HARBOR_SHIP_VARIANTS.length]!;
+}
+
+/** The lighthouse model's authored front faces the opposite way from the ships', so harbours need a
+ *  different yaw offset per model (`harborPlacement.ts` applies it). Kept as a convenience predicate
+ *  (still used by `HexTiles.tsx`/tests) — equivalent to `variant.id === 'lighthouse'`. */
+export function isLighthouseVariant(variant: HarborModelVariant): boolean {
+  return variant.id === 'lighthouse';
 }
 
 /** Single shared `STLLoader` subclass for EVERY model this module loads (terrain, water, harbor
@@ -230,7 +265,7 @@ export const TERRAIN_HEIGHT_BAND: Partial<Record<ScenarioTerrain, HeightBandPale
  *  `ScenarioTerrain`, and a harbour isn't a terrain) — base = the SEA tint below the waterline
  *  (matching the surrounding water tiles, same intent as `HexTiles.tsx`'s retired flat
  *  `HARBOR_TILE_COLOR`), feature = a wood-hull tint above it. USER-CALIBRATED starting value. */
-export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.42 };
+export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.45 };
 
 /** Smooth (cubic Hermite) 0->1 ramp — used instead of a hard cutoff or a linear ramp so the
  *  base/feature transition reads as a soft blend, not a visible seam. */
@@ -258,22 +293,44 @@ export function heightBandWeight(
   return smoothstep01((y - (thresholdY - halfBand)) / (halfBand * 2));
 }
 
+/** Options for `applyHeightBandVertexColors`'s LIVE re-bake path (DEV tuning panel's "Colour
+ *  thresholds" section, `devTuning.ts`) — both fields are opt-in so a call with no 3rd argument (every
+ *  production call site, unchanged) behaves byte-identically to before this option bag existed. */
+export interface HeightBandOptions {
+  /** Overrides `heightBandWeight`'s own `HEIGHT_BAND_BLEND_FRACTION` default for this call — the live
+   *  tuning path passes the panel's live blend slider value here. Omitted (`undefined`) falls through
+   *  to `heightBandWeight`'s default parameter, i.e. the production constant. */
+  blendFraction?: number;
+  /** Skips the cache guard and RECOMPUTES + REPLACES an already-baked `color` attribute — the live
+   *  tuning path passes `true` so dragging a threshold/blend slider re-colours the shared (cached)
+   *  geometry immediately instead of no-op'ing against whatever was baked first. Every production call
+   *  omits this (default `false`), which preserves the original "bake once per shared geometry" cache
+   *  guard exactly. */
+  force?: boolean;
+}
+
 /** Bakes a `color` vertex `BufferAttribute` onto `geometry`, blending `palette.base` -> `palette.
  *  feature` across each vertex's own local Y via `heightBandWeight` — mutates and returns the SAME
  *  geometry object (mirrors `normalizeStlGeometry`'s own convention).
  *
  *  CACHE GUARD (the actual "compute once per shared geometry" mechanism): a no-op if `geometry`
- *  already carries a `color` attribute. Every hex/harbor mesh instance that shares the SAME cached
- *  (terrain, variant) geometry object (`useLoader`'s own cache, keyed by url — T-1505's original
- *  module doc) calls this on every render; only whichever instance mounts FIRST for a given geometry
- *  actually walks its vertices, every other instance (this one on a later render, or a different hex
- *  showing the same variant) sees the attribute already present and returns immediately. */
+ *  already carries a `color` attribute AND `options.force` isn't set. Every hex/harbor mesh instance
+ *  that shares the SAME cached (terrain, variant) geometry object (`useLoader`'s own cache, keyed by
+ *  url — T-1505's original module doc) calls this on every render; only whichever instance mounts
+ *  FIRST for a given geometry actually walks its vertices, every other instance (this one on a later
+ *  render, or a different hex showing the same variant) sees the attribute already present and returns
+ *  immediately — UNLESS `options.force` is set (the DEV tuning live re-bake path, `HexTiles.tsx`'s
+ *  `TerrainStlMesh`/`HarborModelMesh`), which recomputes and REPLACES the attribute (a fresh
+ *  `BufferAttribute`, which three.js picks up without any extra `needsUpdate` bookkeeping) every time
+ *  it's called — used only from a `useEffect` keyed on the live threshold/blend values, never from a
+ *  per-render/per-frame path. */
 export function applyHeightBandVertexColors(
   geometry: BufferGeometry,
   modelHeightY: number,
   palette: HeightBandPalette,
+  options?: HeightBandOptions,
 ): BufferGeometry {
-  if (geometry.getAttribute('color')) return geometry;
+  if (geometry.getAttribute('color') && !options?.force) return geometry;
   // `getAttribute` is typed to return `BufferAttribute | InterleavedBufferAttribute | GLBufferAttribute`
   // for ANY key (three's `BufferGeometry` isn't generically parameterized here) — `STLLoader` always
   // produces a plain `BufferAttribute` position (never interleaved/GL), so this cast is safe; it's
@@ -287,7 +344,7 @@ export function applyHeightBandVertexColors(
   const count = position.count;
   const colors = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
-    const weight = heightBandWeight(position.getY(i), modelHeightY, palette.thresholdFraction);
+    const weight = heightBandWeight(position.getY(i), modelHeightY, palette.thresholdFraction, options?.blendFraction);
     blended.copy(base).lerp(feature, weight);
     colors[i * 3] = blended.r;
     colors[i * 3 + 1] = blended.g;

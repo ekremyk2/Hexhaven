@@ -6,11 +6,13 @@ import type { EdgeId, ScenarioTerrain } from '@hexhaven/shared';
 import {
   applyHeightBandVertexColors,
   HARBOR_HEIGHT_BAND,
+  HARBOR_VARIANT_YAW_OFFSET,
   hasStlCoverage,
   heightBandWeight,
   HEIGHT_BAND_BLEND_FRACTION,
   hexModelHeight,
   hexYaw,
+  isLighthouseVariant,
   modelHeight,
   pickHarborVariant,
   pickRotationStep,
@@ -18,6 +20,7 @@ import {
   pickVariantIndex,
   TERRAIN_FOOTPRINT,
   TERRAIN_HEIGHT_BAND,
+  type HarborVariantId,
   type HeightBandPalette,
 } from './terrainStlModels';
 
@@ -145,6 +148,43 @@ describe('pickHarborVariant', () => {
     const seen = new Set<string>();
     for (let edgeId = 0; edgeId < 40; edgeId++) seen.add(pickHarborVariant(eid(edgeId)).url);
     expect(seen.size).toBeGreaterThan(1);
+  });
+
+  it('every picked variant carries a stable id that resolves in HARBOR_VARIANT_YAW_OFFSET', () => {
+    for (let edgeId = 0; edgeId < 40; edgeId++) {
+      const variant = pickHarborVariant(eid(edgeId));
+      expect(HARBOR_VARIANT_YAW_OFFSET[variant.id]).toBeTypeOf('number');
+    }
+  });
+
+  it('isLighthouseVariant agrees with the variant id', () => {
+    for (let edgeId = 0; edgeId < 40; edgeId++) {
+      const variant = pickHarborVariant(eid(edgeId));
+      expect(isLighthouseVariant(variant)).toBe(variant.id === 'lighthouse');
+    }
+  });
+});
+
+// --- PART A: per-ship-variant yaw offset -------------------------------------------------------------
+
+describe('HARBOR_VARIANT_YAW_OFFSET', () => {
+  const ALL_IDS: HarborVariantId[] = ['ship1', 'ship2', 'ship3', 'lighthouse'];
+
+  it('defines an offset for every harbor variant id', () => {
+    for (const id of ALL_IDS) expect(HARBOR_VARIANT_YAW_OFFSET[id]).toBeTypeOf('number');
+  });
+
+  it('every variant offset is a finite radian value (exact values are user-calibrated, in flux)', () => {
+    // The per-variant yaws are being calibrated live via the dev tuning panel, so this asserts they
+    // are finite numbers rather than pinning specific degrees (which change every calibration round).
+    for (const id of ALL_IDS) expect(Number.isFinite(HARBOR_VARIANT_YAW_OFFSET[id])).toBe(true);
+  });
+
+  it('each id is independently tunable (not aliases of the same underlying value)', () => {
+    // Mutating one id's offset must not be possible to accidentally alias another's — verified by
+    // construction (a plain Record literal), asserted here so a future refactor can't collapse them
+    // back into a shared ship/lighthouse pair without this test catching it.
+    expect(Object.keys(HARBOR_VARIANT_YAW_OFFSET).sort()).toEqual([...ALL_IDS].sort());
   });
 });
 

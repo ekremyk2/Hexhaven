@@ -2,11 +2,15 @@
 import { describe, expect, it } from 'vitest';
 import { GEOMETRY, type EdgeId, type HexTile } from '@hexhaven/shared';
 import { computeSeaHexRing } from './seaHexRing';
-import { computeHarborTiles, nearestRotationStep, HARBOR_MODEL_YAW_OFFSET } from './harborPlacement';
-import { hexYaw } from './terrainStlModels';
+import { computeHarborTiles, nearestRotationStep } from './harborPlacement';
+import { HARBOR_VARIANT_YAW_OFFSET, hexYaw, type HarborModelVariant } from './terrainStlModels';
 
 const BASE_YAW = Math.PI / 6;
 const STEP = Math.PI / 3;
+
+/** The per-variant yaw offset baked into a harbor tile's `yaw` — looked up by the picked variant's
+ *  stable `id` (PART A: per-ship-variant yaw, not a single shared ship/lighthouse pair). */
+const offsetFor = (variant: HarborModelVariant) => HARBOR_VARIANT_YAW_OFFSET[variant.id];
 
 describe('nearestRotationStep', () => {
   it('snaps the base yaw itself to step 0', () => {
@@ -80,7 +84,7 @@ describe('computeHarborTiles — base board (no real sea hex, harbors land on th
 
   it('picks a yaw that is one of the 6 hex-flush steps plus the calibration offset', () => {
     const [tile] = computeHarborTiles(board, GEOMETRY, undefined, seaRing);
-    const stripped = tile!.yaw - HARBOR_MODEL_YAW_OFFSET;
+    const stripped = tile!.yaw - offsetFor(tile!.variant);
     const matchesSomeStep = [0, 1, 2, 3, 4, 5].some((k) => Math.abs(stripped - hexYaw(k)) < 1e-9);
     expect(matchesSomeStep).toBe(true);
   });
@@ -100,7 +104,7 @@ describe('computeHarborTiles — base board (no real sea hex, harbors land on th
     const landY = 1.5 * landHex.r;
     const toLandX = landX - ringX;
     const toLandZ = landY - ringY; // board y -> world z, same convention as coords.ts
-    const stripped = tile!.yaw - HARBOR_MODEL_YAW_OFFSET;
+    const stripped = tile!.yaw - offsetFor(tile!.variant);
     const facingX = Math.sin(stripped);
     const facingZ = Math.cos(stripped);
     expect(facingX * toLandX + facingZ * toLandZ).toBeGreaterThan(0);
@@ -144,7 +148,7 @@ describe('computeHarborTiles — Seafarers/E&P-style board (a REAL sea hex alrea
 
   it('still faces inward (toward the land hex) even for a real-hex target', () => {
     const [tile] = computeHarborTiles(board, geometry, hexTerrain, []);
-    const stripped = tile!.yaw - HARBOR_MODEL_YAW_OFFSET;
+    const stripped = tile!.yaw - offsetFor(tile!.variant);
     // Land hex is due WEST of the sea hex here, so "facing the island" should point in -X.
     const facingX = Math.sin(stripped);
     expect(facingX).toBeLessThan(0);

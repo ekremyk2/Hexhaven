@@ -36,13 +36,17 @@ import type { BoardGeometry, GameState, HexId, ScenarioTerrain } from '@hexhaven
 import { SEA_DEEP } from '../board/palette';
 import { boardWorldExtents, hexWorldCenter } from './coords';
 import { CONTACT_SHADOW_DEPTH, CONTACT_SHADOW_LIFT, SEA_DEPTH, SEA_MARGIN_FACTOR, TABLE_RIM_GAP, TILE_HEIGHT, TOKEN_HOVER } from './constants';
+import { DevTuningPanel } from './DevTuningPanel';
+import { useDevTuningAvailable } from './devTuning';
 import { FogCover } from './FogCover';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
 import { HexTiles } from './HexTiles';
 import { NumberToken3D } from './NumberToken3D';
+import { NumberTokenInsert3D } from './NumberTokenInsert3D';
 import { SceneEnvironment } from './SceneEnvironment';
 import { Sea } from './Sea';
 import { Table } from './Table';
+import { hasStlCoverage } from './terrainStlModels';
 import { hexTopY } from './tileElevation';
 import { useMobileBudget } from './mobileBudget';
 
@@ -81,6 +85,7 @@ export function Board3D({
   children,
 }: Board3DProps) {
   const { t } = useTranslation('common');
+  const tuningAvailable = useDevTuningAvailable();
   const budget = useMobileBudget();
   const controlsRef = useRef<OrbitControlsHandle>(null);
   const extents = useMemo(() => boardWorldExtents(geometry), [geometry]);
@@ -225,6 +230,11 @@ export function Board3D({
           // token/fog floats off ITS OWN tile's real measured top instead of a uniform TILE_HEIGHT.
           const tokenBase = hexTopY(board, hexTerrain, hex.id);
           const tokenCenter = hexWorldCenter(hex, tokenBase + TOKEN_HOVER);
+          // T-1506: the socket insert seats directly on the tile's own surface height (its component
+          // then applies `TOKEN_SOCKET_Y`, a small NEGATIVE sink into the recess) — it must NOT also
+          // pick up the billboard's `TOKEN_HOVER` (a lift meant for a flat card floating just above
+          // the bevel, the opposite direction from "sunk into a socket").
+          const socketCenter = hexWorldCenter(hex, tokenBase);
           if (fogHexes.has(hex.id)) {
             const fogCenter = hexWorldCenter(hex, tokenBase + TOKEN_HOVER * 0.4);
             return <FogCover key={`fog${hex.id}`} position={[fogCenter.x, fogCenter.y, fogCenter.z]} geometry={capGeometry} />;
@@ -241,6 +251,18 @@ export function Board3D({
             );
           }
           if (tile.token == null) return null;
+          // T-1506: STL-terrain hexes get a real 3D token seated in the model's sculpted socket
+          // recess; non-STL `gold` hexes (no socket) keep the flat billboard.
+          if (hasStlCoverage(terrain)) {
+            return (
+              <NumberTokenInsert3D
+                key={`t${hex.id}`}
+                position={[socketCenter.x, socketCenter.y, socketCenter.z]}
+                value={tile.token}
+                dimmed={board.robber === hex.id}
+              />
+            );
+          }
           return (
             <NumberToken3D
               key={`t${hex.id}`}
@@ -285,6 +307,15 @@ export function Board3D({
           <path d="M3 4v5h5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
+
+      {/* DEV-ONLY harbour/port-marker live tuning panel (board3d/devTuning.ts, DevTuningPanel.tsx) —
+          an HTML overlay OUTSIDE the <Canvas> (it has no r3f hooks of its own; it only reads/writes
+          the zustand store `HexTiles.tsx`'s harbour/marker render reads live). Gated on
+          `useDevTuningAvailable()`: true under Vite's dev server, or on the built prod server
+          (:8080) behind a `?tune=1` URL flag / the localStorage key it persists — see that hook's
+          doc comment for exactly how to open it there. Never mounted otherwise, so this whole
+          subtree is absent from a normal end-user session. */}
+      {tuningAvailable && <DevTuningPanel />}
     </div>
   );
 }

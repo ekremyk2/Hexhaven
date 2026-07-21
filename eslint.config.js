@@ -120,7 +120,12 @@ export default [
   {
     // docs/05 §7 (T-306): every user-facing string in the client goes through t('ns.key').
     files: ["apps/client/src/**/*.tsx"],
-    ignores: ["apps/client/src/**/*.test.tsx"],
+    // `DevTuningPanel.tsx` is a DEV-ONLY harbour/port-marker calibration overlay (gated behind
+    // `import.meta.env.DEV` or an explicit `?tune=1`/localStorage flag, see `board3d/devTuning.ts`)
+    // — never part of a real player's session, so its scratch calibration labels aren't "user-facing
+    // copy" in the sense this rule exists to catch (same reasoning as the `*.test.tsx` exclusion
+    // below: not every `.tsx` file under `src/` renders to an actual player).
+    ignores: ["apps/client/src/**/*.test.tsx", "apps/client/src/board3d/DevTuningPanel.tsx"],
     plugins: { "i18n-guard": i18nGuardPlugin },
     rules: {
       "i18n-guard/no-raw-text": "error"

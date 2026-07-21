@@ -24,6 +24,20 @@ export const TOKEN_HOVER = HEX_SIZE * 0.06;
  *  USER-CALIBRATED knob: raise it if items sink into a tile, lower it if they still float. */
 export const TILE_SURFACE_HEIGHT = HEX_SIZE * 0.14;
 
+// --- T-1506: 3D socket number-token inserts (STL-terrain hexes only; `gold` keeps the billboard) ---
+
+/** Vertical offset (world Y) of a 3D socket number-token insert, ADDED to `tileElevation.ts`'s
+ *  `hexTopY` (== `TILE_SURFACE_HEIGHT` for every STL-terrain hex). Negative sinks the token into the
+ *  terrain model's sculpted socket recess below the tile's flat rim; the socket's real depth isn't
+ *  visible from this sandbox — USER-CALIBRATED STARTING GUESS, raise toward 0 if the token floats
+ *  above the rim, lower it further if it still doesn't reach the recess floor. */
+export const TOKEN_SOCKET_Y = -HEX_SIZE * 0.015;
+
+/** Extra uniform scale applied to a socket token insert mesh ON TOP OF `numberTokenModels.ts`'s own
+ *  sheet-relative sizing (`TOKEN_INSERT_DIAMETER` there) — one easy dial to grow/shrink every socket
+ *  token without touching the slicing/placement math. USER-CALIBRATED STARTING GUESS: 1 (no change). */
+export const TOKEN_SOCKET_SCALE = 1;
+
 /** Sea plane: how far past the island's bounding radius it extends, and how far below the tile
  *  baseline (world Y=0) it sits so the tiles visibly rise above the water. */
 export const SEA_MARGIN_FACTOR = 4;

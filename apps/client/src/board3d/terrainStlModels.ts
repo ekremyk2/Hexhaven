@@ -230,7 +230,7 @@ export const TERRAIN_HEIGHT_BAND: Partial<Record<ScenarioTerrain, HeightBandPale
  *  `ScenarioTerrain`, and a harbour isn't a terrain) — base = the SEA tint below the waterline
  *  (matching the surrounding water tiles, same intent as `HexTiles.tsx`'s retired flat
  *  `HARBOR_TILE_COLOR`), feature = a wood-hull tint above it. USER-CALIBRATED starting value. */
-export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.45 };
+export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.42 };
 
 /** Smooth (cubic Hermite) 0->1 ramp — used instead of a hard cutoff or a linear ramp so the
  *  base/feature transition reads as a soft blend, not a visible seam. */

@@ -43,7 +43,7 @@ type BoardState = GameState['board'];
  *  constant to re-aim EVERY harbor tile together; the per-harbor inward-direction math must not need
  *  touching to recalibrate. Radians. Starts at 0 (i.e. "assume the model's dock already faces the
  *  direction `nearestRotationStep`'s snapped yaw points"). */
-export const HARBOR_MODEL_YAW_OFFSET = (-2 * Math.PI) / 3; // user-calibrated on the Beginner board: -120°
+export const HARBOR_MODEL_YAW_OFFSET = (2 * Math.PI) / 3; // user-calibrated on the Beginner board: +120°
 
 const BASE_YAW = Math.PI / 6;
 const ROTATION_STEP = Math.PI / 3;

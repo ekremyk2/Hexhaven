@@ -32,19 +32,28 @@ import { robberHopOffset } from '../board/Pieces';
 import { usePrefersReducedMotion } from '../theme/motion';
 import { edgeWorldPosition, hexWorldCenter, vertexWorldPosition, type WorldVec3 } from './coords';
 import { TILE_HEIGHT } from './constants';
-import { PirateBody, RobberBody, ShipBody } from './PieceBodies';
+import { PirateBody, RobberBody } from './PieceBodies';
 import { HOP_DURATION_MS, PLACEMENT_DURATION_MS, hopOffset, placementDropOffset, placementScale } from './pieceAnimation';
 import { edgeTopY, hexTopY, vertexTopY } from './tileElevation';
 // T-1503: settlement/city/road now render the user-supplied STL models (tinted per seat), falling
 // back to their `PieceBodies` procedural equivalents on load failure — see `StlPieceModels.tsx`.
-// Robber/ship/pirate stay procedural (no STL supplied for them), unchanged from T-1401.
-import { CityModel, RoadModel, SettlementModel } from './StlPieceModels';
+// T-1505 part 2: the Seafarers ship joins them (`ShipModel`, the user-supplied `ship1.stl`). Robber
+// and pirate stay procedural (no STL supplied for either — explicit out-of-scope both tasks agree on).
+import { CityModel, RoadModel, ShipModel, SettlementModel } from './StlPieceModels';
 
 /** How far above its resting spot a piece drops in from — big enough to read as a "landing" rather
  *  than an imperceptible nudge, small enough it never clips through the sky/other pieces. */
 const DROP_HEIGHT = TILE_HEIGHT * 2;
 /** How high the robber's hop arcs above the board mid-hop. */
 const HOP_ARC_HEIGHT = TILE_HEIGHT * 1.6;
+
+/** USER-CALIBRATED CONSTANT (T-1505 part 2) — the user will supply a value once ships render on
+ *  :8080. Added on top of every ship's edge-direction rotation (`edgeWorldPosition`'s `rotationY`,
+ *  the same yaw a road already gets) to correct for whichever direction the shipped `ship1.stl`
+ *  model's own authored bow/front actually faces at local rotation 0 (unverified here — this sandbox
+ *  can't render WebGL). Change ONLY this one constant to re-aim EVERY ship together; the per-ship
+ *  edge-direction math (identical to a road's) must not need touching to recalibrate. Radians. */
+const SHIP_MODEL_YAW_OFFSET = 0;
 
 export interface Pieces3DProps {
   geometry?: BoardGeometry;
@@ -122,8 +131,13 @@ export function Pieces3D({
       {ships.map(({ edge: eid, seat }, i) => {
         const pos = edgeWorldPosition(edgeOf(eid), edgeTopY(boardHexes, geometry, hexTerrain, eid));
         return (
-          <PlacementGroup key={`sh${eid}-${i}`} position={pos} rotationY={pos.rotationY} reducedMotion={reducedMotion}>
-            <ShipBody color={PLAYER_COLORS[seat]} />
+          <PlacementGroup
+            key={`sh${eid}-${i}`}
+            position={pos}
+            rotationY={pos.rotationY + SHIP_MODEL_YAW_OFFSET}
+            reducedMotion={reducedMotion}
+          >
+            <ShipModel color={PLAYER_COLORS[seat]} />
           </PlacementGroup>
         );
       })}

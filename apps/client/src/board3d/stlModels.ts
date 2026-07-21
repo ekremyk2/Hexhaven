@@ -14,11 +14,15 @@
 import settlementStlUrl from './models/settlement.stl?url';
 import cityStlUrl from './models/city.stl?url';
 import roadStlUrl from './models/road.stl?url';
+// T-1505 part 2: the Seafarers ship model — a user-supplied print-resolution STL, so (unlike
+// settlement/city/road above) it goes through the SAME raw -> decimated `models/opt/` pipeline the
+// terrain/harbor models use (`apps/client/scripts/optimize-models.mjs`), not a direct `models/*.stl`.
+import shipStlUrl from './models/opt/ship1.stl?url';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { BufferGeometry, Vector3 } from 'three';
 import { HEX_SIZE } from '../board/palette';
 
-export { settlementStlUrl, cityStlUrl, roadStlUrl };
+export { settlementStlUrl, cityStlUrl, roadStlUrl, shipStlUrl };
 
 /** How a model is fit to its target size (requirement 2, "scale to fit its board slot") — always a
  *  single UNIFORM scale factor (never anisotropic), so an arbitrary source mesh's proportions
@@ -101,9 +105,14 @@ export function normalizeStlGeometry(
 //    visibly larger than a settlement (acceptance criterion), independent of the two source STLs'
 //    own relative scale.
 //  - road length target = the procedural bar's overall span (`len`, including its rounded end-caps).
+//  - ship length target (T-1505 part 2) = a bit longer than a road's, matching `PieceBodies.tsx`'s
+//    own procedural `ShipBody`/`Hull`'s overall hull+bow span (`hullLen * (0.8/2 + 0.36 + ~0.34/2)`,
+//    roughly `S * 0.7`) so the STL hull replaces it at the same order of magnitude, not a road-sized
+//    sliver or an oversized boat overhanging its edge slot.
 export const SETTLEMENT_FOOTPRINT = Math.hypot(HEX_SIZE * 0.36, HEX_SIZE * 0.32);
 export const CITY_FOOTPRINT = Math.hypot(HEX_SIZE * 0.5, HEX_SIZE * 0.4);
 export const ROAD_LENGTH = HEX_SIZE * 0.66;
+export const SHIP_LENGTH = HEX_SIZE * 0.72;
 
 /**
  * Three `STLLoader` subclasses — one per piece type — each overriding `parse()` to normalize the
@@ -130,5 +139,13 @@ export class CitySTLLoader extends STLLoader {
 export class RoadSTLLoader extends STLLoader {
   override parse(data: ArrayBuffer | string): BufferGeometry {
     return normalizeStlGeometry(super.parse(data), ROAD_LENGTH, 'length');
+  }
+}
+
+/** Ship (T-1505 part 2) — same `'length'` fit mode as `RoadSTLLoader` (a ship sits on a sea EDGE,
+ *  like a road on a land edge), just a different target size. */
+export class ShipSTLLoader extends STLLoader {
+  override parse(data: ArrayBuffer | string): BufferGeometry {
+    return normalizeStlGeometry(super.parse(data), SHIP_LENGTH, 'length');
   }
 }

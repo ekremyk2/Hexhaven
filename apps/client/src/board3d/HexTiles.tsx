@@ -7,15 +7,33 @@
 // requirement 3 gives ON-BOARD sea hexes (Seafarers/E&P) their own `water` tile, and requirement
 // "sea-hex ring" synthesizes a one-hex ring of `water` tiles around a LAND-ONLY board (base game) so
 // coastal pieces don't sit against bare table — see `seaHexRing.ts`.
+//
+// T-1505 REWORK (user correction): harbors are SEA-HEX TILES, not separate props floating off the
+// coast (the original pass's `overlays/Harbors3D.tsx`, now retired) — a sea tile that carries a
+// harbor renders a ship/lighthouse model INSTEAD of plain water. `harborPlacement.ts`'s
+// `computeHarborTiles` names which real hex or synthetic ring hex each `board.harbors` edge lands on
+// (plus the island-facing yaw); this module just swaps THAT specific tile's render for
+// `HarborStlTile` in the two loops below, same fallback/Suspense discipline as every other STL tile.
 import { Component, Suspense, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useLoader } from '@react-three/fiber';
 import { DoubleSide, InstancedMesh, Matrix4, type BufferGeometry } from 'three';
-import type { BoardGeometry, GameState, HexId, ScenarioTerrain } from '@hexhaven/shared';
+import type { BoardGeometry, GameState, HarborType, HexId, ScenarioTerrain } from '@hexhaven/shared';
+import { RESOURCE_GLYPH } from '../hud/constants';
 import { SEA, TERRAIN_FILL } from '../board/palette';
+import { TOKEN_RADIUS } from './constants';
 import { hexWorldCenter, type WorldVec3 } from './coords';
 import { buildHexPrismGeometry } from './hexGeometryBuilders';
+import { computeHarborTiles, type HarborTile } from './harborPlacement';
+import { GlyphMarker3D } from './overlays/GlyphMarker3D';
 import { computeSeaHexRing, type RingHex } from './seaHexRing';
-import { hasStlCoverage, hexYaw, pickRotationStep, pickTerrainVariant, TerrainSTLLoader } from './terrainStlModels';
+import {
+  hasStlCoverage,
+  hexYaw,
+  modelHeight,
+  pickRotationStep,
+  pickTerrainVariant,
+  TerrainSTLLoader,
+} from './terrainStlModels';
 import { terrainSurfaceTextures } from './terrainTexture';
 
 type BoardState = GameState['board'];
@@ -84,23 +102,49 @@ export function HexTiles({ board, geometry, hexTerrain }: HexTilesProps) {
   // as ordinary `stlHexes` entries), so they don't need synthetic filler.
   const seaRing = useMemo<RingHex[]>(() => (anySeaHex ? [] : computeSeaHexRing(geometry)), [geometry, anySeaHex]);
 
+  // T-1505 rework: which sea tile (real hex or ring hex) each `board.harbors` edge lands on, keyed
+  // for O(1) lookup in the two render loops below (a hex id, or a ring's `q,r` key — a real HexId and
+  // a ring position never collide since the ring is only ever populated with positions that ARE NOT
+  // real board hexes, see `seaHexRing.ts`).
+  const { harborByHexId, harborByRingKey } = useMemo(() => {
+    const tiles = computeHarborTiles(board, geometry, hexTerrain, seaRing);
+    const harborByHexId = new Map<HexId, HarborTile>();
+    const harborByRingKey = new Map<string, HarborTile>();
+    for (const tile of tiles) {
+      if (tile.target.kind === 'hex') harborByHexId.set(tile.target.hexId, tile);
+      else harborByRingKey.set(`${tile.target.q},${tile.target.r}`, tile);
+    }
+    return { harborByHexId, harborByRingKey };
+  }, [board, geometry, hexTerrain, seaRing]);
+
   return (
     <group>
       {[...proceduralByTerrain.entries()].map(([terrain, matrices]) => (
         <TerrainInstancedTiles key={terrain} terrain={terrain} matrices={matrices} geometry={tileGeometry} />
       ))}
-      {stlHexes.map(({ id, center, terrain }) => (
-        <TerrainStlTile key={`t${id}`} terrain={terrain} seed={id} center={center} fallbackGeometry={tileGeometry} />
-      ))}
-      {seaRing.map((ring) => (
-        <TerrainStlTile
-          key={`ring${ring.q},${ring.r}`}
-          terrain="sea"
-          seed={ring.seed}
-          center={hexWorldCenter(ring)}
-          fallbackGeometry={tileGeometry}
-        />
-      ))}
+      {stlHexes.map(({ id, center, terrain }) => {
+        const harbor = terrain === 'sea' ? harborByHexId.get(id) : undefined;
+        if (harbor) {
+          return <HarborStlTile key={`t${id}`} harbor={harbor} center={center} fallbackGeometry={tileGeometry} />;
+        }
+        return <TerrainStlTile key={`t${id}`} terrain={terrain} seed={id} center={center} fallbackGeometry={tileGeometry} />;
+      })}
+      {seaRing.map((ring) => {
+        const harbor = harborByRingKey.get(`${ring.q},${ring.r}`);
+        const center = hexWorldCenter(ring);
+        if (harbor) {
+          return <HarborStlTile key={`ring${ring.q},${ring.r}`} harbor={harbor} center={center} fallbackGeometry={tileGeometry} />;
+        }
+        return (
+          <TerrainStlTile
+            key={`ring${ring.q},${ring.r}`}
+            terrain="sea"
+            seed={ring.seed}
+            center={center}
+            fallbackGeometry={tileGeometry}
+          />
+        );
+      })}
     </group>
   );
 }
@@ -240,6 +284,94 @@ function TerrainStlTile({
           </group>
         </Suspense>
       </TerrainFallbackBoundary>
+    </group>
+  );
+}
+
+// --- T-1505 REWORK: harbors as sea-hex tiles (retires `overlays/Harbors3D.tsx`'s edge-prop version)
+// -------------------------------------------------------------------------------------------------
+// A harbor tile occupies the EXACT slot a plain water tile would (its caller above only renders one
+// or the other, never both) — so if its own STL fails to load, falling back to NOTHING (as the
+// retired prop version did, reasonably, since it was just an accent) would leave a hole in the sea
+// ring; it must fall back to the ordinary plain-water tile instead, same discipline as every other
+// STL tile in this file.
+
+/** A flat tint for every harbor model (user: single colour, no multicolour — same convention every
+ *  STL tile in this file follows) — a warm wood/hull tone distinct from the water tint so a harbor
+ *  tile still reads as a distinct piece against its plain-water neighbours. */
+const HARBOR_TILE_COLOR = '#8a6a42';
+
+const HARBOR_LABEL_FILL = '#efe4c6';
+const HARBOR_LABEL_TEXT = '#2b2416'; // matches board/palette.ts's INK
+
+function HarborModelMesh({ url }: { url: string }) {
+  const geometry = useLoader(TerrainSTLLoader, url);
+  return <mesh castShadow receiveShadow geometry={geometry}><meshStandardMaterial color={HARBOR_TILE_COLOR} roughness={0.75} metalness={0.05} side={DoubleSide} /></mesh>;
+}
+
+/** Billboarded ratio + resource-icon label (carried over from the retired prop version) so the 3:1/
+ *  2:1 trade ratio stays legible at any camera angle, floating above the harbor model's own measured
+ *  height. */
+function HarborRatioLabel({ type, height }: { type: HarborType; height: number }) {
+  const label = type === 'generic' ? '3:1' : '2:1';
+  const labelY = height + TOKEN_RADIUS * 0.5;
+  if (type === 'generic') {
+    return (
+      <GlyphMarker3D
+        position={[0, labelY, 0]}
+        radius={TOKEN_RADIUS * 0.85}
+        glyph={label}
+        fill={HARBOR_LABEL_FILL}
+        fillOpacity={0.92}
+        textColor={HARBOR_LABEL_TEXT}
+      />
+    );
+  }
+  // Resource harbor: icon above the ratio (mirrors BoardView.tsx's two-line "icon over 2:1" layout).
+  return (
+    <group>
+      <GlyphMarker3D position={[0, labelY + TOKEN_RADIUS * 0.55, 0]} radius={TOKEN_RADIUS * 0.7} glyph={RESOURCE_GLYPH[type]} fill="none" />
+      <GlyphMarker3D
+        position={[0, labelY, 0]}
+        radius={TOKEN_RADIUS * 0.6}
+        glyph={label}
+        fill={HARBOR_LABEL_FILL}
+        fillOpacity={0.92}
+        textColor={HARBOR_LABEL_TEXT}
+        fontSize={TOKEN_RADIUS * 0.5}
+      />
+    </group>
+  );
+}
+
+/** The sea tile a `board.harbors` edge lands on (`harborPlacement.ts`'s `computeHarborTiles`) —
+ *  renders the ship/lighthouse model (`harbor.variant`) rotated to `harbor.yaw` (already the
+ *  island-facing direction PLUS the user-calibrated `HARBOR_MODEL_YAW_OFFSET`, computed once in
+ *  `harborPlacement.ts` — this component applies it verbatim, no further rotation math here) instead
+ *  of the plain water tile this position would otherwise show, plus the billboarded ratio/resource
+ *  label. Falls back to plain water (never nothing) while loading or on a load error — see this
+ *  section's top comment. */
+function HarborStlTile({
+  harbor,
+  center,
+  fallbackGeometry,
+}: {
+  harbor: HarborTile;
+  center: WorldVec3;
+  fallbackGeometry: BufferGeometry;
+}) {
+  const fallback = <TerrainFallbackMesh terrain="sea" geometry={fallbackGeometry} />;
+  const height = modelHeight(harbor.variant);
+  return (
+    <group position={[center.x, center.y, center.z]}>
+      <TerrainFallbackBoundary fallback={fallback}>
+        <Suspense fallback={fallback}>
+          <group rotation={[0, harbor.yaw, 0]}>
+            <HarborModelMesh url={harbor.variant.url} />
+          </group>
+        </Suspense>
+      </TerrainFallbackBoundary>
+      <HarborRatioLabel type={harbor.type} height={height} />
     </group>
   );
 }

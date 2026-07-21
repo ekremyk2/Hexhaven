@@ -14,14 +14,16 @@
 import { Component, Suspense, useMemo, type ReactNode } from 'react';
 import { useLoader } from '@react-three/fiber';
 import { DoubleSide, MeshStandardMaterial } from 'three';
-import { CityBody, RoadBody, SettlementBody } from './PieceBodies';
+import { CityBody, RoadBody, ShipBody, SettlementBody } from './PieceBodies';
 import {
   CitySTLLoader,
   RoadSTLLoader,
   SettlementSTLLoader,
+  ShipSTLLoader,
   cityStlUrl,
   roadStlUrl,
   settlementStlUrl,
+  shipStlUrl,
 } from './stlModels';
 
 /** Requirement 3's "polished game-render look — clean matte/painted, slight sheen": shinier than
@@ -74,6 +76,11 @@ function RoadMesh({ color }: { color: string }) {
   return <mesh castShadow receiveShadow geometry={geometry} material={useMemo(() => seatMaterial(color), [color])} />;
 }
 
+function ShipMesh({ color }: { color: string }) {
+  const geometry = useLoader(ShipSTLLoader, shipStlUrl);
+  return <mesh castShadow receiveShadow geometry={geometry} material={useMemo(() => seatMaterial(color), [color])} />;
+}
+
 /** Settlement — STL geometry (shared/cached by `useLoader`, normalized once by `SettlementSTLLoader`)
  *  tinted to `color`, falling back to `PieceBodies.tsx`'s `SettlementBody` while loading or on
  *  failure. Same local-space convention as every other piece body: origin at ground level, caller
@@ -112,6 +119,23 @@ export function RoadModel({ color }: { color: string }) {
     <StlFallbackBoundary fallback={<RoadBody color={color} />}>
       <Suspense fallback={<RoadBody color={color} />}>
         <RoadMesh color={color} />
+      </Suspense>
+    </StlFallbackBoundary>
+  );
+}
+
+/** Ship (T-1505 part 2) — the user-supplied `ship1.stl` (Seafarers ships render on sea EDGES like
+ *  roads, `RoadModel`'s `'length'` fit-mode sibling), falling back to `PieceBodies.tsx`'s procedural
+ *  `ShipBody` (hull + mast + sail) while loading or on failure. The robber/pirate stay procedural —
+ *  no STL supplied for either (task's explicit "out of scope") — only the ship swaps here. Any extra
+ *  yaw needed to correct the model's own authored "front"/bow direction is applied by the CALLER
+ *  (`Pieces3D.tsx`'s `SHIP_MODEL_YAW_OFFSET`, folded into the wrapping group's rotation alongside the
+ *  edge's own direction), not here — this component only knows the seat colour. */
+export function ShipModel({ color }: { color: string }) {
+  return (
+    <StlFallbackBoundary fallback={<ShipBody color={color} />}>
+      <Suspense fallback={<ShipBody color={color} />}>
+        <ShipMesh color={color} />
       </Suspense>
     </StlFallbackBoundary>
   );

@@ -17,8 +17,11 @@ const SQRT3 = Math.sqrt(3);
 
 /** Mirrors `packages/shared/src/geometry.ts`'s own `NEIGHBOR_DELTAS` (E, W, NE, NW, SE, SW) exactly —
  *  see that file's comment for the derivation. Any hex adjacent to a board hex, in one of these 6
- *  directions, that ISN'T itself a board hex is a ring candidate. */
-const NEIGHBOR_DELTAS: readonly { q: number; r: number }[] = [
+ *  directions, that ISN'T itself a board hex is a ring candidate. Exported for `harborPlacement.ts`
+ *  (T-1505 rework): a harbor on a pure-boundary edge (base board — no real sea hex in `geometry` at
+ *  all) needs to find WHICH of a land hex's 6 axial neighbors its edge points toward, to look that
+ *  position up in this module's ring. */
+export const NEIGHBOR_DELTAS: readonly { q: number; r: number }[] = [
   { q: 1, r: 0 },
   { q: -1, r: 0 },
   { q: 1, r: -1 },

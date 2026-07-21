@@ -40,7 +40,6 @@ import { FogCover } from './FogCover';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
 import { HexTiles } from './HexTiles';
 import { NumberToken3D } from './NumberToken3D';
-import { Harbors3D } from './overlays/Harbors3D';
 import { SceneEnvironment } from './SceneEnvironment';
 import { Sea } from './Sea';
 import { Table } from './Table';
@@ -211,8 +210,11 @@ export function Board3D({
           color="#2b1a10"
           frames={Infinity}
         />
+        {/* T-1505 rework: harbors render as sea-hex tiles (a ship/lighthouse model replacing the
+            plain water tile at the harbor's location) — folded into `<HexTiles>` itself, since which
+            tile a harbor lands on depends on the SAME sea-hex-ring computation that component already
+            owns (`harborPlacement.ts`'s `computeHarborTiles`). No separate overlay to mount here. */}
         <HexTiles board={board} geometry={geometry} hexTerrain={hexTerrain} />
-        <Harbors3D board={board} geometry={geometry} hexTerrain={hexTerrain} />
 
         {geometry.hexes.map((hex) => {
           const tile = board.hexes[hex.id];

@@ -203,6 +203,8 @@ export default function Game() {
           >
             <Pieces3D
               geometry={geometry}
+              board={view.board}
+              hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
               roads={roads}
               settlements={settlements}
               cities={cities}

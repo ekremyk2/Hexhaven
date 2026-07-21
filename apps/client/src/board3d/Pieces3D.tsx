@@ -21,7 +21,9 @@ import {
   GEOMETRY,
   type BoardGeometry,
   type EdgeId,
+  type GameState,
   type HexId,
+  type ScenarioTerrain,
   type Seat,
   type VertexId,
 } from '@hexhaven/shared';
@@ -32,6 +34,7 @@ import { edgeWorldPosition, hexWorldCenter, vertexWorldPosition, type WorldVec3 
 import { TILE_HEIGHT } from './constants';
 import { PirateBody, RobberBody, ShipBody } from './PieceBodies';
 import { HOP_DURATION_MS, PLACEMENT_DURATION_MS, hopOffset, placementDropOffset, placementScale } from './pieceAnimation';
+import { edgeTopY, hexTopY, vertexTopY } from './tileElevation';
 // T-1503: settlement/city/road now render the user-supplied STL models (tinted per seat), falling
 // back to their `PieceBodies` procedural equivalents on load failure — see `StlPieceModels.tsx`.
 // Robber/ship/pirate stay procedural (no STL supplied for them), unchanged from T-1401.
@@ -45,6 +48,12 @@ const HOP_ARC_HEIGHT = TILE_HEIGHT * 1.6;
 
 export interface Pieces3DProps {
   geometry?: BoardGeometry;
+  /** T-1505: which terrain each hex shows (drives sculpted-tile heights, `tileElevation.ts`) — same
+   *  `board`/`hexTerrain` contract every other board3d component already takes. Omitting `board`
+   *  (e.g. a caller with no live game state) falls back to the flat `TILE_HEIGHT` everywhere, exactly
+   *  this component's pre-T-1505 behaviour. */
+  board?: Pick<GameState['board'], 'hexes'>;
+  hexTerrain?: readonly ScenarioTerrain[];
   roads?: { edge: EdgeId; seat: Seat }[];
   settlements?: { vertex: VertexId; seat: Seat }[];
   cities?: { vertex: VertexId; seat: Seat }[];
@@ -55,8 +64,12 @@ export interface Pieces3DProps {
   pirate?: HexId | null;
 }
 
+const NO_HEXES: Pick<GameState['board'], 'hexes'> = { hexes: [] };
+
 export function Pieces3D({
   geometry = GEOMETRY,
+  board,
+  hexTerrain,
   roads = [],
   settlements = [],
   cities = [],
@@ -65,6 +78,7 @@ export function Pieces3D({
   pirate = null,
 }: Pieces3DProps) {
   const reducedMotion = usePrefersReducedMotion();
+  const boardHexes = board ?? NO_HEXES;
 
   const vertexOf = (id: VertexId) => {
     const v = geometry.vertices[id];
@@ -91,12 +105,13 @@ export function Pieces3D({
   }, [robber]);
   const hop = robber != null ? robberHopOffset(prevRobberHexRef.current, robber, geometry) : null;
 
-  const pirateCenter = pirate != null ? hexWorldCenter(hexOf(pirate), TILE_HEIGHT) : null;
+  const pirateCenter =
+    pirate != null ? hexWorldCenter(hexOf(pirate), hexTopY(boardHexes, hexTerrain, pirate)) : null;
 
   return (
     <group>
       {roads.map(({ edge: eid, seat }, i) => {
-        const pos = edgeWorldPosition(edgeOf(eid), TILE_HEIGHT);
+        const pos = edgeWorldPosition(edgeOf(eid), edgeTopY(boardHexes, geometry, hexTerrain, eid));
         return (
           <PlacementGroup key={`r${eid}-${i}`} position={pos} rotationY={pos.rotationY} reducedMotion={reducedMotion}>
             <RoadModel color={PLAYER_COLORS[seat]} />
@@ -105,7 +120,7 @@ export function Pieces3D({
       })}
 
       {ships.map(({ edge: eid, seat }, i) => {
-        const pos = edgeWorldPosition(edgeOf(eid), TILE_HEIGHT);
+        const pos = edgeWorldPosition(edgeOf(eid), edgeTopY(boardHexes, geometry, hexTerrain, eid));
         return (
           <PlacementGroup key={`sh${eid}-${i}`} position={pos} rotationY={pos.rotationY} reducedMotion={reducedMotion}>
             <ShipBody color={PLAYER_COLORS[seat]} />
@@ -114,7 +129,7 @@ export function Pieces3D({
       })}
 
       {settlements.map(({ vertex: vid, seat }, i) => {
-        const pos = vertexWorldPosition(vertexOf(vid), TILE_HEIGHT);
+        const pos = vertexWorldPosition(vertexOf(vid), vertexTopY(boardHexes, geometry, hexTerrain, vid));
         return (
           <PlacementGroup key={`s${vid}-${i}`} position={pos} reducedMotion={reducedMotion}>
             <SettlementModel color={PLAYER_COLORS[seat]} />
@@ -123,7 +138,7 @@ export function Pieces3D({
       })}
 
       {cities.map(({ vertex: vid, seat }, i) => {
-        const pos = vertexWorldPosition(vertexOf(vid), TILE_HEIGHT);
+        const pos = vertexWorldPosition(vertexOf(vid), vertexTopY(boardHexes, geometry, hexTerrain, vid));
         return (
           <PlacementGroup key={`ci${vid}-${i}`} position={pos} reducedMotion={reducedMotion}>
             <CityModel color={PLAYER_COLORS[seat]} />
@@ -137,7 +152,7 @@ export function Pieces3D({
           hexKey={robber}
           offsetDx={hop?.dx ?? 0}
           offsetDz={hop?.dy ?? 0}
-          targetPosition={hexWorldCenter(hexOf(robber), TILE_HEIGHT)}
+          targetPosition={hexWorldCenter(hexOf(robber), hexTopY(boardHexes, hexTerrain, robber))}
           reducedMotion={reducedMotion}
           arcHeight={HOP_ARC_HEIGHT}
         >

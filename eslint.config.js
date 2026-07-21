@@ -125,5 +125,17 @@ export default [
     rules: {
       "i18n-guard/no-raw-text": "error"
     }
+  },
+  {
+    // T-1505: offline Node preprocessing scripts (e.g. `optimize-models.mjs`) — never shipped to the
+    // browser, run only via `pnpm run optimize-models`. No other block here declares Node's ambient
+    // globals (the browser client never needs them), so this one grants just the two this script
+    // actually uses rather than pulling in a whole `globals` package dependency for one file.
+    files: ["apps/client/scripts/**/*.mjs"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: { console: "readonly", Buffer: "readonly" }
+    }
   }
 ];

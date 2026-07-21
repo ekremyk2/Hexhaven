@@ -37,3 +37,8 @@ Thumbs.db
 docs/
 CLAUDE.md
 AGENTS.md
+
+# T-1505: print-resolution raw source STL models (~35 MB) — never shipped. The optimized/decimated
+# copies actually loaded by the client (`apps/client/scripts/optimize-models.mjs`'s output) live in
+# apps/client/src/board3d/models/opt/ and ARE committed.
+apps/client/src/board3d/models/raw/

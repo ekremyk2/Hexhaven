@@ -40,9 +40,11 @@ import { FogCover } from './FogCover';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
 import { HexTiles } from './HexTiles';
 import { NumberToken3D } from './NumberToken3D';
+import { Harbors3D } from './overlays/Harbors3D';
 import { SceneEnvironment } from './SceneEnvironment';
 import { Sea } from './Sea';
 import { Table } from './Table';
+import { hexTopY } from './tileElevation';
 import { useMobileBudget } from './mobileBudget';
 
 export interface Board3DProps {
@@ -210,14 +212,19 @@ export function Board3D({
           frames={Infinity}
         />
         <HexTiles board={board} geometry={geometry} hexTerrain={hexTerrain} />
+        <Harbors3D board={board} geometry={geometry} hexTerrain={hexTerrain} />
 
         {geometry.hexes.map((hex) => {
           const tile = board.hexes[hex.id];
           if (!tile) return null;
           const terrain: ScenarioTerrain = hexTerrain?.[hex.id] ?? tile.terrain;
-          const tokenCenter = hexWorldCenter(hex, TILE_HEIGHT + TOKEN_HOVER);
+          // T-1505: sculpted STL terrain tiles are taller than the flat procedural prism (and vary
+          // hex-to-hex, by terrain AND by the deterministically-picked model variant) — every hex's
+          // token/fog floats off ITS OWN tile's real measured top instead of a uniform TILE_HEIGHT.
+          const tokenBase = hexTopY(board, hexTerrain, hex.id);
+          const tokenCenter = hexWorldCenter(hex, tokenBase + TOKEN_HOVER);
           if (fogHexes.has(hex.id)) {
-            const fogCenter = hexWorldCenter(hex, TILE_HEIGHT + TOKEN_HOVER * 0.4);
+            const fogCenter = hexWorldCenter(hex, tokenBase + TOKEN_HOVER * 0.4);
             return <FogCover key={`fog${hex.id}`} position={[fogCenter.x, fogCenter.y, fogCenter.z]} geometry={capGeometry} />;
           }
           if (hiddenNumbers) {

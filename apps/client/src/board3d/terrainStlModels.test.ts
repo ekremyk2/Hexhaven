@@ -1,9 +1,14 @@
 // Tests for T-1505's deterministic per-hex model/rotation picks — pure math + string lookups, no
 // react/three/DOM needed (same `environment: "node"` convention as `coords.test.ts`).
 import { describe, expect, it } from 'vitest';
+import { BufferAttribute, BufferGeometry, Float32BufferAttribute } from 'three';
 import type { EdgeId, ScenarioTerrain } from '@hexhaven/shared';
 import {
+  applyHeightBandVertexColors,
+  HARBOR_HEIGHT_BAND,
   hasStlCoverage,
+  heightBandWeight,
+  HEIGHT_BAND_BLEND_FRACTION,
   hexModelHeight,
   hexYaw,
   modelHeight,
@@ -12,6 +17,8 @@ import {
   pickTerrainVariant,
   pickVariantIndex,
   TERRAIN_FOOTPRINT,
+  TERRAIN_HEIGHT_BAND,
+  type HeightBandPalette,
 } from './terrainStlModels';
 
 const STL_TERRAINS: ScenarioTerrain[] = ['hills', 'forest', 'pasture', 'fields', 'mountains', 'desert', 'sea'];
@@ -138,5 +145,126 @@ describe('pickHarborVariant', () => {
     const seen = new Set<string>();
     for (let edgeId = 0; edgeId < 40; edgeId++) seen.add(pickHarborVariant(eid(edgeId)).url);
     expect(seen.size).toBeGreaterThan(1);
+  });
+});
+
+// --- T-1505 polish: height-banded vertex colouring --------------------------------------------------
+
+describe('heightBandWeight', () => {
+  const HEIGHT = 100;
+  const THRESHOLD = 0.4; // threshold Y = 40
+
+  it('is fully base (weight 0) well below the threshold', () => {
+    expect(heightBandWeight(0, HEIGHT, THRESHOLD)).toBe(0);
+  });
+
+  it('is fully feature (weight 1) well above the threshold', () => {
+    expect(heightBandWeight(HEIGHT, HEIGHT, THRESHOLD)).toBe(1);
+  });
+
+  it('sits at the midpoint (weight 0.5) exactly at the threshold', () => {
+    const thresholdY = THRESHOLD * HEIGHT;
+    expect(heightBandWeight(thresholdY, HEIGHT, THRESHOLD)).toBeCloseTo(0.5, 6);
+  });
+
+  it('is monotonically non-decreasing as y rises (no reversal within the blend band)', () => {
+    let prev = -Infinity;
+    for (let y = 0; y <= HEIGHT; y += HEIGHT / 40) {
+      const w = heightBandWeight(y, HEIGHT, THRESHOLD);
+      expect(w).toBeGreaterThanOrEqual(prev - 1e-9);
+      prev = w;
+    }
+  });
+
+  it('stays within [0, 1] everywhere', () => {
+    for (let y = -HEIGHT; y <= HEIGHT * 2; y += HEIGHT / 20) {
+      const w = heightBandWeight(y, HEIGHT, THRESHOLD);
+      expect(w).toBeGreaterThanOrEqual(0);
+      expect(w).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('a wider blend band spreads the transition further from the threshold', () => {
+    const thresholdY = THRESHOLD * HEIGHT;
+    const narrow = heightBandWeight(thresholdY + HEIGHT * 0.02, HEIGHT, THRESHOLD, 0.02);
+    const wide = heightBandWeight(thresholdY + HEIGHT * 0.02, HEIGHT, THRESHOLD, 0.5);
+    // Same offset above threshold: the wide band hasn't fully transitioned yet, the narrow one has.
+    expect(narrow).toBeGreaterThan(wide);
+  });
+
+  it('a degenerate zero/negative model height reads as fully base, never NaN/divide-by-zero', () => {
+    expect(heightBandWeight(5, 0, THRESHOLD)).toBe(0);
+    expect(heightBandWeight(5, -1, THRESHOLD)).toBe(0);
+  });
+
+  it('the module default blend fraction is a small (soft, not abrupt) band', () => {
+    expect(HEIGHT_BAND_BLEND_FRACTION).toBeGreaterThan(0);
+    expect(HEIGHT_BAND_BLEND_FRACTION).toBeLessThan(0.5);
+  });
+});
+
+describe('applyHeightBandVertexColors', () => {
+  const PALETTE: HeightBandPalette = { base: '#000000', feature: '#ffffff', thresholdFraction: 0.5 };
+  const MODEL_HEIGHT = 10;
+
+  function geometryWithYs(ys: number[]): BufferGeometry {
+    const geometry = new BufferGeometry();
+    const positions = new Float32Array(ys.length * 3);
+    ys.forEach((y, i) => {
+      positions[i * 3] = 0;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = 0;
+    });
+    geometry.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    return geometry;
+  }
+
+  // `getAttribute` types as `BufferAttribute | InterleavedBufferAttribute | GLBufferAttribute` for any
+  // key — every attribute built by `geometryWithYs`/`applyHeightBandVertexColors` is a plain
+  // `BufferAttribute`, so this cast is safe and is what lets `.getX()` type-check below.
+  function colorAttr(geometry: BufferGeometry): BufferAttribute {
+    return geometry.getAttribute('color') as BufferAttribute;
+  }
+
+  it('sets a color attribute with one RGB triple per vertex', () => {
+    const geometry = geometryWithYs([0, 5, 10]);
+    applyHeightBandVertexColors(geometry, MODEL_HEIGHT, PALETTE);
+    const color = colorAttr(geometry);
+    expect(color).toBeDefined();
+    expect(color.count).toBe(3);
+    expect(color.itemSize).toBe(3);
+  });
+
+  it('a vertex at y=0 gets (close to) the base colour; one at the model top gets the feature colour', () => {
+    const geometry = geometryWithYs([0, MODEL_HEIGHT]);
+    applyHeightBandVertexColors(geometry, MODEL_HEIGHT, PALETTE);
+    const color = colorAttr(geometry);
+    // base = black (0,0,0), feature = white (1,1,1).
+    expect(color.getX(0)).toBeCloseTo(0, 2);
+    expect(color.getX(1)).toBeCloseTo(1, 2);
+  });
+
+  it('is idempotent — a second call on a geometry that already has colours is a no-op', () => {
+    const geometry = geometryWithYs([0, MODEL_HEIGHT]);
+    applyHeightBandVertexColors(geometry, MODEL_HEIGHT, PALETTE);
+    const first = colorAttr(geometry);
+    // Call again with a wildly different palette — if the guard works, colours must NOT change.
+    applyHeightBandVertexColors(geometry, MODEL_HEIGHT, { base: '#ff00ff', feature: '#00ff00', thresholdFraction: 0.1 });
+    const second = colorAttr(geometry);
+    expect(second).toBe(first); // same attribute object — never replaced.
+    expect(second.getX(0)).toBeCloseTo(0, 2);
+  });
+
+  it('every terrain with a height-band palette has a threshold within (0, 1)', () => {
+    for (const terrain of Object.keys(TERRAIN_HEIGHT_BAND) as ScenarioTerrain[]) {
+      const palette = TERRAIN_HEIGHT_BAND[terrain]!;
+      expect(palette.thresholdFraction).toBeGreaterThan(0);
+      expect(palette.thresholdFraction).toBeLessThan(1);
+    }
+  });
+
+  it('the harbour palette also has a threshold within (0, 1)', () => {
+    expect(HARBOR_HEIGHT_BAND.thresholdFraction).toBeGreaterThan(0);
+    expect(HARBOR_HEIGHT_BAND.thresholdFraction).toBeLessThan(1);
   });
 });

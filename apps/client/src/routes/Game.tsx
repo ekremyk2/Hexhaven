@@ -214,6 +214,8 @@ export default function Game() {
             />
             <Interaction3D
               geometry={geometry}
+              board={view.board}
+              hexTerrain={seafarers?.hexTerrain ?? epExt?.seaMap}
               mode={mode}
               targets={targets}
               onPick={onPick}

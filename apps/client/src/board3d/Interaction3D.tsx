@@ -26,7 +26,15 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode, type RefObject } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { DoubleSide, type MeshStandardMaterial } from 'three';
-import { GEOMETRY, type BoardGeometry, type GeometryEdge, type GeometryHex, type GeometryVertex } from '@hexhaven/shared';
+import {
+  GEOMETRY,
+  type BoardGeometry,
+  type GameState,
+  type GeometryEdge,
+  type GeometryHex,
+  type GeometryVertex,
+  type ScenarioTerrain,
+} from '@hexhaven/shared';
 import type { TargetMode } from '../store/uiMode';
 import { edgeWorldPosition, hexWorldCenter, vertexWorldPosition } from './coords';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
@@ -37,13 +45,18 @@ import {
   EDGE_HIT_LENGTH,
   EDGE_HIT_RADIUS,
   exceedsDragThreshold,
-  HEX_MARKER_ELEVATION,
+  HEX_MARKER_LIFT,
   nextHoverAfterTargetsChange,
   pulseOpacity,
-  VERTEX_EDGE_MARKER_ELEVATION,
+  VERTEX_EDGE_MARKER_LIFT,
   VERTEX_GHOST_RADIUS,
   VERTEX_HIT_RADIUS,
 } from './interactionTargets';
+// T-1505 polish (marker grounding): placement markers/ghosts used to float at a flat elevation
+// (`TILE_HEIGHT`-based) that ignored sculpted STL terrain — they now rest on the SAME per-vertex/
+// edge/hex sculpted top Y that `Pieces3D.tsx` already uses, so a settlement ghost on a vertex sits
+// exactly where the real settlement will land.
+import { edgeTopY, hexTopY, vertexTopY } from './tileElevation';
 
 const PULSE_MIN = 0.35;
 const PULSE_MAX = 0.6;
@@ -65,6 +78,12 @@ const prefersReducedMotion = (): boolean =>
 
 export interface Interaction3DProps {
   geometry?: BoardGeometry;
+  /** T-1505 polish: which terrain each hex shows, so markers can rest on the sculpted STL rim
+   *  instead of a flat elevation — same `board`/`hexTerrain` contract every other board3d component
+   *  takes (`Pieces3D.tsx`, `Board3D.tsx`). Omitting `board` falls back to the flat `TILE_HEIGHT`
+   *  everywhere, same as before this task. */
+  board?: Pick<GameState['board'], 'hexes'>;
+  hexTerrain?: readonly ScenarioTerrain[];
   /** Which category is currently listening; `null` means nothing is interactive. */
   mode: TargetMode | null;
   /** Ids (within `mode`'s category) that are currently legal — only these ever receive pointer
@@ -75,6 +94,8 @@ export interface Interaction3DProps {
    *  `PLAYER_COLORS`), passed straight through from the SAME value `Game.tsx` feeds the SVG layer. */
   ghostColor: string;
 }
+
+const NO_HEXES: Pick<GameState['board'], 'hexes'> = { hexes: [] };
 
 /** Tracks whether the pointer has moved past `DRAG_THRESHOLD_PX` since its last `pointerdown` on the
  *  canvas — read (not subscribed to) by every target's `onClick` handler so an orbit-rotate drag
@@ -167,16 +188,21 @@ function targetPointerProps(handlers: TargetHandlers) {
 
 function VertexTarget({
   vertex,
+  topY,
   color,
   hovered,
   handlers,
 }: {
   vertex: GeometryVertex;
+  /** World Y the marker rests at — the vertex's own sculpted top (`tileElevation.ts`'s `vertexTopY`)
+   *  plus `VERTEX_EDGE_MARKER_LIFT`, computed by the caller (`Interaction3D`) so every vertex can use
+   *  a DIFFERENT top-Y depending on which hex(es)/terrain it touches. */
+  topY: number;
   color: string;
   hovered: boolean;
   handlers: TargetHandlers;
 }) {
-  const w = vertexWorldPosition(vertex, VERTEX_EDGE_MARKER_ELEVATION);
+  const w = vertexWorldPosition(vertex, topY);
   const position: [number, number, number] = [w.x, w.y, w.z];
   const ghostMatRef = useGhostMaterial(hovered);
 
@@ -206,16 +232,20 @@ function VertexTarget({
 
 function EdgeTarget({
   edge,
+  topY,
   color,
   hovered,
   handlers,
 }: {
   edge: GeometryEdge;
+  /** World Y the marker rests at — the edge's own sculpted top (`tileElevation.ts`'s `edgeTopY`)
+   *  plus `VERTEX_EDGE_MARKER_LIFT`, computed by the caller. */
+  topY: number;
   color: string;
   hovered: boolean;
   handlers: TargetHandlers;
 }) {
-  const w = edgeWorldPosition(edge, VERTEX_EDGE_MARKER_ELEVATION);
+  const w = edgeWorldPosition(edge, topY);
   const position: [number, number, number] = [w.x, w.y, w.z];
   const ghostMatRef = useGhostMaterial(hovered);
   // A capsule's local long axis is Y by construction; rotating the mesh -90deg around local Z first
@@ -255,18 +285,22 @@ function EdgeTarget({
 
 function HexTarget({
   hex,
+  topY,
   capGeometry,
   color,
   hovered,
   handlers,
 }: {
   hex: GeometryHex;
+  /** World Y the marker rests at — the hex's own sculpted top (`tileElevation.ts`'s `hexTopY`) plus
+   *  `HEX_MARKER_LIFT`, computed by the caller. */
+  topY: number;
   capGeometry: ReturnType<typeof buildHexCapGeometry>;
   color: string;
   hovered: boolean;
   handlers: TargetHandlers;
 }) {
-  const c = hexWorldCenter(hex, HEX_MARKER_ELEVATION);
+  const c = hexWorldCenter(hex, topY);
   const position: [number, number, number] = [c.x, c.y, c.z];
   const ghostMatRef = useGhostMaterial(hovered);
 
@@ -294,7 +328,16 @@ function HexTarget({
   );
 }
 
-export function Interaction3D({ geometry = GEOMETRY, mode, targets, onPick, ghostColor }: Interaction3DProps) {
+export function Interaction3D({
+  geometry = GEOMETRY,
+  board,
+  hexTerrain,
+  mode,
+  targets,
+  onPick,
+  ghostColor,
+}: Interaction3DProps) {
+  const boardHexes = board ?? NO_HEXES;
   const [hovered, setHovered] = useState<number | null>(null);
   const draggedRef = useOrbitClickGuard();
   const { gl } = useThree();
@@ -332,13 +375,27 @@ export function Interaction3D({ geometry = GEOMETRY, mode, targets, onPick, ghos
     children = geometry.vertices
       .filter((v) => activeIds.has(v.id))
       .map((v) => (
-        <VertexTarget key={`ivt${v.id}`} vertex={v} color={ghostColor} hovered={hovered === v.id} handlers={makeHandlers(v.id)} />
+        <VertexTarget
+          key={`ivt${v.id}`}
+          vertex={v}
+          topY={vertexTopY(boardHexes, geometry, hexTerrain, v.id) + VERTEX_EDGE_MARKER_LIFT}
+          color={ghostColor}
+          hovered={hovered === v.id}
+          handlers={makeHandlers(v.id)}
+        />
       ));
   } else if (mode === 'edge') {
     children = geometry.edges
       .filter((e) => activeIds.has(e.id))
       .map((e) => (
-        <EdgeTarget key={`iet${e.id}`} edge={e} color={ghostColor} hovered={hovered === e.id} handlers={makeHandlers(e.id)} />
+        <EdgeTarget
+          key={`iet${e.id}`}
+          edge={e}
+          topY={edgeTopY(boardHexes, geometry, hexTerrain, e.id) + VERTEX_EDGE_MARKER_LIFT}
+          color={ghostColor}
+          hovered={hovered === e.id}
+          handlers={makeHandlers(e.id)}
+        />
       ));
   } else if (mode === 'hex' && capGeometry) {
     children = geometry.hexes
@@ -347,6 +404,7 @@ export function Interaction3D({ geometry = GEOMETRY, mode, targets, onPick, ghos
         <HexTarget
           key={`iht${h.id}`}
           hex={h}
+          topY={hexTopY(boardHexes, hexTerrain, h.id) + HEX_MARKER_LIFT}
           capGeometry={capGeometry}
           color={ghostColor}
           hovered={hovered === h.id}

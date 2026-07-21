@@ -9,10 +9,10 @@ import {
   EDGE_GHOST_RADIUS,
   EDGE_HIT_RADIUS,
   exceedsDragThreshold,
-  HEX_MARKER_ELEVATION,
+  HEX_MARKER_LIFT,
   nextHoverAfterTargetsChange,
   pulseOpacity,
-  VERTEX_EDGE_MARKER_ELEVATION,
+  VERTEX_EDGE_MARKER_LIFT,
   VERTEX_GHOST_RADIUS,
   VERTEX_HIT_RADIUS,
 } from './interactionTargets';
@@ -123,8 +123,8 @@ describe('marker sizing constants', () => {
     expect(EDGE_HIT_RADIUS).toBeGreaterThan(EDGE_GHOST_RADIUS);
   });
 
-  it('markers sit at a positive elevation above the tile baseline (not buried in the board)', () => {
-    expect(VERTEX_EDGE_MARKER_ELEVATION).toBeGreaterThan(0);
-    expect(HEX_MARKER_ELEVATION).toBeGreaterThan(0);
+  it('markers sit at a positive lift above their target surface (not buried in the board)', () => {
+    expect(VERTEX_EDGE_MARKER_LIFT).toBeGreaterThan(0);
+    expect(HEX_MARKER_LIFT).toBeGreaterThan(0);
   });
 });

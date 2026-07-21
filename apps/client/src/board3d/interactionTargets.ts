@@ -7,7 +7,7 @@
 // here is what keeps this task's behaviour testable anyway.
 import type { BoardGeometry } from '@hexhaven/shared';
 import { HEX_SIZE } from '../board/palette';
-import { TILE_HEIGHT, TOKEN_HOVER } from './constants';
+import { TOKEN_HOVER } from './constants';
 import type { TargetMode } from '../store/uiMode';
 
 // ---- Marker sizing (world units, HEX_SIZE-relative — same convention as constants.ts) ------------
@@ -31,14 +31,19 @@ export const EDGE_GHOST_RADIUS = HEX_SIZE * 0.085;
 export const EDGE_HIT_LENGTH = HEX_SIZE * 0.5;
 export const EDGE_HIT_RADIUS = HEX_SIZE * 0.16;
 
-/** Vertex/edge markers float just above the tile surface so they read as a piece resting on the
- *  board rather than half-buried in it (a sphere/capsule centered exactly at the surface would poke
- *  halfway through the tile mesh). */
-export const VERTEX_EDGE_MARKER_ELEVATION = TILE_HEIGHT + VERTEX_GHOST_RADIUS;
+/** How far ABOVE a target's own resting surface a vertex/edge marker floats, so it reads as a piece
+ *  resting on the board rather than half-buried in it (a sphere/capsule centered exactly at the
+ *  surface would poke halfway through the tile mesh). T-1505 polish: this used to be added on top of
+ *  the flat `TILE_HEIGHT` unconditionally, which left markers hovering above taller sculpted STL
+ *  terrain tiles — `Interaction3D.tsx` now adds this LIFT on top of the per-vertex/edge sculpted top
+ *  Y instead (`tileElevation.ts`'s `vertexTopY`/`edgeTopY`, the same helpers pieces already rest on),
+ *  so a settlement/city/road ghost sits exactly where the real piece will land. */
+export const VERTEX_EDGE_MARKER_LIFT = VERTEX_GHOST_RADIUS;
 
-/** Hex markers sit above the number-token layer (`NumberToken3D`'s own `TILE_HEIGHT + TOKEN_HOVER`)
- *  so a robber/pirate/hex-piece highlight never z-fights the token it shares the tile with. */
-export const HEX_MARKER_ELEVATION = TILE_HEIGHT + TOKEN_HOVER * 3;
+/** Same lift, above a hex's own sculpted top Y (`tileElevation.ts`'s `hexTopY`) — clears the
+ *  number-token layer (`NumberToken3D`'s own `hexTopY + TOKEN_HOVER`) so a robber/pirate/hex-piece
+ *  highlight never z-fights the token it shares the tile with. */
+export const HEX_MARKER_LIFT = TOKEN_HOVER * 3;
 
 // ---- Legal-target enumeration ----------------------------------------------------------------
 

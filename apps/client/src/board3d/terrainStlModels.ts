@@ -26,9 +26,9 @@ import pasture2Url from './models/opt/pasture2.stl?url';
 import desert1Url from './models/opt/desert1.stl?url';
 import waterUrl from './models/opt/water.stl?url';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
-import type { BufferGeometry } from 'three';
+import { BufferAttribute, Color, type BufferGeometry } from 'three';
 import type { EdgeId, ScenarioTerrain } from '@hexhaven/shared';
-import { HEX_SIZE } from '../board/palette';
+import { HEX_SIZE, SEA } from '../board/palette';
 import { normalizeStlGeometry } from './stlModels';
 
 /** Target footprint every terrain/water/harbor tile model normalizes to — the real hex tile's own
@@ -181,4 +181,118 @@ export class TerrainSTLLoader extends STLLoader {
   override parse(data: ArrayBuffer | string): BufferGeometry {
     return normalizeStlGeometry(super.parse(data), TERRAIN_FOOTPRINT, 'footprint');
   }
+}
+
+// --- T-1505 polish: height-banded vertex colouring (terrains + harbour) ----------------------------
+// STL models are single-colour; the user asked for each model's VERTICES to be coloured by their own
+// local Y (base at 0, per `normalizeStlGeometry`'s "sit at y=0" convention, up to the model's own
+// normalized `modelHeight`) — a BASE colour below a per-terrain threshold blending into a FEATURE
+// colour above it, across a small smooth band. Baked ONCE into a `color` `BufferAttribute` on the
+// geometry (see `applyHeightBandVertexColors`'s cache-guard below) — the same "mutate the shared
+// cached geometry object exactly once" discipline `stlModels.ts`'s `normalizeStlGeometry` already
+// uses for shape, just triggered from the mesh component (`HexTiles.tsx`) instead of the loader's
+// `parse()` (the ONE shared `TerrainSTLLoader` class serves every terrain, so it has no per-terrain
+// palette to reach for at parse-time — the calling mesh component knows `terrain` already).
+
+/** One terrain's (or the harbour model's) base->feature palette. ALL user-tunable — the user will
+ *  calibrate these once terrains/harbours actually render on :8080. */
+export interface HeightBandPalette {
+  /** Colour below the threshold (earth/rock/soil/water at the model's base). CSS colour string. */
+  base: string;
+  /** Colour above the threshold (canopy/peak/crest/wheat/grass/hull). CSS colour string. */
+  feature: string;
+  /** Where the base->feature transition CENTERS, as a fraction (0..1) of the model's OWN normalized
+   *  height (`modelHeight`/`hexModelHeight` — NOT a fraction of `TERRAIN_FOOTPRINT`). Raise toward 1
+   *  to push the feature colour further up the model; lower toward 0 to let it spread further down. */
+  thresholdFraction: number;
+}
+
+/** Width of the smooth blend band straddling each terrain's threshold, as a fraction of the model's
+ *  own height — ONE shared knob (the user asked for "a small blend band" generically, not a
+ *  per-terrain width) rather than a per-palette field. 0 would read as a hard edge; raise it for a
+ *  softer, more gradual transition. */
+export const HEIGHT_BAND_BLEND_FRACTION = 0.08;
+
+/** Per-terrain base/feature palette + threshold — USER-CALIBRATED STARTING VALUES (T-1505 polish).
+ *  Every value here is a plain named constant, editable in place: change a `base`/`feature` hex
+ *  string or a `thresholdFraction` number and rebuild, no logic elsewhere needs to change. Terrains
+ *  with NO entry here (`desert`, `sea`) stay single-tone — `HexTiles.tsx` only enables `vertexColors`
+ *  when a palette entry exists, otherwise keeping its existing flat `TILE_FILL` material colour. */
+export const TERRAIN_HEIGHT_BAND: Partial<Record<ScenarioTerrain, HeightBandPalette>> = {
+  forest: { base: '#6b4a2b', feature: '#2f6b3c', thresholdFraction: 0.35 },
+  mountains: { base: '#6f727a', feature: '#e9edf2', thresholdFraction: 0.65 },
+  hills: { base: '#7a4a2c', feature: '#b45d33', thresholdFraction: 0.5 },
+  fields: { base: '#8a6a2e', feature: '#dfae3c', thresholdFraction: 0.4 },
+  pasture: { base: '#6d6a3a', feature: '#7fb05a', thresholdFraction: 0.4 },
+};
+
+/** The harbour ship/lighthouse model's own band — kept separate from `TERRAIN_HEIGHT_BAND` (keyed by
+ *  `ScenarioTerrain`, and a harbour isn't a terrain) — base = the SEA tint below the waterline
+ *  (matching the surrounding water tiles, same intent as `HexTiles.tsx`'s retired flat
+ *  `HARBOR_TILE_COLOR`), feature = a wood-hull tint above it. USER-CALIBRATED starting value. */
+export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.3 };
+
+/** Smooth (cubic Hermite) 0->1 ramp — used instead of a hard cutoff or a linear ramp so the
+ *  base/feature transition reads as a soft blend, not a visible seam. */
+function smoothstep01(t: number): number {
+  const c = Math.min(1, Math.max(0, t));
+  return c * c * (3 - 2 * c);
+}
+
+/** `y` (a vertex's local height, base at 0) -> blend weight toward `palette.feature` (0 = pure base,
+ *  1 = pure feature) — smoothed across a band of width `blendFraction * modelHeightY` centered at
+ *  `palette.thresholdFraction * modelHeightY`. Pure/framework-free (no three.js dependency at all),
+ *  so it's unit-testable in isolation from `applyHeightBandVertexColors`'s geometry mutation. A
+ *  degenerate `modelHeightY <= 0` (shouldn't happen for a real STL-covered terrain, defensive) reads
+ *  as fully base rather than dividing by zero. */
+export function heightBandWeight(
+  y: number,
+  modelHeightY: number,
+  thresholdFraction: number,
+  blendFraction: number = HEIGHT_BAND_BLEND_FRACTION,
+): number {
+  if (modelHeightY <= 0) return 0;
+  const thresholdY = thresholdFraction * modelHeightY;
+  const halfBand = (blendFraction * modelHeightY) / 2;
+  if (halfBand <= 0) return y >= thresholdY ? 1 : 0;
+  return smoothstep01((y - (thresholdY - halfBand)) / (halfBand * 2));
+}
+
+/** Bakes a `color` vertex `BufferAttribute` onto `geometry`, blending `palette.base` -> `palette.
+ *  feature` across each vertex's own local Y via `heightBandWeight` — mutates and returns the SAME
+ *  geometry object (mirrors `normalizeStlGeometry`'s own convention).
+ *
+ *  CACHE GUARD (the actual "compute once per shared geometry" mechanism): a no-op if `geometry`
+ *  already carries a `color` attribute. Every hex/harbor mesh instance that shares the SAME cached
+ *  (terrain, variant) geometry object (`useLoader`'s own cache, keyed by url — T-1505's original
+ *  module doc) calls this on every render; only whichever instance mounts FIRST for a given geometry
+ *  actually walks its vertices, every other instance (this one on a later render, or a different hex
+ *  showing the same variant) sees the attribute already present and returns immediately. */
+export function applyHeightBandVertexColors(
+  geometry: BufferGeometry,
+  modelHeightY: number,
+  palette: HeightBandPalette,
+): BufferGeometry {
+  if (geometry.getAttribute('color')) return geometry;
+  // `getAttribute` is typed to return `BufferAttribute | InterleavedBufferAttribute | GLBufferAttribute`
+  // for ANY key (three's `BufferGeometry` isn't generically parameterized here) — `STLLoader` always
+  // produces a plain `BufferAttribute` position (never interleaved/GL), so this cast is safe; it's
+  // what lets `.getY()`/`.count` below type-check at all.
+  const position = geometry.getAttribute('position') as BufferAttribute | undefined;
+  if (!position) return geometry; // defensive: an empty/degenerate geometry — nothing to colour.
+
+  const base = new Color(palette.base);
+  const feature = new Color(palette.feature);
+  const blended = new Color();
+  const count = position.count;
+  const colors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const weight = heightBandWeight(position.getY(i), modelHeightY, palette.thresholdFraction);
+    blended.copy(base).lerp(feature, weight);
+    colors[i * 3] = blended.r;
+    colors[i * 3 + 1] = blended.g;
+    colors[i * 3 + 2] = blended.b;
+  }
+  geometry.setAttribute('color', new BufferAttribute(colors, 3));
+  return geometry;
 }

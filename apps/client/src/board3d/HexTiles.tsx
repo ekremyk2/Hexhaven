@@ -27,11 +27,14 @@ import { computeHarborTiles, type HarborTile } from './harborPlacement';
 import { GlyphMarker3D } from './overlays/GlyphMarker3D';
 import { computeSeaHexRing, type RingHex } from './seaHexRing';
 import {
+  applyHeightBandVertexColors,
+  HARBOR_HEIGHT_BAND,
   hasStlCoverage,
   hexYaw,
   modelHeight,
   pickRotationStep,
   pickTerrainVariant,
+  TERRAIN_HEIGHT_BAND,
   TerrainSTLLoader,
 } from './terrainStlModels';
 import { terrainSurfaceTextures } from './terrainTexture';
@@ -61,6 +64,12 @@ const FALLBACK_MATERIAL = TERRAIN_MATERIAL.desert!;
  *  record (`sea` was previously never given its own tile mesh at all — the big ocean plane stood in
  *  for it — so `TERRAIN_FILL` never needed a `sea` entry until T-1505's water tiles). */
 const TILE_FILL: Partial<Record<ScenarioTerrain, string>> = { ...TERRAIN_FILL, sea: SEA };
+
+/** `MeshStandardMaterial.color` MULTIPLIES its `vertexColors` (three.js semantics) — a banded tile
+ *  (`TERRAIN_HEIGHT_BAND`/`HARBOR_HEIGHT_BAND` below) must use this neutral white so the baked
+ *  base/feature colours show true, instead of the flat `TILE_FILL` tint muddying them. Terrains with
+ *  NO band entry keep using their own `TILE_FILL` colour as before (no vertex colours enabled). */
+const VERTEX_COLOR_NEUTRAL = '#ffffff';
 
 export interface HexTilesProps {
   board: BoardState;
@@ -231,13 +240,28 @@ function TerrainFallbackMesh({ terrain, geometry }: { terrain: ScenarioTerrain; 
   );
 }
 
-function TerrainStlMesh({ terrain, url }: { terrain: ScenarioTerrain; url: string }) {
+function TerrainStlMesh({
+  terrain,
+  url,
+  modelHeightY,
+}: {
+  terrain: ScenarioTerrain;
+  url: string;
+  /** The model's own normalized height (`modelHeight(variant)`) — the band's `thresholdFraction` is
+   *  relative to THIS, not `TERRAIN_FOOTPRINT`. */
+  modelHeightY: number;
+}) {
   const geometry = useLoader(TerrainSTLLoader, url);
+  const band = TERRAIN_HEIGHT_BAND[terrain];
+  // Idempotent past the first call for this shared geometry object — see the cache-guard doc on
+  // `applyHeightBandVertexColors` itself.
+  if (band) applyHeightBandVertexColors(geometry, modelHeightY, band);
   const material = TERRAIN_MATERIAL[terrain] ?? FALLBACK_MATERIAL;
   return (
     <mesh castShadow receiveShadow geometry={geometry}>
       <meshStandardMaterial
-        color={TILE_FILL[terrain] ?? TERRAIN_FILL.desert}
+        color={band ? VERTEX_COLOR_NEUTRAL : (TILE_FILL[terrain] ?? TERRAIN_FILL.desert)}
+        vertexColors={!!band}
         roughness={material.roughness}
         metalness={material.metalness}
         side={DoubleSide}
@@ -280,7 +304,7 @@ function TerrainStlTile({
       <TerrainFallbackBoundary fallback={fallback}>
         <Suspense fallback={fallback}>
           <group rotation={[0, yaw, 0]}>
-            <TerrainStlMesh terrain={terrain} url={variant.url} />
+            <TerrainStlMesh terrain={terrain} url={variant.url} modelHeightY={modelHeight(variant)} />
           </group>
         </Suspense>
       </TerrainFallbackBoundary>
@@ -296,17 +320,25 @@ function TerrainStlTile({
 // ring; it must fall back to the ordinary plain-water tile instead, same discipline as every other
 // STL tile in this file.
 
-/** A flat tint for every harbor model — the SAME sea colour as the plain-water tiles (user: "make
- *  harbors sea color too") so a harbor tile blends into the surrounding sea ring; the ship/lighthouse
- *  silhouette + the ratio label are what mark it as a port, not a contrasting tile colour. */
-const HARBOR_TILE_COLOR = SEA;
+// T-1505 polish: the harbor model's own base tint (below the waterline) is now the SAME SEA colour
+// via `HARBOR_HEIGHT_BAND.base` (blending into a wood-hull `feature` colour above it) rather than a
+// flat single-colour material — retires the old flat `HARBOR_TILE_COLOR` constant this replaced;
+// "blends into the surrounding sea ring at the waterline, hull reads as wood above it" carries the
+// same original intent ("make harbors sea color too") forward.
 
 const HARBOR_LABEL_FILL = '#efe4c6';
 const HARBOR_LABEL_TEXT = '#2b2416'; // matches board/palette.ts's INK
 
-function HarborModelMesh({ url }: { url: string }) {
+function HarborModelMesh({ url, modelHeightY }: { url: string; modelHeightY: number }) {
   const geometry = useLoader(TerrainSTLLoader, url);
-  return <mesh castShadow receiveShadow geometry={geometry}><meshStandardMaterial color={HARBOR_TILE_COLOR} roughness={0.75} metalness={0.05} side={DoubleSide} /></mesh>;
+  // Idempotent past the first call for this shared geometry object — see the cache-guard doc on
+  // `applyHeightBandVertexColors` itself.
+  applyHeightBandVertexColors(geometry, modelHeightY, HARBOR_HEIGHT_BAND);
+  return (
+    <mesh castShadow receiveShadow geometry={geometry}>
+      <meshStandardMaterial color={VERTEX_COLOR_NEUTRAL} vertexColors roughness={0.75} metalness={0.05} side={DoubleSide} />
+    </mesh>
+  );
 }
 
 /** Billboarded ratio + resource-icon label (carried over from the retired prop version) so the 3:1/
@@ -367,7 +399,7 @@ function HarborStlTile({
       <TerrainFallbackBoundary fallback={fallback}>
         <Suspense fallback={fallback}>
           <group rotation={[0, harbor.yaw, 0]}>
-            <HarborModelMesh url={harbor.variant.url} />
+            <HarborModelMesh url={harbor.variant.url} modelHeightY={height} />
           </group>
         </Suspense>
       </TerrainFallbackBoundary>

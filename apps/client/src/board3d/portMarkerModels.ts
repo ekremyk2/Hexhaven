@@ -81,3 +81,41 @@ export const PORT_MARKER_YAW_BY_VARIANT: Record<HarborVariantId, number> = {
   ship3: 0,
   lighthouse: 0,
 };
+
+/** Per-RESOURCE-TYPE marker yaw correction (radians), added on top of the per-variant yaw. Each of
+ *  the 6 marker STLs is authored with its own "front" direction, so a single yaw can't align them all
+ *  — this is the marker-model analog of `TERRAIN_YAW_OFFSET` (turn the odd ones 180° etc.).
+ *  USER-CALIBRATED; all start at 0. */
+/** Port-marker height gradient: a bone-white base fading up to the harbour's resource colour at the
+ *  raised icon face (mirrors the number-token gradient). Top colours reuse the 2D board's own
+ *  `TERRAIN_FILL` so a 3:1/2:1 marker reads the same resource hue as its terrain. The 3:1 `generic`
+ *  marker has no single resource, so it stays bone all the way up. */
+export const PORT_MARKER_BASE_COLOR = '#a3a3a3';
+export const PORT_MARKER_TOP_COLOR: Record<HarborType, string> = {
+  generic: '#161616', // 3:1 — black icon face (no resource colour)
+  brick: '#b45d33',
+  lumber: '#775132',
+  wool: '#ffffff',
+  grain: '#ddb964',
+  ore: '#626364',
+};
+/** Height fraction (0 base .. 1 icon face) where the base gives way to the top colour — PER RESOURCE
+ *  TYPE (each marker STL's icon sits at its own height). User-calibrated. */
+export const PORT_MARKER_THRESHOLD_BY_TYPE: Record<HarborType, number> = {
+  generic: 0.5,
+  brick: 0.22,
+  lumber: 0.21,
+  wool: 0.19,
+  grain: 0.17,
+  ore: 0.24,
+};
+export const PORT_MARKER_COLOR_BLEND = 0.0;
+
+export const PORT_MARKER_YAW_BY_TYPE: Record<HarborType, number> = {
+  generic: -1.5708, // -90° — all six landed on the same correction once ship3's base was re-authored,
+  brick: -1.5708, //   so this is effectively one shared marker yaw (the per-type split is now a no-op
+  lumber: -1.5708, //  fallback the panel still exposes).
+  wool: -1.5708,
+  grain: -1.5708,
+  ore: -1.5708,
+};

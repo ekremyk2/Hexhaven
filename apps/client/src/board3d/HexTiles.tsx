@@ -19,16 +19,22 @@ import { useLoader } from '@react-three/fiber';
 import { DoubleSide, InstancedMesh, Matrix4, type BufferGeometry } from 'three';
 import type { BoardGeometry, GameState, HarborType, HexId, ScenarioTerrain } from '@hexhaven/shared';
 import { RESOURCE_GLYPH } from '../hud/constants';
-import { SEA, TERRAIN_FILL, TOKEN_FACE } from '../board/palette';
+import { SEA, TERRAIN_FILL } from '../board/palette';
 import { TOKEN_RADIUS } from './constants';
 import { hexWorldCenter, type WorldVec3 } from './coords';
 import { buildHexPrismGeometry } from './hexGeometryBuilders';
-import { degToRad, HARBOR_VARIANT_IDS, isBandTerrainId, useDevTuningAvailable, useDevTuningStore } from './devTuning';
+import { degToRad, isBandTerrainId, useDevTuningAvailable, useDevTuningStore } from './devTuning';
 import { computeHarborTiles, type HarborTile } from './harborPlacement';
+import { applyTokenHeightColors } from './numberTokenModels';
 import { GlyphMarker3D } from './overlays/GlyphMarker3D';
 import {
+  PORT_MARKER_BASE_COLOR,
+  PORT_MARKER_COLOR_BLEND,
   PORT_MARKER_OFFSET,
   PORT_MARKER_SCALE,
+  PORT_MARKER_THRESHOLD_BY_TYPE,
+  PORT_MARKER_TOP_COLOR,
+  PORT_MARKER_YAW_BY_TYPE,
   PORT_MARKER_YAW_BY_VARIANT,
   portMarkerUrlFor,
   PortMarkerSTLLoader,
@@ -36,13 +42,20 @@ import {
 import { computeSeaHexRing, type RingHex } from './seaHexRing';
 import {
   applyHeightBandVertexColors,
+  firstTerrainVariant,
+  HARBOR_BASE_YAW,
   HARBOR_HEIGHT_BAND,
+  HARBOR_HEIGHT_BAND_BLEND,
+  HARBOR_ROTATION,
+  HARBOR_THRESHOLD_BY_VARIANT,
+  HARBOR_VARIANT_YAW_OFFSET,
   hasStlCoverage,
-  hexYaw,
+  HEX_BASE_YAW,
+  HEX_RANDOM_ROTATION,
+  hexRandomYaw,
   modelHeight,
-  pickRotationStep,
-  pickTerrainVariant,
   TERRAIN_HEIGHT_BAND,
+  TERRAIN_YAW_OFFSET,
   TerrainSTLLoader,
   type HarborVariantId,
 } from './terrainStlModels';
@@ -120,28 +133,13 @@ export function HexTiles({ board, geometry, hexTerrain }: HexTilesProps) {
   // as ordinary `stlHexes` entries), so they don't need synthetic filler.
   const seaRing = useMemo<RingHex[]>(() => (anySeaHex ? [] : computeSeaHexRing(geometry)), [geometry, anySeaHex]);
 
-  // DEV-TUNING (board3d/devTuning.ts) requirement 2: a live PER-VARIANT override for
-  // `HARBOR_VARIANT_YAW_OFFSET` (one yaw per `HarborVariantId` — `ship1`/`ship2`/`ship3`/
-  // `lighthouse`), gated on the panel actually being available (DEV, or `?tune=1`/localStorage on a
-  // prod build) AND the override toggle itself — `undefined` (the default, and ALWAYS in a normal
-  // production render) reproduces `computeHarborTiles`'s original behavior exactly. Rebuilt fresh
-  // whenever the store's `variantYawDeg` changes so dragging one variant's slider re-renders only
-  // that variant's harbours (the other 3 ids' offsets are unchanged, so their tiles' computed `yaw`
-  // is unchanged too).
-  const tuningAvailable = useDevTuningAvailable();
-  const tuning = useDevTuningStore();
-  const variantYawOffsetOverride = useMemo<Partial<Record<HarborVariantId, number>> | undefined>(() => {
-    if (!tuningAvailable || !tuning.yawOverrideEnabled) return undefined;
-    const entries = HARBOR_VARIANT_IDS.map((id) => [id, degToRad(tuning.variantYawDeg[id])] as const);
-    return Object.fromEntries(entries) as Record<HarborVariantId, number>;
-  }, [tuningAvailable, tuning.yawOverrideEnabled, tuning.variantYawDeg]);
-
   // T-1505 rework: which sea tile (real hex or ring hex) each `board.harbors` edge lands on, keyed
   // for O(1) lookup in the two render loops below (a hex id, or a ring's `q,r` key — a real HexId and
   // a ring position never collide since the ring is only ever populated with positions that ARE NOT
-  // real board hexes, see `seaHexRing.ts`).
+  // real board hexes, see `seaHexRing.ts`). Yaw/marker calibration is applied live per-tile in
+  // `HarborStlTile`, so placement itself is tuning-independent now.
   const { harborByHexId, harborByRingKey } = useMemo(() => {
-    const tiles = computeHarborTiles(board, geometry, hexTerrain, seaRing, variantYawOffsetOverride);
+    const tiles = computeHarborTiles(board, geometry, hexTerrain, seaRing);
     const harborByHexId = new Map<HexId, HarborTile>();
     const harborByRingKey = new Map<string, HarborTile>();
     for (const tile of tiles) {
@@ -149,7 +147,7 @@ export function HexTiles({ board, geometry, hexTerrain }: HexTilesProps) {
       else harborByRingKey.set(`${tile.target.q},${tile.target.r}`, tile);
     }
     return { harborByHexId, harborByRingKey };
-  }, [board, geometry, hexTerrain, seaRing, variantYawOffsetOverride]);
+  }, [board, geometry, hexTerrain, seaRing]);
 
   return (
     <group>
@@ -333,7 +331,13 @@ function TerrainStlTile({
   center: WorldVec3;
   fallbackGeometry: BufferGeometry;
 }) {
-  const variant = pickTerrainVariant(terrain, seed);
+  const tuningAvailable = useDevTuningAvailable();
+  const tuning = useDevTuningStore();
+  const randomOn = tuningAvailable ? tuning.hexRandomRotation : HEX_RANDOM_ROTATION;
+  // Always a SINGLE variant per resource: the number-token offsets are calibrated against it, so
+  // random rotation (below) can spin the hex for variety while the socket stays where the token
+  // expects it (the token's offset is rotated by the same random yaw in `NumberTokenInsert3D`).
+  const variant = firstTerrainVariant(terrain);
   const fallback = <TerrainFallbackMesh terrain={terrain} geometry={fallbackGeometry} />;
   // No STL coverage after all (shouldn't happen — `HexTiles` only routes STL-covered terrains here —
   // defensive fallback rather than throwing mid-render).
@@ -346,7 +350,10 @@ function TerrainStlTile({
   // inherited the STL's 30°-based yaw. Wrapping just the STL mesh in its own inner rotated group
   // (sharing the outer group's origin, i.e. still rotating around the hex's true center) keeps the
   // fallback's un-rotated footprint correct in both the loading and error states.
-  const yaw = hexYaw(pickRotationStep(seed));
+  // Single base yaw for EVERY hex (user: random rotation disabled for now to calibrate a consistent
+  // orientation); the per-hex `k·60°` variety is re-added only when random rotation is on.
+  const baseYaw = tuningAvailable ? degToRad(tuning.hexBaseYawDeg) : HEX_BASE_YAW;
+  const yaw = baseYaw + (TERRAIN_YAW_OFFSET[terrain] ?? 0) + hexRandomYaw(seed, randomOn);
   return (
     <group position={[center.x, center.y, center.z]}>
       <TerrainFallbackBoundary fallback={fallback}>
@@ -389,27 +396,40 @@ const SHOW_HARBOR_RATIO_LABEL = false;
  *  the likely real fix if a model is lying flat / on the wrong up-axis, which no yaw offset alone can
  *  correct. `tuningAvailable` false (always true in a normal production render) collapses this to a
  *  no-op identity transform, byte-identical to the pre-tuning-panel render. */
-function HarborModelMesh({ url, modelHeightY }: { url: string; modelHeightY: number }) {
+function HarborModelMesh({ url, modelHeightY, variantId }: { url: string; modelHeightY: number; variantId: HarborVariantId }) {
   const geometry = useLoader(TerrainSTLLoader, url);
-  // Production bake-once (UNCHANGED): idempotent past the first call for this shared geometry object
-  // — see the cache-guard doc on `applyHeightBandVertexColors` itself.
-  applyHeightBandVertexColors(geometry, modelHeightY, HARBOR_HEIGHT_BAND);
+  // Production bake-once: the hull band with THIS variant's threshold + the harbour-specific blend
+  // (each ship model shares one geometry via `useLoader`, so this bakes once per variant).
+  applyHeightBandVertexColors(
+    geometry,
+    modelHeightY,
+    { ...HARBOR_HEIGHT_BAND, thresholdFraction: HARBOR_THRESHOLD_BY_VARIANT[variantId] },
+    { blendFraction: HARBOR_HEIGHT_BAND_BLEND },
+  );
   const tuningAvailable = useDevTuningAvailable();
   const tuning = useDevTuningStore();
 
-  // DEV-TUNING "Colour thresholds" section: LIVE re-bake, same discipline as `TerrainStlMesh` above —
-  // gated only on the panel being available; a normal production render (`tuningAvailable` false)
-  // never runs this effect, so the bake-once call above is the only thing that ever touches this
-  // geometry's `color` attribute in production.
+  // LIVE re-bake from the panel's harbour colour pickers + per-variant threshold + harbour blend; a
+  // normal production render (`tuningAvailable` false) never runs this, so the bake-once above is the
+  // only thing that touches this geometry's `color` attribute in production.
   useEffect(() => {
     if (!tuningAvailable) return;
     applyHeightBandVertexColors(
       geometry,
       modelHeightY,
-      { ...HARBOR_HEIGHT_BAND, thresholdFraction: tuning.harborThreshold },
-      { blendFraction: tuning.blendFraction, force: true },
+      { base: tuning.harborBaseColor, feature: tuning.harborFeatureColor, thresholdFraction: tuning.harborThresholdByVariant[variantId] },
+      { blendFraction: tuning.harborBlend, force: true },
     );
-  }, [tuningAvailable, geometry, modelHeightY, tuning.harborThreshold, tuning.blendFraction]);
+  }, [
+    tuningAvailable,
+    geometry,
+    modelHeightY,
+    variantId,
+    tuning.harborBaseColor,
+    tuning.harborFeatureColor,
+    tuning.harborThresholdByVariant,
+    tuning.harborBlend,
+  ]);
 
   const rotX = tuningAvailable ? degToRad(tuning.harborBaseRotXDeg) : 0;
   const rotY = tuningAvailable ? degToRad(tuning.harborBaseRotYDeg) : 0;
@@ -444,39 +464,49 @@ class PortMarkerFallbackBoundary extends Component<{ children: ReactNode }, { fa
   }
 }
 
-function PortMarkerMesh({ url }: { url: string }) {
-  const geometry = useLoader(PortMarkerSTLLoader, url);
+function PortMarkerMesh({ url, type }: { url: string; type: HarborType }) {
+  const rawGeometry = useLoader(PortMarkerSTLLoader, url);
+  const tuningAvailable = useDevTuningAvailable();
+  const tuning = useDevTuningStore();
+  // Bone base -> per-resource top height gradient (same bake as the number tokens). Colours + split
+  // come LIVE from the tuning panel's pickers when available, else the baked `PORT_MARKER_*` constants.
+  const base = tuningAvailable ? tuning.markerBaseColor : PORT_MARKER_BASE_COLOR;
+  const top = tuningAvailable ? tuning.markerTopColor[type] : PORT_MARKER_TOP_COLOR[type];
+  const threshold = tuningAvailable ? tuning.markerThresholdByType[type] : PORT_MARKER_THRESHOLD_BY_TYPE[type];
+  const blend = tuningAvailable ? tuning.markerColorBlend : PORT_MARKER_COLOR_BLEND;
+  // Clone per marker (shared per-url loader cache must not be mutated).
+  const geometry = useMemo(
+    () => applyTokenHeightColors(rawGeometry.clone(), base, top, threshold, blend),
+    [rawGeometry, base, top, threshold, blend],
+  );
   return (
     <mesh castShadow receiveShadow geometry={geometry}>
-      <meshStandardMaterial color={TOKEN_FACE} roughness={0.7} metalness={0.05} side={DoubleSide} />
+      <meshStandardMaterial vertexColors roughness={0.7} metalness={0.05} side={DoubleSide} />
     </mesh>
   );
 }
 
-/** One harbor's port marker — `PORT_MARKER_OFFSET`/`PORT_MARKER_YAW`/`PORT_MARKER_SCALE`
- *  (`portMarkerModels.ts`) are the user's ONE obvious tunable set for seating this in the housing.
- *  DEV-TUNING requirement 3: the live panel's marker sliders override these three constants when
- *  available; `tuningAvailable` false (always true in a normal production render) reproduces the
- *  original constants exactly. */
-function PortMarker3D({ type, variantId, harborYaw }: { type: HarborType; variantId: HarborVariantId; harborYaw: number }) {
+/** One harbour's port marker, seated in its housing as a plain CHILD of the harbour's rotation group
+ *  (`HarborStlTile`) — so it rides the harbour's yaw exactly like the number-token offset rides its
+ *  hex. Per-variant offset/yaw/scale (each ship model's housing sits at a different local spot) come
+ *  live from the tuning panel when available, else the baked `PORT_MARKER_*` (`portMarkerModels.ts`)
+ *  / `PORT_MARKER_YAW_BY_VARIANT` constants. */
+function PortMarker3D({ type, variantId }: { type: HarborType; variantId: HarborVariantId }) {
   const url = portMarkerUrlFor(type);
   const tuningAvailable = useDevTuningAvailable();
   const tuning = useDevTuningStore();
-  // POSITION is seated in the harbour housing (offset lives in the ship's frame, so it follows the
-  // harbour — NOT the camera; only number tokens billboard). ORIENTATION is locked to a FIXED WORLD
-  // direction: we counter-rotate out the harbour's own facing (`harborYaw`), so every marker's icon
-  // points the same way regardless of which way its harbour faces — this is what removes the "some are
-  // 180° off" (a seated marker otherwise inherits its harbour's facing, and opposite harbours face
-  // opposite ways). `markerYawDeg`/`PORT_MARKER_YAW_BY_VARIANT` now mean the DESIRED WORLD yaw.
   const off = tuningAvailable ? tuning.markerOffset[variantId] : PORT_MARKER_OFFSET;
-  const worldYaw = tuningAvailable ? degToRad(tuning.markerYawDeg[variantId]) : PORT_MARKER_YAW_BY_VARIANT[variantId];
-  const localYaw = worldYaw - harborYaw;
+  // Facing = per-variant yaw (housing on that ship model) + per-RESOURCE-TYPE yaw (each marker STL is
+  // authored facing its own way — this is what corrects the "some are 180° off").
+  const variantYaw = tuningAvailable ? degToRad(tuning.markerYawDeg[variantId]) : PORT_MARKER_YAW_BY_VARIANT[variantId];
+  const typeYaw = tuningAvailable ? degToRad(tuning.markerTypeYawDeg[type]) : PORT_MARKER_YAW_BY_TYPE[type];
+  const yaw = variantYaw + typeYaw;
   const scale = tuningAvailable ? tuning.markerScale[variantId] : PORT_MARKER_SCALE;
   return (
-    <group position={[off.x, off.y, off.z]} rotation={[0, localYaw, 0]} scale={scale}>
+    <group position={[off.x, off.y, off.z]} rotation={[0, yaw, 0]} scale={scale}>
       <PortMarkerFallbackBoundary>
         <Suspense fallback={null}>
-          <PortMarkerMesh url={url} />
+          <PortMarkerMesh url={url} type={type} />
         </Suspense>
       </PortMarkerFallbackBoundary>
     </group>
@@ -537,22 +567,24 @@ function HarborStlTile({
 }) {
   const fallback = <TerrainFallbackMesh terrain="sea" geometry={fallbackGeometry} />;
   const height = modelHeight(harbor.variant);
+  const variantId = harbor.variant.id;
+  const tuningAvailable = useDevTuningAvailable();
+  const tuning = useDevTuningStore();
+  // Mirrors the terrain hex: a single shared base yaw + a per-variant model correction align every
+  // harbour (with the island-facing rotation OFF for marker calibration); flipping rotation on adds
+  // each harbour's own `inwardYaw` on top, and the marker — a child of this same rotation group —
+  // rides along into its housing.
+  const rotationOn = tuningAvailable ? tuning.harborRotationEnabled : HARBOR_ROTATION;
+  const baseYaw = tuningAvailable ? degToRad(tuning.harborBaseYawDeg) : HARBOR_BASE_YAW;
+  const variantYaw = tuningAvailable ? degToRad(tuning.variantYawDeg[variantId]) : HARBOR_VARIANT_YAW_OFFSET[variantId];
+  const harborYaw = baseYaw + variantYaw + (rotationOn ? harbor.inwardYaw : 0);
   return (
     <group position={[center.x, center.y, center.z]}>
       <TerrainFallbackBoundary fallback={fallback}>
         <Suspense fallback={fallback}>
-          {/* baseYaw (real housing direction, inward) rotates BOTH the ship and the marker; the
-              per-model authoring correction (modelYawOffset, e.g. ship3 +120°) rotates ONLY the ship
-              mesh, so it can't fling the marker out of its housing (user: markers on rotated harbours
-              were displaced by the yaw). */}
-          <group rotation={[0, harbor.baseYaw, 0]}>
-            <group rotation={[0, harbor.modelYawOffset, 0]}>
-              <HarborModelMesh url={harbor.variant.url} modelHeightY={height} />
-              {/* Marker is INSIDE the ship's full frame (baseYaw + per-model correction) so it tracks
-                  the housing that's part of the ship mesh — seated, turning with the harbour, not the
-                  camera. Per-variant offset/yaw/scale seat it (each ship model's housing differs). */}
-              <PortMarker3D type={harbor.type} variantId={harbor.variant.id} harborYaw={harbor.yaw} />
-            </group>
+          <group rotation={[0, harborYaw, 0]}>
+            <HarborModelMesh url={harbor.variant.url} modelHeightY={height} variantId={variantId} />
+            <PortMarker3D type={harbor.type} variantId={variantId} />
           </group>
         </Suspense>
       </TerrainFallbackBoundary>

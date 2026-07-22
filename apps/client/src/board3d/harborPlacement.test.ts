@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { GEOMETRY, type EdgeId, type HexTile } from '@hexhaven/shared';
 import { computeSeaHexRing } from './seaHexRing';
 import { computeHarborTiles, nearestRotationStep } from './harborPlacement';
-import { HARBOR_VARIANT_YAW_OFFSET, hexYaw, type HarborModelVariant } from './terrainStlModels';
+import { HARBOR_BASE_YAW, hexYaw } from './terrainStlModels';
 
 const BASE_YAW = Math.PI / 6;
 const STEP = Math.PI / 3;
 
-/** The per-variant yaw offset baked into a harbor tile's `yaw` — looked up by the picked variant's
- *  stable `id` (PART A: per-ship-variant yaw, not a single shared ship/lighthouse pair). */
-const offsetFor = (variant: HarborModelVariant) => HARBOR_VARIANT_YAW_OFFSET[variant.id];
+/** A harbour tile's FULL island-facing yaw = the shared base yaw + its snapped inward rotation (the
+ *  per-variant model correction is applied separately in `HexTiles.tsx`, not on the tile). */
+const facingYaw = (inwardYaw: number) => HARBOR_BASE_YAW + inwardYaw;
 
 describe('nearestRotationStep', () => {
   it('snaps the base yaw itself to step 0', () => {
@@ -82,10 +82,10 @@ describe('computeHarborTiles — base board (no real sea hex, harbors land on th
     }
   });
 
-  it('picks a yaw that is one of the 6 hex-flush steps plus the calibration offset', () => {
+  it('picks an inward yaw that lands on one of the 6 hex-flush steps', () => {
     const [tile] = computeHarborTiles(board, GEOMETRY, undefined, seaRing);
-    const stripped = tile!.yaw - offsetFor(tile!.variant);
-    const matchesSomeStep = [0, 1, 2, 3, 4, 5].some((k) => Math.abs(stripped - hexYaw(k)) < 1e-9);
+    const full = facingYaw(tile!.inwardYaw);
+    const matchesSomeStep = [0, 1, 2, 3, 4, 5].some((k) => Math.abs(full - hexYaw(k)) < 1e-9);
     expect(matchesSomeStep).toBe(true);
   });
 
@@ -104,9 +104,9 @@ describe('computeHarborTiles — base board (no real sea hex, harbors land on th
     const landY = 1.5 * landHex.r;
     const toLandX = landX - ringX;
     const toLandZ = landY - ringY; // board y -> world z, same convention as coords.ts
-    const stripped = tile!.yaw - offsetFor(tile!.variant);
-    const facingX = Math.sin(stripped);
-    const facingZ = Math.cos(stripped);
+    const full = facingYaw(tile!.inwardYaw);
+    const facingX = Math.sin(full);
+    const facingZ = Math.cos(full);
     expect(facingX * toLandX + facingZ * toLandZ).toBeGreaterThan(0);
   });
 
@@ -148,9 +148,9 @@ describe('computeHarborTiles — Seafarers/E&P-style board (a REAL sea hex alrea
 
   it('still faces inward (toward the land hex) even for a real-hex target', () => {
     const [tile] = computeHarborTiles(board, geometry, hexTerrain, []);
-    const stripped = tile!.yaw - offsetFor(tile!.variant);
+    const full = facingYaw(tile!.inwardYaw);
     // Land hex is due WEST of the sea hex here, so "facing the island" should point in -X.
-    const facingX = Math.sin(stripped);
+    const facingX = Math.sin(full);
     expect(facingX).toBeLessThan(0);
   });
 });

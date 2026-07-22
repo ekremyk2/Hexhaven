@@ -33,10 +33,15 @@ export const TILE_SURFACE_HEIGHT = HEX_SIZE * 0.14;
  *  above the rim, lower it further if it still doesn't reach the recess floor. */
 export const TOKEN_SOCKET_Y = -HEX_SIZE * 0.015;
 
+/** Horizontal offset (world X/Z) of a socket number-token insert from the hex centre — user-calibrated
+ *  seating within the recess. Default 0 (centred). */
+export const TOKEN_SOCKET_X = 0;
+export const TOKEN_SOCKET_Z = 0;
+
 /** Extra uniform scale applied to a socket token insert mesh ON TOP OF `numberTokenModels.ts`'s own
  *  sheet-relative sizing (`TOKEN_INSERT_DIAMETER` there) — one easy dial to grow/shrink every socket
  *  token without touching the slicing/placement math. USER-CALIBRATED STARTING GUESS: 1 (no change). */
-export const TOKEN_SOCKET_SCALE = 1;
+export const TOKEN_SOCKET_SCALE = 1.1;
 
 /** Sea plane: how far past the island's bounding radius it extends, and how far below the tile
  *  baseline (world Y=0) it sits so the tiles visibly rise above the water. */
@@ -71,7 +76,17 @@ export const TABLE_RIM_GAP = SEA_DEPTH * 0.08;
  *  token system governs the DOM/Tailwind chrome around the canvas, not materials inside the WebGL
  *  scene, which has never gone through that token pipeline (see `board/palette.ts`'s own
  *  `TERRAIN_FILL`/`GOLD` precedent). */
-export const TABLE_WOOD_COLOR = 0x8a5a34;
+export const TABLE_WOOD_COLOR = '#8a5a34';
+
+/** Table footprint is a SQUARE slab now (user: "a square table"), sized off the board radius. The
+ *  square is deliberately modest (a discrete table with dark room around it), NOT the old round
+ *  table's view-filling 9× margin. */
+export const TABLE_ROUGHNESS = 0.62;
+export const TABLE_SQUARE_FACTOR = 1.7;
+
+/** Contact-shadow catcher radius as a multiple of the board radius (kept near the square table's
+ *  own footprint). */
+export const CONTACT_SHADOW_SCALE_FACTOR = 1.7;
 
 /** How far above the tabletop's own top face the soft `<ContactShadows>` catcher plane floats —
  *  another hairline z-fighting guard (see `TABLE_RIM_GAP`'s note), and how tall a depth range (world
@@ -80,3 +95,35 @@ export const TABLE_WOOD_COLOR = 0x8a5a34;
  *  (over-covering just makes the falloff gentler, never breaks the read). */
 export const CONTACT_SHADOW_LIFT = SEA_DEPTH * 0.03;
 export const CONTACT_SHADOW_DEPTH = HEX_SIZE * 2.2;
+
+// --- Environment "dark room + spotlit table" look (user direction) --------------------------------
+// Brownish-black surroundings, a square table, and a top light aimed straight down at the board — the
+// baked DEFAULTS below; the dev panel's Environment section overrides them live.
+
+/** Brownish-black backdrop behind everything ("rest can be brownish black"). */
+export const BACKGROUND_COLOR = '#1a1410';
+
+/** Baked direct-light intensities/colours (the panel tunes these live). */
+export const AMBIENT_INTENSITY = 0.18;
+export const HEMI_INTENSITY = 0.22;
+export const KEY_INTENSITY = 1.2;
+export const KEY_COLOR = '#fff4e2';
+export const FILL_INTENSITY = 0.3;
+export const FILL_COLOR = '#dce8ff';
+
+/** Top light: a spotlight above the board centre aimed straight down, the "pendant lamp over the
+ *  table" read. `decay: 0` keeps its brightness distance-independent (predictable, non-physical
+ *  units matching the directional lights). Height is a multiple of the camera fit distance. */
+export const SPOT_INTENSITY = 3.4;
+export const SPOT_COLOR = '#fff2d8';
+export const SPOT_ANGLE_DEG = 44;
+export const SPOT_PENUMBRA = 0.5;
+export const SPOT_HEIGHT_FACTOR = 1.5;
+
+/** IBL (baked `SceneEnvironment`) overall brightness — dimmed for the darker room. */
+export const ENV_INTENSITY = 0.4;
+
+/** Contact-shadow catcher look. */
+export const CONTACT_SHADOW_OPACITY = 0.6;
+export const CONTACT_SHADOW_BLUR = 2.6;
+export const CONTACT_SHADOW_COLOR = '#241a12';

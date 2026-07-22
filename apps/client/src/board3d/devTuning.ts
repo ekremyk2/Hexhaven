@@ -22,17 +22,65 @@ import { useState } from 'react';
 import { create } from 'zustand';
 import { HEX_SIZE } from '../board/palette';
 import {
+  HARBOR_BASE_YAW,
   HARBOR_HEIGHT_BAND,
+  HARBOR_HEIGHT_BAND_BLEND,
+  HARBOR_ROTATION,
+  HARBOR_THRESHOLD_BY_VARIANT,
   HARBOR_VARIANT_YAW_OFFSET,
   HEIGHT_BAND_BLEND_FRACTION,
+  HEX_BASE_YAW,
+  HEX_RANDOM_ROTATION,
   TERRAIN_HEIGHT_BAND,
+  TERRAIN_TOKEN_OFFSET,
   type HarborVariantId,
 } from './terrainStlModels';
-import { PORT_MARKER_OFFSET, PORT_MARKER_SCALE, PORT_MARKER_YAW_BY_VARIANT } from './portMarkerModels';
+import {
+  PORT_MARKER_BASE_COLOR,
+  PORT_MARKER_COLOR_BLEND,
+  PORT_MARKER_OFFSET,
+  PORT_MARKER_SCALE,
+  PORT_MARKER_THRESHOLD_BY_TYPE,
+  PORT_MARKER_TOP_COLOR,
+  PORT_MARKER_YAW_BY_TYPE,
+  PORT_MARKER_YAW_BY_VARIANT,
+} from './portMarkerModels';
+import type { HarborType } from '@hexhaven/shared';
+import {
+  AMBIENT_INTENSITY,
+  BACKGROUND_COLOR,
+  CONTACT_SHADOW_BLUR,
+  CONTACT_SHADOW_COLOR,
+  CONTACT_SHADOW_OPACITY,
+  CONTACT_SHADOW_SCALE_FACTOR,
+  ENV_INTENSITY,
+  FILL_COLOR,
+  FILL_INTENSITY,
+  HEMI_INTENSITY,
+  KEY_COLOR,
+  KEY_INTENSITY,
+  SPOT_ANGLE_DEG,
+  SPOT_COLOR,
+  SPOT_INTENSITY,
+  SPOT_PENUMBRA,
+  TABLE_ROUGHNESS,
+  TABLE_SQUARE_FACTOR,
+  TABLE_THICKNESS,
+  TABLE_WOOD_COLOR,
+  TOKEN_SOCKET_SCALE,
+  TOKEN_SOCKET_X,
+  TOKEN_SOCKET_Y,
+  TOKEN_SOCKET_Z,
+} from './constants';
+import { TOKEN_COLOR_BLEND, TOKEN_COLOR_THRESHOLD } from './numberTokenModels';
 
 /** The 4 harbor model variants the yaw-override sliders cover, in the order the panel renders them —
  *  re-exported so `DevTuningPanel.tsx`/`HexTiles.tsx` don't need their own copy of this list. */
 export const HARBOR_VARIANT_IDS: readonly HarborVariantId[] = ['ship1', 'ship2', 'ship3', 'lighthouse'];
+
+/** The 6 harbour resource types (each its own marker STL), in the panel's render order — the port
+ *  marker yaw is corrected PER TYPE (each STL is authored facing its own way). */
+export const HARBOR_TYPE_IDS: readonly HarborType[] = ['generic', 'brick', 'lumber', 'wool', 'grain', 'ore'];
 
 /** The 5 terrains `TERRAIN_HEIGHT_BAND` (`terrainStlModels.ts`) carries a palette for, in the order
  *  the panel's "Colour thresholds" section renders their sliders — re-exported so
@@ -146,6 +194,21 @@ const DEFAULT_TERRAIN_THRESHOLD: Record<BandTerrainId, number> = {
   pasture: TERRAIN_HEIGHT_BAND.pasture!.thresholdFraction,
 };
 
+/** Each terrain's starting token offset = its baked `TERRAIN_TOKEN_OFFSET` override if present, else
+ *  the global `TOKEN_SOCKET_*` default. */
+function tokenOffsetDefault(t: BandTerrainId): { x: number; y: number; z: number } {
+  const o = TERRAIN_TOKEN_OFFSET[t];
+  return { x: o?.x ?? TOKEN_SOCKET_X, y: o?.y ?? TOKEN_SOCKET_Y, z: o?.z ?? TOKEN_SOCKET_Z };
+}
+
+const DEFAULT_TOKEN_OFFSET: Record<BandTerrainId, { x: number; y: number; z: number }> = {
+  forest: tokenOffsetDefault('forest'),
+  mountains: tokenOffsetDefault('mountains'),
+  hills: tokenOffsetDefault('hills'),
+  fields: tokenOffsetDefault('fields'),
+  pasture: tokenOffsetDefault('pasture'),
+};
+
 export interface DevTuningValues {
   // 1: harbour ship/lighthouse model base orientation + scale — applied to EVERY harbour model
   // BEFORE its per-tile placement yaw (`harbor.yaw`, from `harborPlacement.ts`). The likely real fix
@@ -154,6 +217,10 @@ export interface DevTuningValues {
   harborBaseRotYDeg: number;
   harborBaseRotZDeg: number;
   harborBaseScale: number;
+  // Harbour rotation (mirrors the hex-rotation controls): a single base yaw for every harbour + a
+  // toggle for each harbour's island-facing rotation. Off = all harbours aligned (marker calibration).
+  harborRotationEnabled: boolean;
+  harborBaseYawDeg: number;
   // 2: PER-VARIANT override for `HARBOR_VARIANT_YAW_OFFSET` — one yaw (degrees) per model variant
   // (`ship1`/`ship2`/`ship3`/`lighthouse`), gated by a single enable checkbox. Each model's authored
   // "front" faces a different way, so a single global yaw offset can only ever fix one variant while
@@ -170,6 +237,9 @@ export interface DevTuningValues {
   markerOffset: Record<HarborVariantId, { x: number; y: number; z: number }>;
   markerYawDeg: Record<HarborVariantId, number>;
   markerScale: Record<HarborVariantId, number>;
+  // Per-RESOURCE-TYPE marker yaw correction (degrees), added on top of the per-variant yaw — each of
+  // the 6 marker STLs is authored facing its own way, so a single yaw can't align them all.
+  markerTypeYawDeg: Record<HarborType, number>;
   // 4: LIVE height-band colour-threshold overrides — mirrors `TERRAIN_HEIGHT_BAND`'s per-terrain
   // `thresholdFraction` (`terrainStlModels.ts`), `HARBOR_HEIGHT_BAND.thresholdFraction`, and the
   // shared `HEIGHT_BAND_BLEND_FRACTION` 1:1. Unlike sections 1-3 above, `HexTiles.tsx` reads these
@@ -179,6 +249,56 @@ export interface DevTuningValues {
   terrainThreshold: Record<BandTerrainId, number>;
   harborThreshold: number;
   blendFraction: number;
+  // 5: number-token socket seating (T-1506) — Y offset added to the socket position (negative sinks
+  // into the recess) + uniform scale. `NumberTokenInsert3D` reads these LIVE when the panel is
+  // available, else the `TOKEN_SOCKET_Y`/`TOKEN_SOCKET_SCALE` constants (`constants.ts`).
+  // Number-token seat offset PER TERRAIN (world offset from the hex centre) — each sculpted model's
+  // socket sits at a slightly different spot, so the token is nudged per resource. `NumberTokenInsert3D`
+  // reads the tuned value live, else the baked `TERRAIN_TOKEN_OFFSET` / global `TOKEN_SOCKET_*`.
+  tokenOffset: Record<BandTerrainId, { x: number; y: number; z: number }>;
+  tokenSocketScale: number;
+  // Number-token height-gradient colour split (base->light) + blend width — `NumberTokenInsert3D`
+  // re-bakes the vertex colours live from these (`applyTokenHeightColors`).
+  tokenColorThreshold: number;
+  tokenColorBlend: number;
+  // 6: hex rotation — a SINGLE base yaw applied to every terrain hex, plus a toggle for the per-hex
+  // random k·60° variety (user disabled it during calibration so all hexes align; re-enable after the
+  // base yaw is dialed in). `HexTiles.tsx` reads these live when the panel is available.
+  hexBaseYawDeg: number;
+  hexRandomRotation: boolean;
+  // LIVE harbour + marker colours (user-set via the panel's colour pickers). Harbour hull uses a
+  // height band (base below the waterline -> feature above); the marker uses a bone base -> per-resource
+  // top. Thresholds/blends are shared per group.
+  harborBaseColor: string;
+  harborFeatureColor: string;
+  harborThresholdByVariant: Record<HarborVariantId, number>;
+  harborBlend: number;
+  markerBaseColor: string;
+  markerTopColor: Record<HarborType, string>;
+  markerThresholdByType: Record<HarborType, number>;
+  markerColorBlend: number;
+  // Environment (Board3D.tsx): dark-room backdrop, direct lights, a top spotlight aimed at the board,
+  // IBL brightness, the square table, and the contact-shadow catcher — all live-tunable.
+  bgColor: string;
+  ambientIntensity: number;
+  hemiIntensity: number;
+  keyIntensity: number;
+  keyColor: string;
+  fillIntensity: number;
+  fillColor: string;
+  spotIntensity: number;
+  spotColor: string;
+  spotAngleDeg: number;
+  spotPenumbra: number;
+  envIntensity: number;
+  tableColor: string;
+  tableSizeFactor: number;
+  tableThickness: number;
+  tableRoughness: number;
+  contactOpacity: number;
+  contactBlur: number;
+  contactColor: string;
+  contactScaleFactor: number;
 }
 
 export interface DevTuningState extends DevTuningValues {
@@ -194,6 +314,8 @@ export const DEV_TUNING_DEFAULTS: DevTuningValues = {
   harborBaseRotYDeg: 0,
   harborBaseRotZDeg: 0,
   harborBaseScale: 1,
+  harborRotationEnabled: HARBOR_ROTATION,
+  harborBaseYawDeg: radToDeg(HARBOR_BASE_YAW),
   yawOverrideEnabled: false,
   variantYawDeg: { ...DEFAULT_VARIANT_YAW_DEG },
   markerOffset: {
@@ -204,9 +326,52 @@ export const DEV_TUNING_DEFAULTS: DevTuningValues = {
   },
   markerYawDeg: { ...DEFAULT_VARIANT_MARKER_YAW_DEG },
   markerScale: { ...DEFAULT_VARIANT_MARKER_SCALE },
+  markerTypeYawDeg: Object.fromEntries(
+    HARBOR_TYPE_IDS.map((t) => [t, radToDeg(PORT_MARKER_YAW_BY_TYPE[t])]),
+  ) as Record<HarborType, number>,
   terrainThreshold: { ...DEFAULT_TERRAIN_THRESHOLD },
   harborThreshold: HARBOR_HEIGHT_BAND.thresholdFraction,
   blendFraction: HEIGHT_BAND_BLEND_FRACTION,
+  tokenOffset: {
+    forest: { ...DEFAULT_TOKEN_OFFSET.forest },
+    mountains: { ...DEFAULT_TOKEN_OFFSET.mountains },
+    hills: { ...DEFAULT_TOKEN_OFFSET.hills },
+    fields: { ...DEFAULT_TOKEN_OFFSET.fields },
+    pasture: { ...DEFAULT_TOKEN_OFFSET.pasture },
+  },
+  tokenSocketScale: TOKEN_SOCKET_SCALE,
+  tokenColorThreshold: TOKEN_COLOR_THRESHOLD,
+  tokenColorBlend: TOKEN_COLOR_BLEND,
+  hexBaseYawDeg: radToDeg(HEX_BASE_YAW),
+  hexRandomRotation: HEX_RANDOM_ROTATION,
+  harborBaseColor: HARBOR_HEIGHT_BAND.base,
+  harborFeatureColor: HARBOR_HEIGHT_BAND.feature,
+  harborThresholdByVariant: { ...HARBOR_THRESHOLD_BY_VARIANT },
+  harborBlend: HARBOR_HEIGHT_BAND_BLEND,
+  markerBaseColor: PORT_MARKER_BASE_COLOR,
+  markerTopColor: { ...PORT_MARKER_TOP_COLOR },
+  markerThresholdByType: { ...PORT_MARKER_THRESHOLD_BY_TYPE },
+  markerColorBlend: PORT_MARKER_COLOR_BLEND,
+  bgColor: BACKGROUND_COLOR,
+  ambientIntensity: AMBIENT_INTENSITY,
+  hemiIntensity: HEMI_INTENSITY,
+  keyIntensity: KEY_INTENSITY,
+  keyColor: KEY_COLOR,
+  fillIntensity: FILL_INTENSITY,
+  fillColor: FILL_COLOR,
+  spotIntensity: SPOT_INTENSITY,
+  spotColor: SPOT_COLOR,
+  spotAngleDeg: SPOT_ANGLE_DEG,
+  spotPenumbra: SPOT_PENUMBRA,
+  envIntensity: ENV_INTENSITY,
+  tableColor: TABLE_WOOD_COLOR,
+  tableSizeFactor: TABLE_SQUARE_FACTOR,
+  tableThickness: TABLE_THICKNESS,
+  tableRoughness: TABLE_ROUGHNESS,
+  contactOpacity: CONTACT_SHADOW_OPACITY,
+  contactBlur: CONTACT_SHADOW_BLUR,
+  contactColor: CONTACT_SHADOW_COLOR,
+  contactScaleFactor: CONTACT_SHADOW_SCALE_FACTOR,
 };
 
 export const useDevTuningStore = create<DevTuningState>((set) => ({

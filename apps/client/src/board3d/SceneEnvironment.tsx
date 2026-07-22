@@ -25,11 +25,14 @@ export interface SceneEnvironmentProps {
   /** Cubemap bake resolution — `mobileBudget.ts` halves this on touch/small-viewport devices, the
    *  single biggest cost lever for a one-time bake (bigger cubemap faces = more bake-time pixels). */
   resolution: number;
+  /** Overall IBL brightness applied to every PBR material — dimmed for the dark-room look, live from
+   *  the tuning panel's Environment section. */
+  intensity: number;
 }
 
-export function SceneEnvironment({ resolution }: SceneEnvironmentProps) {
+export function SceneEnvironment({ resolution, intensity }: SceneEnvironmentProps) {
   return (
-    <Environment resolution={resolution} frames={1}>
+    <Environment resolution={resolution} frames={1} environmentIntensity={intensity}>
       {/* Overhead "sky" — the dominant soft light: big and bright so specular highlights on glossy
           tiles/pieces read like an overcast studio skylight, not one hard bulb. */}
       <Lightformer form="rect" color="#fbfdff" intensity={2.6} position={[0, 18, 0]} scale={[22, 22, 1]} target={[0, 0, 0]} />

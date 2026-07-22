@@ -31,13 +31,7 @@
 import type { BoardGeometry, EdgeId, GameState, HarborType, HexId, ScenarioTerrain } from '@hexhaven/shared';
 import { edgeWorldPosition, hexWorldCenter, toWorldUnits } from './coords';
 import { NEIGHBOR_DELTAS, type RingHex } from './seaHexRing';
-import {
-  HARBOR_VARIANT_YAW_OFFSET,
-  hexYaw,
-  pickHarborVariant,
-  type HarborModelVariant,
-  type HarborVariantId,
-} from './terrainStlModels';
+import { pickHarborVariant, type HarborModelVariant } from './terrainStlModels';
 import { resolvedHexTerrain } from './tileElevation';
 
 type BoardState = GameState['board'];
@@ -71,15 +65,11 @@ export interface HarborTile {
   edgeId: EdgeId;
   type: HarborType;
   variant: HarborModelVariant;
-  /** Final yaw (radians) for the harbor SHIP model — `baseYaw + modelYawOffset`. */
-  yaw: number;
-  /** The harbour's real housing direction (inward, toward the island), snapped to a hex step — with
-   *  NO per-model correction. The port marker + the ship both rotate by this; only the ship then adds
-   *  `modelYawOffset` on top. */
-  baseYaw: number;
-  /** Per-ship-model authoring correction (e.g. ship3 +120°) — turns the SHIP MESH only, never the
-   *  marker. `yaw - baseYaw`. */
-  modelYawOffset: number;
+  /** The harbour's island-facing rotation (radians) BEYOND the shared `HARBOR_BASE_YAW` — a multiple
+   *  of 60° (the inward direction snapped to a hex-flush step, minus the base). `HexTiles.tsx` adds it
+   *  on top of `HARBOR_BASE_YAW` + the variant offset ONLY when harbour rotation is enabled; while it's
+   *  off (calibration) every harbour aligns and the marker offsets are dialled in one frame. */
+  inwardYaw: number;
   /** Which sea tile this harbor renders on top of instead of plain water — `HexTiles.tsx` matches
    *  this against the real hex it's about to render (`kind: 'hex'`) or the synthetic ring hex
    *  (`kind: 'ring'`) it's about to render, and swaps in the harbor model there instead. */
@@ -99,15 +89,6 @@ export function computeHarborTiles(
   geometry: Pick<BoardGeometry, 'edges' | 'hexes'>,
   hexTerrain: readonly ScenarioTerrain[] | undefined,
   seaRing: readonly RingHex[],
-  /** DEV-TUNING ONLY (`board3d/devTuning.ts`): when set, replaces `HARBOR_VARIANT_YAW_OFFSET[id]` for
-   *  whichever variant ids are present in this record — each of `ship1`/`ship2`/`ship3`/`lighthouse`
-   *  is looked up independently by the picked variant's own `id`, so each model can be re-oriented
-   *  without affecting the others (each model's authored "front" faces a different way, so a single
-   *  shared override could never fix more than one variant at a time — the bug this replaces). An id
-   *  missing from the record (or the record itself being `undefined`, the default and always the case
-   *  in production) falls back to that id's `HARBOR_VARIANT_YAW_OFFSET` constant, reproducing the
-   *  exact original per-variant-lookup behavior. */
-  variantYawOffsetOverride?: Partial<Record<HarborVariantId, number>>,
 ): HarborTile[] {
   const ringByKey = new Map<string, RingHex>();
   for (const ring of seaRing) ringByKey.set(`${ring.q},${ring.r}`, ring);
@@ -160,20 +141,15 @@ export function computeHarborTiles(
     // island) — the exact negation of the land-hex-to-edge "outward" vector (collinear on a regular
     // hex grid: the edge midpoint is always exactly between the land hex's center and the sea tile's
     // center, real or synthetic).
-    const inwardYaw = Math.atan2(-dx, -dz);
+    const rawInwardYaw = Math.atan2(-dx, -dz);
     const variant = pickHarborVariant(edgeId);
-    const overrideForVariant = variantYawOffsetOverride?.[variant.id];
-    const modelYawOffset = overrideForVariant ?? HARBOR_VARIANT_YAW_OFFSET[variant.id];
-    // `baseYaw` = the harbour's REAL housing direction (inward, toward the island), snapped to a hex
-    // step. `modelYawOffset` = a per-ship-model authoring correction (e.g. ship3 +120°) that turns
-    // only the SHIP MESH so its dock faces out — it must NOT move the port marker (which sits in the
-    // housing, whose real direction is `baseYaw`). `HexTiles.tsx` applies `baseYaw` to the ship+marker
-    // group and `modelYawOffset` to a nested ship-only group; `yaw` (= their sum) is kept for the ship
-    // and for existing callers/tests.
-    const baseYaw = hexYaw(nearestRotationStep(inwardYaw));
-    const yaw = baseYaw + modelYawOffset;
+    // Island-facing rotation as a delta beyond the shared base yaw: snap the inward direction to a
+    // hex-flush step and express it as `step·60°` (the `HARBOR_BASE_YAW` component is added back by
+    // `HexTiles.tsx`, so this is 0 for a harbour already at the base orientation). `HexTiles.tsx`
+    // applies the per-variant model correction + this rotation live.
+    const inwardYaw = nearestRotationStep(rawInwardYaw) * ROTATION_STEP;
 
-    tiles.push({ edgeId, type, variant, yaw, baseYaw, modelYawOffset, target });
+    tiles.push({ edgeId, type, variant, inwardYaw, target });
   }
 
   return tiles;

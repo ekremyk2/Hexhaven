@@ -10,10 +10,9 @@
 // showing on subsequent loads without the query string; `?tune=0` turns it back off.
 import { useState } from 'react';
 import {
-  BAND_TERRAIN_IDS,
   DEV_TUNING_DEFAULTS,
+  HARBOR_TYPE_IDS,
   HARBOR_VARIANT_IDS,
-  MARKER_OFFSET_RANGE,
   useDevTuningStore,
   type DevTuningValues,
 } from './devTuning';
@@ -89,49 +88,78 @@ function SliderRow({
   );
 }
 
+/** One labeled colour swatch/picker + editable hex field — the colour analog of `SliderRow`. */
+function ColorRow({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '76px 1fr 72px', alignItems: 'center', gap: 6 }}>
+      <span style={{ color: TEXT_DIM, fontSize: 11 }}>{label}</span>
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} style={{ width: '100%', height: 20, padding: 0, border: 'none', background: 'transparent', cursor: 'pointer' }} />
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: 72,
+          color: TEXT,
+          fontSize: 11,
+          fontFamily: 'monospace',
+          textAlign: 'right',
+          background: 'rgba(0,0,0,0.25)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: 3,
+          padding: '1px 3px',
+        }}
+      />
+    </div>
+  );
+}
+
 function SectionTitle({ children }: { children: string }) {
   return (
     <div style={{ color: TEXT, fontSize: 12, fontWeight: 700, marginTop: 10, marginBottom: 4 }}>{children}</div>
   );
 }
 
-/** The "copy values" readout (task requirement 4) — a plain text dump the user reads back to the PM
- *  to hard-code into `HARBOR_VARIANT_YAW_OFFSET` (`terrainStlModels.ts`) / `PORT_MARKER_OFFSET`/
- *  `PORT_MARKER_YAW`/`PORT_MARKER_SCALE` (`portMarkerModels.ts`). Degrees are shown alongside the
- *  radians those constants actually store, so no manual conversion is needed either way. */
+/** The "copy values" readout — a plain text dump of the harbour + marker colours/thresholds the user
+ *  sets with the pickers, ready to hard-code into `HARBOR_HEIGHT_BAND` (`terrainStlModels.ts`) and
+ *  `PORT_MARKER_*` (`portMarkerModels.ts`). */
 function valuesReadout(v: DevTuningValues): string {
   const lines = [
-    '// harbor ship base orientation (apply to normalizeStlGeometry\'s Z-up->Y-up remap, i.e. BEFORE harbor.yaw):',
-    `//   rotation X/Y/Z (deg): ${fmt(v.harborBaseRotXDeg, 1)}, ${fmt(v.harborBaseRotYDeg, 1)}, ${fmt(v.harborBaseRotZDeg, 1)}`,
-    `//   rotation X/Y/Z (rad): ${fmt((v.harborBaseRotXDeg * Math.PI) / 180, 4)}, ${fmt((v.harborBaseRotYDeg * Math.PI) / 180, 4)}, ${fmt((v.harborBaseRotZDeg * Math.PI) / 180, 4)}`,
-    `//   scale multiplier: ${fmt(v.harborBaseScale, 3)}`,
-    '',
-    '// HARBOR_VARIANT_YAW_OFFSET override, PER VARIANT (terrainStlModels.ts):',
-    `//   enabled: ${v.yawOverrideEnabled}`,
-    'export const HARBOR_VARIANT_YAW_OFFSET: Record<HarborVariantId, number> = {',
-    ...HARBOR_VARIANT_IDS.map(
-      (id) =>
-        `  ${id}: ${fmt((v.variantYawDeg[id] * Math.PI) / 180, 4)}, // ${fmt(v.variantYawDeg[id], 1)} deg`,
-    ),
+    '// Harbour hull colours (terrainStlModels.ts):',
+    `export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: '${v.harborBaseColor}', feature: '${v.harborFeatureColor}', thresholdFraction: ${fmt(v.harborThresholdByVariant.ship1, 2)} };`,
+    `export const HARBOR_HEIGHT_BAND_BLEND = ${fmt(v.harborBlend, 2)};`,
+    'export const HARBOR_THRESHOLD_BY_VARIANT: Record<HarborVariantId, number> = {',
+    ...HARBOR_VARIANT_IDS.map((id) => `  ${id}: ${fmt(v.harborThresholdByVariant[id], 2)},`),
     '};',
     '',
-    '// Port-marker fit, PER VARIANT (portMarkerModels.ts):',
-    'export const PORT_MARKER_YAW_BY_VARIANT: Record<HarborVariantId, number> = {',
-    ...HARBOR_VARIANT_IDS.map(
-      (id) => `  ${id}: ${fmt((v.markerYawDeg[id] * Math.PI) / 180, 4)}, // ${fmt(v.markerYawDeg[id], 1)} deg`,
-    ),
+    '// Port marker colours (portMarkerModels.ts):',
+    `export const PORT_MARKER_BASE_COLOR = '${v.markerBaseColor}';`,
+    `export const PORT_MARKER_COLOR_BLEND = ${fmt(v.markerColorBlend, 2)};`,
+    'export const PORT_MARKER_TOP_COLOR: Record<HarborType, string> = {',
+    ...HARBOR_TYPE_IDS.map((t) => `  ${t}: '${v.markerTopColor[t]}',`),
     '};',
-    ...HARBOR_VARIANT_IDS.map(
-      (id) =>
-        `// ${id} offset { x: ${fmt(v.markerOffset[id].x, 3)}, y: ${fmt(v.markerOffset[id].y, 3)}, z: ${fmt(v.markerOffset[id].z, 3)} }  scale ${fmt(v.markerScale[id], 3)}`,
-    ),
+    'export const PORT_MARKER_THRESHOLD_BY_TYPE: Record<HarborType, number> = {',
+    ...HARBOR_TYPE_IDS.map((t) => `  ${t}: ${fmt(v.markerThresholdByType[t], 2)},`),
+    '};',
     '',
-    '// Colour-band thresholds (terrainStlModels.ts) — live-calibrated:',
-    'export const TERRAIN_HEIGHT_BAND_THRESHOLDS = {',
-    ...BAND_TERRAIN_IDS.map((id) => `  ${id}: ${fmt(v.terrainThreshold[id], 2)}, // thresholdFraction`),
-    '};',
-    `export const HARBOR_HEIGHT_BAND_THRESHOLD = ${fmt(v.harborThreshold, 2)}; // HARBOR_HEIGHT_BAND.thresholdFraction`,
-    `export const HEIGHT_BAND_BLEND_FRACTION = ${fmt(v.blendFraction, 2)};`,
+    '// Environment (constants.ts):',
+    `export const BACKGROUND_COLOR = '${v.bgColor}';`,
+    `export const ENV_INTENSITY = ${fmt(v.envIntensity, 2)};`,
+    `export const AMBIENT_INTENSITY = ${fmt(v.ambientIntensity, 2)};`,
+    `export const HEMI_INTENSITY = ${fmt(v.hemiIntensity, 2)};`,
+    `export const KEY_INTENSITY = ${fmt(v.keyIntensity, 2)}; // colour '${v.keyColor}'`,
+    `export const FILL_INTENSITY = ${fmt(v.fillIntensity, 2)}; // colour '${v.fillColor}'`,
+    `export const SPOT_INTENSITY = ${fmt(v.spotIntensity, 2)}; // colour '${v.spotColor}'`,
+    `export const SPOT_ANGLE_DEG = ${fmt(v.spotAngleDeg, 0)};`,
+    `export const SPOT_PENUMBRA = ${fmt(v.spotPenumbra, 2)};`,
+    `export const TABLE_WOOD_COLOR = '${v.tableColor}';`,
+    `export const TABLE_SQUARE_FACTOR = ${fmt(v.tableSizeFactor, 2)};`,
+    `export const TABLE_THICKNESS = ${fmt(v.tableThickness, 1)};`,
+    `export const TABLE_ROUGHNESS = ${fmt(v.tableRoughness, 2)};`,
+    `export const CONTACT_SHADOW_COLOR = '${v.contactColor}';`,
+    `export const CONTACT_SHADOW_OPACITY = ${fmt(v.contactOpacity, 2)};`,
+    `export const CONTACT_SHADOW_BLUR = ${fmt(v.contactBlur, 1)};`,
+    `export const CONTACT_SHADOW_SCALE_FACTOR = ${fmt(v.contactScaleFactor, 2)};`,
   ];
   return lines.join('\n');
 }
@@ -174,7 +202,7 @@ export function DevTuningPanel() {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-        <span style={{ fontSize: 12, fontWeight: 700 }}>Harbour/Port Tuning (dev)</span>
+        <span style={{ fontSize: 12, fontWeight: 700 }}>Harbour &amp; Marker Colours (dev)</span>
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
@@ -194,156 +222,89 @@ export function DevTuningPanel() {
 
       {!collapsed && (
         <>
-          <SectionTitle>1. Harbour ship/lighthouse base orientation (all models)</SectionTitle>
+          <SectionTitle>1. Harbour colours</SectionTitle>
+          <ColorRow label="base" value={tuning.harborBaseColor} onChange={(v) => set({ harborBaseColor: v })} />
+          <ColorRow label="feature" value={tuning.harborFeatureColor} onChange={(v) => set({ harborFeatureColor: v })} />
           <SliderRow
-            label="rot X"
-            value={tuning.harborBaseRotXDeg}
-            min={-180}
-            max={180}
-            step={1}
-            decimals={0}
-            unit="°"
-            onChange={(v) => set({ harborBaseRotXDeg: v })}
-          />
-          <SliderRow
-            label="rot Y"
-            value={tuning.harborBaseRotYDeg}
-            min={-180}
-            max={180}
-            step={1}
-            decimals={0}
-            unit="°"
-            onChange={(v) => set({ harborBaseRotYDeg: v })}
-          />
-          <SliderRow
-            label="rot Z"
-            value={tuning.harborBaseRotZDeg}
-            min={-180}
-            max={180}
-            step={1}
-            decimals={0}
-            unit="°"
-            onChange={(v) => set({ harborBaseRotZDeg: v })}
-          />
-          <SliderRow
-            label="scale"
-            value={tuning.harborBaseScale}
-            min={0.1}
-            max={4}
+            label="blend"
+            value={tuning.harborBlend}
+            min={0}
+            max={1}
             step={0.01}
             decimals={2}
-            unit="×"
-            onChange={(v) => set({ harborBaseScale: v })}
+            onChange={(v) => set({ harborBlend: v })}
           />
-
-          <SectionTitle>2. Ship yaw offset override (per model variant)</SectionTitle>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: TEXT_DIM, marginBottom: 4 }}>
-            <input
-              type="checkbox"
-              checked={tuning.yawOverrideEnabled}
-              onChange={(e) => set({ yawOverrideEnabled: e.target.checked })}
-            />
-            override enabled
-          </label>
+          <div style={{ color: TEXT_DIM, fontSize: 11, fontWeight: 700, marginTop: 6 }}>threshold by ship</div>
           {HARBOR_VARIANT_IDS.map((id) => (
             <SliderRow
               key={id}
               label={id}
-              value={tuning.variantYawDeg[id]}
-              min={-180}
-              max={180}
-              step={1}
-              decimals={0}
-              unit="°"
-              onChange={(v) => set({ variantYawDeg: { ...tuning.variantYawDeg, [id]: v } })}
-            />
-          ))}
-
-          <SectionTitle>3. Port marker fit (per model variant)</SectionTitle>
-          {HARBOR_VARIANT_IDS.map((id) => (
-            <div key={id} style={{ marginBottom: 4 }}>
-              <div style={{ color: TEXT_DIM, fontSize: 11, fontWeight: 700, marginTop: 4 }}>{id}</div>
-              <SliderRow
-                label="offset X"
-                value={tuning.markerOffset[id].x}
-                min={-MARKER_OFFSET_RANGE}
-                max={MARKER_OFFSET_RANGE}
-                step={0.005}
-                decimals={3}
-                onChange={(v) => set({ markerOffset: { ...tuning.markerOffset, [id]: { ...tuning.markerOffset[id], x: v } } })}
-              />
-              <SliderRow
-                label="offset Y"
-                value={tuning.markerOffset[id].y}
-                min={-MARKER_OFFSET_RANGE}
-                max={MARKER_OFFSET_RANGE}
-                step={0.005}
-                decimals={3}
-                onChange={(v) => set({ markerOffset: { ...tuning.markerOffset, [id]: { ...tuning.markerOffset[id], y: v } } })}
-              />
-              <SliderRow
-                label="offset Z"
-                value={tuning.markerOffset[id].z}
-                min={-MARKER_OFFSET_RANGE}
-                max={MARKER_OFFSET_RANGE}
-                step={0.005}
-                decimals={3}
-                onChange={(v) => set({ markerOffset: { ...tuning.markerOffset, [id]: { ...tuning.markerOffset[id], z: v } } })}
-              />
-              <SliderRow
-                label="yaw"
-                value={tuning.markerYawDeg[id]}
-                min={-180}
-                max={180}
-                step={1}
-                decimals={0}
-                unit="°"
-                onChange={(v) => set({ markerYawDeg: { ...tuning.markerYawDeg, [id]: v } })}
-              />
-              <SliderRow
-                label="scale"
-                value={tuning.markerScale[id]}
-                min={0.1}
-                max={4}
-                step={0.01}
-                decimals={2}
-                unit="×"
-                onChange={(v) => set({ markerScale: { ...tuning.markerScale, [id]: v } })}
-              />
-            </div>
-          ))}
-
-          <SectionTitle>4. Colour thresholds (live)</SectionTitle>
-          {BAND_TERRAIN_IDS.map((id) => (
-            <SliderRow
-              key={id}
-              label={id}
-              value={tuning.terrainThreshold[id]}
+              value={tuning.harborThresholdByVariant[id]}
               min={0}
               max={1}
               step={0.01}
               decimals={2}
-              onChange={(v) => set({ terrainThreshold: { ...tuning.terrainThreshold, [id]: v } })}
+              onChange={(v) => set({ harborThresholdByVariant: { ...tuning.harborThresholdByVariant, [id]: v } })}
             />
           ))}
-          <SliderRow
-            label="harbor"
-            value={tuning.harborThreshold}
-            min={0}
-            max={1}
-            step={0.01}
-            decimals={2}
-            onChange={(v) => set({ harborThreshold: v })}
-          />
+
+          <SectionTitle>2. Marker colours</SectionTitle>
+          <ColorRow label="base" value={tuning.markerBaseColor} onChange={(v) => set({ markerBaseColor: v })} />
           <SliderRow
             label="blend"
-            value={tuning.blendFraction}
+            value={tuning.markerColorBlend}
             min={0}
             max={1}
             step={0.01}
             decimals={2}
-            onChange={(v) => set({ blendFraction: v })}
+            onChange={(v) => set({ markerColorBlend: v })}
           />
+          <div style={{ color: TEXT_DIM, fontSize: 11, fontWeight: 700, marginTop: 6 }}>top colour by resource</div>
+          {HARBOR_TYPE_IDS.map((t) => (
+            <ColorRow
+              key={t}
+              label={t}
+              value={tuning.markerTopColor[t]}
+              onChange={(v) => set({ markerTopColor: { ...tuning.markerTopColor, [t]: v } })}
+            />
+          ))}
+          <div style={{ color: TEXT_DIM, fontSize: 11, fontWeight: 700, marginTop: 6 }}>threshold by resource</div>
+          {HARBOR_TYPE_IDS.map((t) => (
+            <SliderRow
+              key={t}
+              label={t}
+              value={tuning.markerThresholdByType[t]}
+              min={0}
+              max={1}
+              step={0.01}
+              decimals={2}
+              onChange={(v) => set({ markerThresholdByType: { ...tuning.markerThresholdByType, [t]: v } })}
+            />
+          ))}
+
+          <SectionTitle>3. Environment · light</SectionTitle>
+          <ColorRow label="background" value={tuning.bgColor} onChange={(v) => set({ bgColor: v })} />
+          <SliderRow label="IBL" value={tuning.envIntensity} min={0} max={2} step={0.02} decimals={2} onChange={(v) => set({ envIntensity: v })} />
+          <SliderRow label="ambient" value={tuning.ambientIntensity} min={0} max={2} step={0.02} decimals={2} onChange={(v) => set({ ambientIntensity: v })} />
+          <SliderRow label="hemisphere" value={tuning.hemiIntensity} min={0} max={2} step={0.02} decimals={2} onChange={(v) => set({ hemiIntensity: v })} />
+          <SliderRow label="key" value={tuning.keyIntensity} min={0} max={5} step={0.05} decimals={2} onChange={(v) => set({ keyIntensity: v })} />
+          <ColorRow label="key colour" value={tuning.keyColor} onChange={(v) => set({ keyColor: v })} />
+          <SliderRow label="fill" value={tuning.fillIntensity} min={0} max={3} step={0.02} decimals={2} onChange={(v) => set({ fillIntensity: v })} />
+          <ColorRow label="fill colour" value={tuning.fillColor} onChange={(v) => set({ fillColor: v })} />
+          <SliderRow label="spot" value={tuning.spotIntensity} min={0} max={12} step={0.1} decimals={1} onChange={(v) => set({ spotIntensity: v })} />
+          <ColorRow label="spot colour" value={tuning.spotColor} onChange={(v) => set({ spotColor: v })} />
+          <SliderRow label="spot angle" value={tuning.spotAngleDeg} min={5} max={85} step={1} decimals={0} unit="°" onChange={(v) => set({ spotAngleDeg: v })} />
+          <SliderRow label="spot soft" value={tuning.spotPenumbra} min={0} max={1} step={0.02} decimals={2} onChange={(v) => set({ spotPenumbra: v })} />
+
+          <SectionTitle>4. Table &amp; shadow</SectionTitle>
+          <ColorRow label="table" value={tuning.tableColor} onChange={(v) => set({ tableColor: v })} />
+          <SliderRow label="table size" value={tuning.tableSizeFactor} min={0.6} max={6} step={0.05} decimals={2} unit="×" onChange={(v) => set({ tableSizeFactor: v })} />
+          <SliderRow label="thickness" value={tuning.tableThickness} min={1} max={160} step={1} decimals={0} onChange={(v) => set({ tableThickness: v })} />
+          <SliderRow label="roughness" value={tuning.tableRoughness} min={0} max={1} step={0.02} decimals={2} onChange={(v) => set({ tableRoughness: v })} />
+          <ColorRow label="shadow" value={tuning.contactColor} onChange={(v) => set({ contactColor: v })} />
+          <SliderRow label="shadow opacity" value={tuning.contactOpacity} min={0} max={1} step={0.02} decimals={2} onChange={(v) => set({ contactOpacity: v })} />
+          <SliderRow label="shadow blur" value={tuning.contactBlur} min={0} max={12} step={0.1} decimals={1} onChange={(v) => set({ contactBlur: v })} />
+          <SliderRow label="shadow size" value={tuning.contactScaleFactor} min={0.6} max={6} step={0.05} decimals={2} unit="×" onChange={(v) => set({ contactScaleFactor: v })} />
 
           <div style={{ display: 'flex', gap: 6, marginTop: 10 }}>
             <button

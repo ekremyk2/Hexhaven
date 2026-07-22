@@ -31,20 +31,42 @@ import { useEffect, useMemo, useRef, type ElementRef, type ReactNode } from 'rea
 import { useTranslation } from 'react-i18next';
 import { Canvas, useThree } from '@react-three/fiber';
 import { ContactShadows, OrbitControls } from '@react-three/drei';
-import { ACESFilmicToneMapping, InstancedMesh, SRGBColorSpace } from 'three';
+import { ACESFilmicToneMapping, InstancedMesh, MOUSE, Object3D, SRGBColorSpace } from 'three';
 import type { BoardGeometry, GameState, HexId, ScenarioTerrain } from '@hexhaven/shared';
-import { SEA_DEEP } from '../board/palette';
 import { boardWorldExtents, hexWorldCenter } from './coords';
-import { CONTACT_SHADOW_DEPTH, CONTACT_SHADOW_LIFT, SEA_DEPTH, SEA_MARGIN_FACTOR, TABLE_RIM_GAP, TILE_HEIGHT, TOKEN_HOVER } from './constants';
+import {
+  AMBIENT_INTENSITY,
+  BACKGROUND_COLOR,
+  CONTACT_SHADOW_BLUR,
+  CONTACT_SHADOW_COLOR,
+  CONTACT_SHADOW_DEPTH,
+  CONTACT_SHADOW_LIFT,
+  CONTACT_SHADOW_OPACITY,
+  CONTACT_SHADOW_SCALE_FACTOR,
+  ENV_INTENSITY,
+  FILL_COLOR,
+  FILL_INTENSITY,
+  HEMI_INTENSITY,
+  KEY_COLOR,
+  KEY_INTENSITY,
+  SEA_DEPTH,
+  SPOT_ANGLE_DEG,
+  SPOT_COLOR,
+  SPOT_HEIGHT_FACTOR,
+  SPOT_INTENSITY,
+  SPOT_PENUMBRA,
+  TABLE_RIM_GAP,
+  TILE_HEIGHT,
+  TOKEN_HOVER,
+} from './constants';
 import { DevTuningPanel } from './DevTuningPanel';
-import { useDevTuningAvailable } from './devTuning';
+import { useDevTuningAvailable, useDevTuningStore } from './devTuning';
 import { FogCover } from './FogCover';
 import { buildHexCapGeometry } from './hexGeometryBuilders';
 import { HexTiles } from './HexTiles';
 import { NumberToken3D } from './NumberToken3D';
 import { NumberTokenInsert3D } from './NumberTokenInsert3D';
 import { SceneEnvironment } from './SceneEnvironment';
-import { Sea } from './Sea';
 import { Table } from './Table';
 import { hasStlCoverage } from './terrainStlModels';
 import { hexTopY } from './tileElevation';
@@ -86,10 +108,14 @@ export function Board3D({
 }: Board3DProps) {
   const { t } = useTranslation('common');
   const tuningAvailable = useDevTuningAvailable();
+  const tuning = useDevTuningStore();
   const budget = useMobileBudget();
   const controlsRef = useRef<OrbitControlsHandle>(null);
   const extents = useMemo(() => boardWorldExtents(geometry), [geometry]);
   const capGeometry = useMemo(() => buildHexCapGeometry(geometry), [geometry]);
+  // Aim object for the top spotlight — positioned at the board centre so the beam points straight
+  // down at the board (a spotLight always points from its position toward its target).
+  const spotTarget = useMemo(() => new Object3D(), []);
   const fogHexes = useMemo(
     () => new Set<HexId>([...epUnexplored, ...seafarersFogHidden]),
     [epUnexplored, seafarersFogHidden],
@@ -106,6 +132,26 @@ export function Board3D({
     target[1] + fitDistance * 0.72,
     extents.center.z + fitDistance * 0.82,
   ];
+
+  // Environment values — live from the tuning panel when available, else the baked constants (so the
+  // dark-room / square-table / top-light look applies in normal production too).
+  const env = tuningAvailable ? tuning : null;
+  const bgColor = env?.bgColor ?? BACKGROUND_COLOR;
+  const ambientI = env?.ambientIntensity ?? AMBIENT_INTENSITY;
+  const hemiI = env?.hemiIntensity ?? HEMI_INTENSITY;
+  const keyI = env?.keyIntensity ?? KEY_INTENSITY;
+  const keyColor = env?.keyColor ?? KEY_COLOR;
+  const fillI = env?.fillIntensity ?? FILL_INTENSITY;
+  const fillColor = env?.fillColor ?? FILL_COLOR;
+  const spotI = env?.spotIntensity ?? SPOT_INTENSITY;
+  const spotColor = env?.spotColor ?? SPOT_COLOR;
+  const spotAngle = ((env?.spotAngleDeg ?? SPOT_ANGLE_DEG) * Math.PI) / 180;
+  const spotPenumbra = env?.spotPenumbra ?? SPOT_PENUMBRA;
+  const envIntensity = env?.envIntensity ?? ENV_INTENSITY;
+  const contactOpacity = env?.contactOpacity ?? CONTACT_SHADOW_OPACITY;
+  const contactBlur = env?.contactBlur ?? CONTACT_SHADOW_BLUR;
+  const contactColor = env?.contactColor ?? CONTACT_SHADOW_COLOR;
+  const contactScaleFactor = env?.contactScaleFactor ?? CONTACT_SHADOW_SCALE_FACTOR;
 
   // Expected non-sea tile count — the verification note's "assert the expected number of tile
   // meshes" is checked against this in dev (`Board3DDebug`, below).
@@ -144,19 +190,19 @@ export function Board3D({
         className="h-full w-full"
         aria-label="HEXHAVEN 3D board"
       >
-        <color attach="background" args={[SEA_DEEP]} />
+        <color attach="background" args={[bgColor]} />
         {/* Offline image-based lighting (T-1500 requirement 2) — see SceneEnvironment.tsx for why
             this is the offline-safe branch of drei's <Environment>. Contributes ambient fill +
             soft specular reflections on every PBR material in the scene, on top of the direct
             lights below. */}
-        <SceneEnvironment resolution={budget.envResolution} />
+        <SceneEnvironment resolution={budget.envResolution} intensity={envIntensity} />
         {/* Ambient + hemisphere: tuned DOWN from T-1404 (0.45/0.55 -> 0.2/0.3) now that
             `<SceneEnvironment>`'s IBL supplies its own ambient contribution — these stay as a small
             safety-net fill so nothing in shadow reads as pure black even where the environment
             bake's contribution is weak. Key + fill directional lights below still carry the actual
             modeled sun/sky direction and cast the shadows. */}
-        <ambientLight intensity={0.2} />
-        <hemisphereLight color={0xbfe0ff} groundColor={0x2f3a42} intensity={0.3} />
+        <ambientLight intensity={ambientI} />
+        <hemisphereLight color={0xbfe0ff} groundColor={0x2f3a42} intensity={hemiI} />
         {/* Key light: bumped up from T-1404's 1.2 -> 1.4 for the requirement-3 "bright, even key ...
             not moody" read. Still casts the board's soft shadows: `shadow-radius` softens the
             shadow-map edge (PCF blur) so shadows read as soft daylight rather than a hard-edged
@@ -169,7 +215,8 @@ export function Board3D({
             fitDistance * 0.95,
             extents.center.z + fitDistance * 0.25,
           ]}
-          intensity={1.4}
+          intensity={keyI}
+          color={keyColor}
           castShadow
           shadow-mapSize-width={budget.shadowMapSize}
           shadow-mapSize-height={budget.shadowMapSize}
@@ -188,12 +235,25 @@ export function Board3D({
             from the room around it. */}
         <directionalLight
           position={[-fitDistance * 0.3, fitDistance * 0.35, -fitDistance * 0.2]}
-          intensity={0.32}
-          color={0xdce8ff}
+          intensity={fillI}
+          color={fillColor}
+        />
+        {/* Top light: a spotlight above the board centre aimed straight down at it (target sits at
+            the board centre) — the "pendant lamp over the table" read the dark-room look wants.
+            decay=0 keeps its brightness distance-independent, matching the non-physical direct lights
+            above. */}
+        <primitive object={spotTarget} position={[extents.center.x, 0, extents.center.z]} />
+        <spotLight
+          position={[extents.center.x, target[1] + fitDistance * SPOT_HEIGHT_FACTOR, extents.center.z]}
+          target={spotTarget}
+          intensity={spotI}
+          color={spotColor}
+          angle={spotAngle}
+          penumbra={spotPenumbra}
+          decay={0}
         />
 
         <Table geometry={geometry} />
-        <Sea geometry={geometry} />
         {/* Soft ground-contact shadow catcher (T-1500 requirement 3) — sits a hairline above the
             tabletop's own top surface (`CONTACT_SHADOW_LIFT`, same z-fighting-guard convention as
             `Table.tsx`'s own offset from the sea) and samples `CONTACT_SHADOW_DEPTH` upward, which
@@ -206,13 +266,13 @@ export function Board3D({
             the environment bake's one-time cost. */}
         <ContactShadows
           position={[extents.center.x, -(SEA_DEPTH + TABLE_RIM_GAP) + CONTACT_SHADOW_LIFT, extents.center.z]}
-          scale={extents.radius * SEA_MARGIN_FACTOR * 1.05}
+          scale={extents.radius * contactScaleFactor}
           far={CONTACT_SHADOW_DEPTH}
           resolution={budget.contactShadowResolution}
           smooth={budget.contactShadowSmooth}
-          blur={2.6}
-          opacity={0.6}
-          color="#2b1a10"
+          blur={contactBlur}
+          opacity={contactOpacity}
+          color={contactColor}
           frames={Infinity}
         />
         {/* T-1505 rework: harbors render as sea-hex tiles (a ship/lighthouse model replacing the
@@ -259,6 +319,8 @@ export function Board3D({
                 key={`t${hex.id}`}
                 position={[socketCenter.x, socketCenter.y, socketCenter.z]}
                 value={tile.token}
+                terrain={terrain}
+                seed={hex.id}
                 dimmed={board.robber === hex.id}
               />
             );
@@ -288,6 +350,9 @@ export function Board3D({
           maxPolarAngle={1.45}
           enablePan
           screenSpacePanning={false}
+          // Middle mouse button (scroll-wheel click) drags to PAN; left still orbits, right also pans.
+          // The wheel itself keeps zooming (enableZoom's default).
+          mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
         />
 
         {import.meta.env.DEV && <Board3DDebug expectedTileCount={expectedTileCount} />}
@@ -308,14 +373,12 @@ export function Board3D({
         </svg>
       </button>
 
-      {/* DEV-ONLY harbour/port-marker live tuning panel (board3d/devTuning.ts, DevTuningPanel.tsx) —
-          an HTML overlay OUTSIDE the <Canvas> (it has no r3f hooks of its own; it only reads/writes
-          the zustand store `HexTiles.tsx`'s harbour/marker render reads live). Gated on
-          `useDevTuningAvailable()`: true under Vite's dev server, or on the built prod server
-          (:8080) behind a `?tune=1` URL flag / the localStorage key it persists — see that hook's
-          doc comment for exactly how to open it there. Never mounted otherwise, so this whole
-          subtree is absent from a normal end-user session. */}
-      {tuningAvailable && <DevTuningPanel />}
+      {/* Live tuning panel (board3d/devTuning.ts, DevTuningPanel.tsx) — an HTML overlay OUTSIDE the
+          <Canvas> that writes the zustand store the board reads live. DEV-only: `import.meta.env.DEV`
+          is statically false in the built prod bundle (:8080), so this whole subtree — and the panel
+          module — is tree-shaken out of what ships. Run a local Vite dev server to bring it back for
+          re-calibration; the calibrated values are all baked into constants either way. */}
+      {import.meta.env.DEV && <DevTuningPanel />}
     </div>
   );
 }

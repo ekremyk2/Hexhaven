@@ -138,12 +138,55 @@ export function hexYaw(step: number): number {
   return Math.PI / 6 + step * (Math.PI / 3);
 }
 
+/** Single base orientation applied to EVERY terrain hex (radians). The user-calibrated target; the
+ *  per-hex random `k·60°` variety is added ON TOP only when `HEX_RANDOM_ROTATION` is on. */
+export const HEX_BASE_YAW = Math.PI / 6; // 30°
+
+/** Per-terrain yaw correction (radians) added to `HEX_BASE_YAW` — each sculpted model is authored at a
+ *  slightly different orientation, so these align them all to face the same way (user-calibrated).
+ *  Terrains not listed use 0 (already correct at the base yaw). */
+export const TERRAIN_YAW_OFFSET: Partial<Record<ScenarioTerrain, number>> = {
+  hills: Math.PI / 3, // brick: +60°
+  forest: (2 * Math.PI) / 3, // +120°
+  pasture: (-2 * Math.PI) / 3, // wool: -120°
+};
+
+/** Per-terrain number-token seat override (world offset from the hex centre) — each sculpted terrain
+ *  model's socket recess sits at a slightly different local spot, so the token needs nudging per
+ *  terrain. Terrains not listed fall back to the global `TOKEN_SOCKET_X/Y/Z` (`constants.ts`).
+ *  USER-CALIBRATED via the tuning panel. */
+export const TERRAIN_TOKEN_OFFSET: Partial<Record<ScenarioTerrain, { x: number; y: number; z: number }>> = {
+  forest: { x: 10.535, y: 0.8, z: 18.295 },
+  mountains: { x: 16.5, y: 1.0, z: 14.97 },
+  hills: { x: 11.645, y: 1.0, z: 12.25 },
+  fields: { x: 16.5, y: 3.0, z: 9.425 },
+  pasture: { x: 17.25, y: 3.0, z: 8.0 },
+};
+
+/** Random per-hex `k·60°` rotation for visual variety. Re-enabled after base-yaw + token-socket
+ *  calibration: the terrain uses a SINGLE variant per resource (so the socket stays put) and the
+ *  number token's per-terrain offset is rotated by this same random yaw (`NumberTokenInsert3D`), so
+ *  spinning the hex carries its token along into the socket instead of leaving it behind. */
+export const HEX_RANDOM_ROTATION = true;
+
+/** The extra per-hex rotation step in radians (`k·60°`), or 0 when random rotation is off. */
+export function hexRandomYaw(seed: number, enabled: boolean): number {
+  return enabled ? pickRotationStep(seed) * (Math.PI / 3) : 0;
+}
+
 /** The variant a given hex/seed renders — `undefined` when `terrain` has no STL coverage at all
  *  (caller falls back to the procedural prism; see `hasStlCoverage`). */
 export function pickTerrainVariant(terrain: ScenarioTerrain, seed: number): TerrainModelVariant | undefined {
   const variants = terrainVariants(terrain);
   if (variants.length === 0) return undefined;
   return variants[pickVariantIndex(seed, variants.length)];
+}
+
+/** The FIRST variant for a terrain — used (instead of the random per-hex pick) while random rotation
+ *  is disabled, so every hex of a resource is the SAME sculpt at the SAME yaw and they all face one
+ *  direction (user calibration). `undefined` when the terrain has no STL coverage. */
+export function firstTerrainVariant(terrain: ScenarioTerrain): TerrainModelVariant | undefined {
+  return terrainVariants(terrain)[0];
 }
 
 /** The world-Y height of the sculpted model a given hex/seed will render for `terrain` — 0 when
@@ -187,9 +230,19 @@ const HARBOR_LIGHTHOUSE_VARIANT: HarborModelVariant = { id: 'lighthouse', url: h
 export const HARBOR_VARIANT_YAW_OFFSET: Record<HarborVariantId, number> = {
   ship1: 0, // 0° (user-calibrated)
   ship2: 0, // 0° (user-calibrated)
-  ship3: (2 * Math.PI) / 3, // +120° (user-calibrated — the one mis-authored ship model)
+  ship3: 0, // 0° — the base was re-authored (new STL), so no correction needed anymore
   lighthouse: 0, // 0° (user-calibrated)
 };
+
+/** Single base orientation applied to EVERY harbour model (radians) — same role as `HEX_BASE_YAW` for
+ *  terrain. Per-variant `HARBOR_VARIANT_YAW_OFFSET` aligns the differently-authored ship models on top
+ *  of this; the island-facing per-harbour rotation is added only when `HARBOR_ROTATION` is on. */
+export const HARBOR_BASE_YAW = Math.PI / 6; // 30°
+
+/** Each harbour's dock-faces-the-island rotation. Re-enabled after marker calibration: the markers are
+ *  children of the harbour's rotation group, so they ride the harbour into its island-facing angle and
+ *  stay seated. (Calibration was done with this off, so every harbour aligned in one frame.) */
+export const HARBOR_ROTATION = true;
 
 /** Deterministically picks a harbor's model (mostly ships, an occasional lighthouse for variety) from
  *  its `EdgeId` — stable across renders, same discipline as `pickTerrainVariant`. */
@@ -265,7 +318,20 @@ export const TERRAIN_HEIGHT_BAND: Partial<Record<ScenarioTerrain, HeightBandPale
  *  `ScenarioTerrain`, and a harbour isn't a terrain) — base = the SEA tint below the waterline
  *  (matching the surrounding water tiles, same intent as `HexTiles.tsx`'s retired flat
  *  `HARBOR_TILE_COLOR`), feature = a wood-hull tint above it. USER-CALIBRATED starting value. */
-export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#8a6a42', thresholdFraction: 0.45 };
+export const HARBOR_HEIGHT_BAND: HeightBandPalette = { base: SEA, feature: '#775132', thresholdFraction: 0.71 };
+
+/** Harbour hull threshold PER SHIP VARIANT — each ship model's waterline/proportions differ, so the
+ *  base->hull split sits at a different height on each. User-calibrated. */
+export const HARBOR_THRESHOLD_BY_VARIANT: Record<HarborVariantId, number> = {
+  ship1: 0.71,
+  ship2: 0.71,
+  ship3: 0.47,
+  lighthouse: 0.71,
+};
+
+/** Harbour-specific blend width — kept SEPARATE from the terrain `HEIGHT_BAND_BLEND_FRACTION` so the
+ *  harbours can have a hard base/hull seam without flattening the terrain bands. */
+export const HARBOR_HEIGHT_BAND_BLEND = 0.0;
 
 /** Smooth (cubic Hermite) 0->1 ramp — used instead of a hard cutoff or a linear ramp so the
  *  base/feature transition reads as a soft blend, not a visible seam. */
